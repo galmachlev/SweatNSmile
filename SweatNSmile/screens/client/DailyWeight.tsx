@@ -1,10 +1,10 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-export default function Gallery() {
+export default function DailyWeight() {
   return (
     <View>
-      <Text>Gallery</Text>
+      <Text>DailyWeight</Text>
     </View>
   )
 }

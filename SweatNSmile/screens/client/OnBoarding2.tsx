@@ -1,10 +1,10 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-export default function AllWeightsTable() {
+export default function OnBoarding2() {
   return (
     <View>
-      <Text>AllWeightsTable</Text>
+      <Text>OnBoarding2</Text>
     </View>
   )
 }
