@@ -1,6 +1,6 @@
 // ייצוא טייפ של מוצר
 export type Product = {
-    product_id: string; 
+    product_id: string; // ?
     name: string; 
     category: string; 
     description: string; 
