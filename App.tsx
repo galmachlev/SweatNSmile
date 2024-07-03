@@ -6,9 +6,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import React from 'react';
-import Register_BasicDetails_1 from './screens/stack/Register_BasicDetails_1';
-import Register_PhysicalData_2 from './screens/stack/Register_PhysicalData_2';
-import Register_ActivityLevel_3 from './screens/stack/Register_ActivityLevel_3';
+import Onboarding from './screens/client/OnBoarding';
+import Register from './screens/stack/Register';
 
 
 const Tab = createBottomTabNavigator();
@@ -19,10 +18,9 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
       <NavigationContainer>
-            <Stack.Navigator initialRouteName="Register_BasicDetails_1">
-                <Stack.Screen name="Register_BasicDetails_1" component={Register_BasicDetails_1} />
-                <Stack.Screen name="Register_PhysicalData_2" component={Register_PhysicalData_2} />
-                <Stack.Screen name="Register_ActivityLevel_3" component={Register_ActivityLevel_3} />
+            <Stack.Navigator initialRouteName="OnBoarding" >
+                <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }}/>
+                <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details', headerLeft: () => null, gestureEnabled: false}}/>
             </Stack.Navigator>
       </NavigationContainer>
   );
