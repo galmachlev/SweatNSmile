@@ -28,7 +28,7 @@ const Register = () => {
         'Basic Details',
         'Physical Details',
         'Activity Level',
-        'Daily Caloric Intake'
+        'Congratulations'
     ];
 
     useEffect(() => {

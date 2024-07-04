@@ -10,7 +10,7 @@ export default function Onboarding() {
   const swiperRef = useRef<Swiper>(null);
 
   const handleSkip = () => {
-    navigation.navigate('Register' as never);
+    navigation.navigate('My Gallery' as never);
   };
 
   const handleNext = () => {
