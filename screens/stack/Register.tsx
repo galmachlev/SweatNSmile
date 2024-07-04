@@ -248,13 +248,6 @@ const Register = () => {
                             value={formik.values.goalDate ? formik.values.goalDate.toISOString().split('T')[0] : ''}
                             placeholder="YYYY-MM-DD"
                         />
-                        <Text style={styles.label}>Allergies</Text>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={formik.handleChange('allergies')}
-                            value={formik.values.allergies ?? ''}
-                            placeholder="Allergies"
-                        />
                         <Button title="Next" onPress={() => swiperRef.current?.scrollBy(1)} />
                     </View>
                 </ScrollView>
@@ -299,7 +292,7 @@ const Register = () => {
                         <View style={styles.radioButtonContainer}>
                             <RadioButton
                                 value="veryActive"
-                                status={formik.values.activityLevel === 'veryActive' ? 'checked' : 'unchecked'}
+                                status={formik.values.activityLevel === 'very active' ? 'checked' : 'unchecked'}
                                 onPress={() => formik.setFieldValue('activityLevel', 'veryActive')}
                             />
                             <Text style={styles.radioButtonLabel}>Very Active (very hard exercise/sports & physical job)</Text>
