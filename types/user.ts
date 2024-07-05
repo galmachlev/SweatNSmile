@@ -25,6 +25,7 @@ export type User= {
     currentWeight: number,
     goalWeight: number,
     goalDate: Date,
+    dailyCalories: number,
 
     //***************/
  
