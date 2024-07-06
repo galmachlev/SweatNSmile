@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
@@ -64,74 +64,76 @@ const DailyCalories: React.FC = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text>Gender:</Text>
-            <Picker selectedValue={gender} onValueChange={(value: string) => setGender(value.toString())}>
-                <Picker.Item label="Select Gender" value="" />
-                <Picker.Item label="Male" value="male" />
-                <Picker.Item label="Female" value="female" />
-            </Picker>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView contentContainerStyle={styles.container}>
+                <Text>Gender:</Text>
+                <Picker selectedValue={gender} onValueChange={(value: string) => setGender(value.toString())}>
+                    <Picker.Item label="Select Gender" value="" />
+                    <Picker.Item label="Male" value="male" />
+                    <Picker.Item label="Female" value="female" />
+                </Picker>
 
-            <Text>Height (cm):</Text>
-            <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={height}
-                onChangeText={setHeight}
-            />
-
-            <Text>Current Weight (kg):</Text>
-            <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={currentWeight}
-                onChangeText={setCurrentWeight}
-            />
-
-            <Text>Goal Weight (kg):</Text>
-            <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={goalWeight}
-                onChangeText={setGoalWeight}
-            />
-
-            <Text>Goal Date:</Text>
-            <Button title={format(goalDate, 'yyyy-MM-dd')} onPress={() => setShowDatePicker(true)} />
-            {showDatePicker && (
-                <DateTimePicker
-                    value={goalDate}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                        const currentDate = selectedDate || goalDate;
-                        setShowDatePicker(false);
-                        setGoalDate(currentDate);
-                    }}
+                <Text>Height (cm):</Text>
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={height}
+                    onChangeText={setHeight}
                 />
-            )}
 
-            <Text>Activity Level:</Text>
-            <Picker selectedValue={activityLevel} onValueChange={(value: string) => setActivityLevel(value.toString())}>
-                <Picker.Item label="Select Activity Level" value="" />
-                <Picker.Item label="Sedentary" value="sedentary" />
-                <Picker.Item label="Light" value="light" />
-                <Picker.Item label="Moderate" value="moderate" />
-                <Picker.Item label="Active" value="active" />
-                <Picker.Item label="Very Active" value="very active" />
-            </Picker>
+                <Text>Current Weight (kg):</Text>
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={currentWeight}
+                    onChangeText={setCurrentWeight}
+                />
 
-            <Button title="Calculate" onPress={handleCalculate} />
+                <Text>Goal Weight (kg):</Text>
+                <TextInput
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={goalWeight}
+                    onChangeText={setGoalWeight}
+                />
 
-            {result && (
-                <View style={styles.result}>
-                    <Text>BMR: {result.BMR.toFixed(2)}</Text>
-                    <Text>TDEE: {result.TDEE.toFixed(2)}</Text>
-                    <Text>Daily Calorie Deficit: {result.DailyCalorieDeficit.toFixed(2)}</Text>
-                    <Text>Recommended Daily Calories: {result.RecommendedDailyCalories.toFixed(2)}</Text>
-                </View>
-            )}
-        </View>
+                <Text>Goal Date:</Text>
+                <Button title={format(goalDate, 'yyyy-MM-dd')} onPress={() => setShowDatePicker(true)} />
+                {showDatePicker && (
+                    <DateTimePicker
+                        value={goalDate}
+                        mode="date"
+                        display="default"
+                        onChange={(event, selectedDate) => {
+                            const currentDate = selectedDate || goalDate;
+                            setShowDatePicker(false);
+                            setGoalDate(currentDate);
+                        }}
+                    />
+                )}
+
+                <Text>Activity Level:</Text>
+                <Picker selectedValue={activityLevel} onValueChange={(value: string) => setActivityLevel(value.toString())}>
+                    <Picker.Item label="Select Activity Level" value="" />
+                    <Picker.Item label="Sedentary" value="sedentary" />
+                    <Picker.Item label="Light" value="light" />
+                    <Picker.Item label="Moderate" value="moderate" />
+                    <Picker.Item label="Active" value="active" />
+                    <Picker.Item label="Very Active" value="very active" />
+                </Picker>
+
+                <Button title="Calculate" onPress={handleCalculate} />
+
+                {result && (
+                    <View style={styles.result}>
+                        <Text>BMR: {result.BMR.toFixed(2)}</Text>
+                        <Text>TDEE: {result.TDEE.toFixed(2)}</Text>
+                        <Text>Daily Calorie Deficit: {result.DailyCalorieDeficit.toFixed(2)}</Text>
+                        <Text>Recommended Daily Calories: {result.RecommendedDailyCalories.toFixed(2)}</Text>
+                    </View>
+                )}
+            </ScrollView>
+        </TouchableWithoutFeedback>
     );
 };
 

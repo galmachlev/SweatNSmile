@@ -9,6 +9,7 @@ import React from 'react';
 import Onboarding from './screens/client/OnBoarding';
 import Register from './screens/stack/Register';
 import Gallery from './screens/client/Gallery';
+import DailyCalories from './screens/client/DailyCalories';
 
 
 const Tab = createBottomTabNavigator();
@@ -22,7 +23,10 @@ export default function App() {
             <Stack.Navigator initialRouteName="OnBoarding" >
                 <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }}/>
                 <Stack.Screen name="My Gallery" component={Gallery}/>
-                <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details', headerLeft: () => null, gestureEnabled: false}}/>
+                <Stack.Screen name="DailyCalories" component={DailyCalories}/>
+                <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details'
+                  // , headerLeft: () => null, gestureEnabled: false
+                  }}/>
             </Stack.Navigator>
       </NavigationContainer>
   );
