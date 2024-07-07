@@ -8,12 +8,12 @@ interface GalleryImage {
 }
 
 // Calculate the item size based on the screen width
-const numColumns = 4;
+const numColumns = 3;
 const screenWidth = Dimensions.get('window').width;
 const itemSize = (screenWidth - 20) / numColumns; // 20 is the total padding (10 on each side)
 
 const GalleryScreen: React.FC = () => {
-  const defaultImage = require('../../Images/img-gallery.png'); // Define your default image here
+  const defaultImage = require('../../Images/gallery_img.png'); // Define your default image here
   const [galleryImg, setGalleryImg] = useState<GalleryImage[]>(
     Array(50).fill({ uri: Image.resolveAssetSource(defaultImage).uri }) // Initialize 50 images with the default image URI
   );
