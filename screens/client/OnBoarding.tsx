@@ -10,7 +10,7 @@ export default function Onboarding() {
   const swiperRef = useRef<Swiper>(null);
 
   const handleSkip = () => {
-    navigation.navigate('DailyChatGpt' as never);
+    navigation.navigate('HomePage' as never);
   };
 
   const handleNext = () => {
