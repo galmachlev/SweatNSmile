@@ -7,10 +7,13 @@ import { Ionicons } from '@expo/vector-icons'; // Assuming you're using Expo for
 import Onboarding from './screens/client/OnBoarding';
 import Register from './screens/stack/Register';
 import Gallery from './screens/client/Gallery';
+import Profile from './screens/client/Profile';
+import AllMenusTable from './screens/client/AllMenusTable';
 import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/DailyMenu';
+import HomeStore from './screens/client/HomeStore';
 
 type RootStackParamList = {
   OnBoarding: undefined;
@@ -18,6 +21,9 @@ type RootStackParamList = {
   DailyCalories: undefined;
   Register: undefined;
   Gallery: undefined;
+  Profile: undefined;
+  AllMenusTable: undefined;
+  HomeStore: undefined;
   // Add other screens as needed
 };
 
@@ -27,7 +33,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const menuItems = [
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
   { name: 'Profile', icon: 'person', routeName: 'Profile' }, // Assuming Profile screen exists
-  { name: 'Store', icon: 'cart', routeName: 'Store' }, // Assuming Store screen exists
+  { name: 'Store', icon: 'cart', routeName: 'HomeStore' }, // Assuming Store screen exists
   { name: 'All Menus', icon: 'list', routeName: 'AllMenusTable' }, // Assuming AllMenusTable screen exists
 ];
 
@@ -149,6 +155,10 @@ export default function App() {
           }}
         />
         <Stack.Screen name="Gallery" component={Gallery} />
+        <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
+        <Stack.Screen name="HomeStore" component={HomeStore} />
+
         {/* Add other stack screens here for Profile, Store, AllMenusTable if needed */}
       </Stack.Navigator>
     </NavigationContainer>

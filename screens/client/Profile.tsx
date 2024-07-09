@@ -1,12 +1,10 @@
 import React from 'react'
+import { View, Text } from 'react-native'
 
 export default function Profile() {
   return (
-    <div>
-      
-      <h1>
-        Profile
-      </h1>
-    </div>
+    <View>
+      <Text>Profile</Text>
+    </View>
   )
 }
