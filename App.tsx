@@ -87,10 +87,10 @@ function TabNavigator() {
           },
           tabBarLabelStyle: {
             fontSize: 12,
-            marginBottom: -10, // Adjust as needed for spacing between icon and label
+            marginBottom: 2, // Adjust as needed for spacing between icon and label
           },
           tabBarIconStyle: {
-            marginBottom: -10, // Adjust as needed for spacing between icon and label
+            marginBottom: 2, // Adjust as needed for spacing between icon and label
           },
         })}
       >
