@@ -79,8 +79,10 @@ function TabNavigator() {
           tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)',
           tabBarStyle: {
             backgroundColor: '#9AB28B',
+            borderTopLeftRadius: 50, 
+            borderTopRightRadius: 50,
             borderTopWidth: 0,
-            height: 60,
+            height: 80,
             paddingBottom: 5,
           },
           tabBarLabelStyle: {
@@ -133,15 +135,14 @@ const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContainer: {
     backgroundColor: '#9AB28B',
     padding: 20,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    alignSelf: 'center', // Center the container horizontally
-    width: '90%', // Adjust the width as needed
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    alignSelf: 'flex-end', // Center the container horizontally
+    width: '50%', // Adjust the width as needed
   },
   menuItem: {
     flexDirection: 'row',
