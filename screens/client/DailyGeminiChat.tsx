@@ -72,10 +72,10 @@ const DailyGeminiChat: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F0F0F0",
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 10, // Adjust padding as needed
+    paddingTop: 5, // Adjust padding as needed
   },
   header: {
     flexDirection: 'row',
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingHorizontal: 20,
-    marginBottom: 10, // Ensure some space between header and content
+    marginBottom: 5, // Ensure some space between header and content
   },
   title: {
     fontSize: 18,

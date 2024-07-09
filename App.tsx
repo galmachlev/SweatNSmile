@@ -32,9 +32,9 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const menuItems = [
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
-  { name: 'Profile', icon: 'person', routeName: 'Profile' }, // Assuming Profile screen exists
   { name: 'Store', icon: 'cart', routeName: 'HomeStore' }, // Assuming Store screen exists
   { name: 'All Menus', icon: 'list', routeName: 'AllMenusTable' }, // Assuming AllMenusTable screen exists
+  { name: 'Profile', icon: 'person', routeName: 'Profile' }, // Assuming Profile screen exists
 ];
 
 type MoreMenuProps = {
@@ -69,6 +69,7 @@ function MoreMenu({ visible, onClose }: MoreMenuProps) {
             <Ionicons name="close" size={24} color="white" style={styles.menuIcon} />
             <Text style={styles.menuText}>Close</Text>
           </TouchableOpacity>
+          <View style={styles.chatBubble} />
         </View>
       </View>
     </Modal>
@@ -100,7 +101,7 @@ function TabNavigator() {
               iconName = 'ellipsis-horizontal';
             }
 
-            return <Ionicons name={iconName as any} size={size} color={color} />;
+            return <Ionicons name={iconName as any} size={28} color={color} />;
           },
           tabBarActiveTintColor: 'white',
           tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)',
@@ -109,8 +110,9 @@ function TabNavigator() {
             borderTopLeftRadius: 50,
             borderTopRightRadius: 50,
             borderTopWidth: 0,
-            height: 80,
-            paddingBottom: 5,
+            height: 85,
+            paddingBottom: 20,
+            paddingTop: 10,
           },
           tabBarLabelStyle: {
             fontSize: 12,
@@ -146,11 +148,7 @@ export default function App() {
         <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
         <Stack.Screen name="HomePage" component={TabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="DailyCalories" component={DailyCalories} />
-        <Stack.Screen
-          name="Register"
-          component={Register}
-          options={{
-            headerTitle: 'Basic Details',
+        <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details',
             // headerLeft: () => null, gestureEnabled: false
           }}
         />
@@ -172,23 +170,40 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: '#9AB28B',
-    padding: 20,
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
+    paddingHorizontal: 40,
+    paddingVertical: 25,
+    borderRadius: 30,
     alignSelf: 'flex-end', // Center the container horizontally
-    width: '50%', // Adjust the width as needed
+    maxWidth: '90%', // Adjust the width as needed
+    position: 'absolute',
+    bottom: 90,
+    right: 20,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    justifyContent: 'center', // Center items horizontally
+    paddingVertical: 14,
+    justifyContent: 'flex-start', // Center items horizontally
   },
   menuIcon: {
     marginRight: 10,
   },
   menuText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
+  },
+  chatBubble: {
+    // position: 'absolute',
+    // width: 0,
+    // height: 0,
+    // borderStyle: 'solid',
+    // borderTopWidth: 0,
+    // borderRightWidth: 20,
+    // borderBottomWidth: 20,
+    // borderLeftWidth: 20,
+    // borderRightColor: 'transparent',
+    // borderLeftColor: 'transparent',
+    // right: 20,
+    // bottom: -5,
   },
 });

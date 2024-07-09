@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   chatBox: {
-    minHeight: 160,
+    minHeight: 140,
   },
   pdfButton: {
     backgroundColor: '#FBF783', // Yellow color

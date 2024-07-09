@@ -16,6 +16,7 @@ const streets = [
     "King George", "Beit Habad", "Yaffo", "Bialik", "Haim Ozer"
 ];
 
+
 const Register = () => {
     
     const [cityPickerOpen, setCityPickerOpen] = useState(false);
@@ -30,6 +31,19 @@ const Register = () => {
         'Activity Level',
         'Congratulations'
     ];
+    const SendToDb = async () => {
+        //לשנות את זה בהתאם לרנדר
+        let res = await fetch('http://89.207.132.170:3000/user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formik.values)
+        });
+        let data = await res.json();
+        console.log(data);
+        navigation.navigate('Login' as never);
+    }
 
     useEffect(() => {
         navigation.setOptions({ headerTitle: screenTitles[currentIndex] });
@@ -309,11 +323,11 @@ const Register = () => {
                         <TextInput
                             style={styles.input}
                             onChangeText={formik.handleChange('caloricIntake')}
-                            value={formik.values.caloricIntake ? formik.values.caloricIntake.toString() : ''}
+                            // value={formik.values.caloricIntake ? formik.values.caloricIntake.toString() : ''}
                             placeholder="Caloric Intake"
                             keyboardType="numeric"
                         />
-                        <Button title="Submit"/>
+                        <Button title="Submit" onPress={() => SendToDb()}/>
                     </View>
                 </ScrollView>
 
