@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Button, Modal, TouchableOpacity, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons'; // Assuming you're using Expo for icons
@@ -12,16 +12,37 @@ import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/DailyMenu';
 
-const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+type RootStackParamList = {
+  OnBoarding: undefined;
+  HomePage: undefined;
+  DailyCalories: undefined;
+  Register: undefined;
+  Gallery: undefined;
+  // Add other screens as needed
+};
 
-function MoreMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const menuItems = [
-    { name: 'Gallery', icon: 'images', action: () => { onClose(); /* Navigate to Gallery */ } },
-    { name: 'Profile', icon: 'person', action: () => { onClose(); /* Navigate to Profile */ } },
-    { name: 'Store', icon: 'cart', action: () => { onClose(); /* Navigate to Store */ } },
-    { name: 'All Menus', icon: 'list', action: () => { onClose(); /* Navigate to All Menus */ } },
-  ];
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
+
+const menuItems = [
+  { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
+  { name: 'Profile', icon: 'person', routeName: 'Profile' }, // Assuming Profile screen exists
+  { name: 'Store', icon: 'cart', routeName: 'Store' }, // Assuming Store screen exists
+  { name: 'All Menus', icon: 'list', routeName: 'AllMenusTable' }, // Assuming AllMenusTable screen exists
+];
+
+type MoreMenuProps = {
+  visible: boolean;
+  onClose: () => void;
+};
+
+function MoreMenu({ visible, onClose }: MoreMenuProps) {
+  const navigation = useNavigation<any>(); // Use 'any' as a temporary fix
+
+  const navigateToScreen = (routeName: keyof RootStackParamList) => {
+    onClose(); // Close the menu first
+    navigation.navigate(routeName); // Navigate to the specified route
+  };
 
   return (
     <Modal
@@ -33,8 +54,8 @@ function MoreMenu({ visible, onClose }: { visible: boolean; onClose: () => void 
       <View style={styles.modalBackground}>
         <View style={styles.modalContainer}>
           {menuItems.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.menuItem} onPress={item.action}>
-              <Ionicons name={item.icon} size={24} color="white" style={styles.menuIcon} />
+            <TouchableOpacity key={index} style={styles.menuItem} onPress={() => navigateToScreen(item.routeName as keyof RootStackParamList)}>
+              <Ionicons name={item.icon as any} size={24} color="white" style={styles.menuIcon} />
               <Text style={styles.menuText}>{item.name}</Text>
             </TouchableOpacity>
           ))}
@@ -61,7 +82,7 @@ function TabNavigator() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) => {
-            let iconName: 'home' | 'fitness' | 'restaurant' | 'ellipsis-horizontal';
+            let iconName;
 
             if (route.name === 'Home') {
               iconName = 'home';
@@ -73,7 +94,7 @@ function TabNavigator() {
               iconName = 'ellipsis-horizontal';
             }
 
-            return <Ionicons name={iconName} size={size} color={color} />;
+            return <Ionicons name={iconName as any} size={size} color={color} />;
           },
           tabBarActiveTintColor: 'white',
           tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)',
@@ -127,6 +148,8 @@ export default function App() {
             // headerLeft: () => null, gestureEnabled: false
           }}
         />
+        <Stack.Screen name="Gallery" component={Gallery} />
+        {/* Add other stack screens here for Profile, Store, AllMenusTable if needed */}
       </Stack.Navigator>
     </NavigationContainer>
   );
