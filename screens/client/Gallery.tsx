@@ -1,22 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Alert, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-
+import { Camera } from 'expo-camera';
 
 interface GalleryImage {
   uri: string | null;
 }
 
-// Calculate the item size based on the screen width
 const numColumns = 3;
 const screenWidth = Dimensions.get('window').width;
-const itemSize = (screenWidth - 20) / numColumns; // 20 is the total padding (10 on each side)
+const itemSize = (screenWidth - 20) / numColumns;
 
 const GalleryScreen: React.FC = () => {
-  const defaultImage = require('../../Images/gallery_img.png'); // Define your default image here
+  const defaultImage = require('../../Images/gallery_img.png');
   const [galleryImg, setGalleryImg] = useState<GalleryImage[]>(
-    Array(50).fill({ uri: Image.resolveAssetSource(defaultImage).uri }) // Initialize 50 images with the default image URI
+    Array(50).fill({ uri: Image.resolveAssetSource(defaultImage).uri })
   );
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+      const { status: mediaLibraryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (cameraStatus !== 'granted') {
+        Alert.alert('Camera Permission', 'Permission to access the camera is required!');
+      }
+      if (mediaLibraryStatus !== 'granted') {
+        Alert.alert('Library Permission', 'Permission to access the photo library is required!');
+      }
+    };
+
+    requestPermissions();
+  }, []);
 
   const pickImage = async (index: number) => {
     Alert.alert(
@@ -65,7 +79,7 @@ const GalleryScreen: React.FC = () => {
       setGalleryImg(newGalleryImg);
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -104,7 +118,7 @@ const styles = StyleSheet.create({
   gridItem: {
     width: itemSize,
     height: itemSize,
-    margin: 1, 
+    margin: 1,
     borderWidth: 1,
     borderColor: '#ccc',
     alignItems: 'center',
@@ -130,7 +144,7 @@ const styles = StyleSheet.create({
     bottom: 2,
     right: 2,
     backgroundColor: '#9AB28B',
-    borderRadius: 15, // Half of width and height to make it circular
+    borderRadius: 15,
     width: 25,
     height: 25,
     alignItems: 'center',

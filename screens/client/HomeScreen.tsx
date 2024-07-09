@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, FlatList } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
 import { ScrollView } from 'react-native-gesture-handler';
 
@@ -8,23 +8,20 @@ const HomeScreen: React.FC = () => {
   const startDate = new Date('2024-02-07'); // Example start date, one month ago
   const currentDate = new Date(); // Current date
   const estimatedDate = new Date('2024-09-08'); // Example target date
-  
+
   // Calculate progress in percentage based on start and current date
   const totalDays = Math.ceil((estimatedDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
   const passedDays = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
-  
+
   // Calculate progress percentage
   let progress = (passedDays / totalDays) * 100;
-  
+
   // Limit progress to 100% if current date is beyond or exactly estimatedDate
   if (currentDate >= estimatedDate) {
     progress = 100;
   } else {
     progress = Math.min(progress, 100); // Ensure progress does not exceed 100%
   }
-  
-  // Calculate width of progressBarFill based on progress percentage
-  const progressBarWidth: string = `${progress}%`;
 
   const handleNavigation = (screenName: string) => {
     console.log(`Navigating to ${screenName}`);
@@ -37,54 +34,54 @@ const HomeScreen: React.FC = () => {
 
   return (
     <ScrollView>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
-          <Text style={styles.greeting}>Hello, {userName}</Text>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
+        <Text style={styles.greeting}>Hello, {userName}</Text>
+      </View>
 
-        <View style={styles.progressBarContainer}>
-          <Text style={styles.progressBarTextLeft}>Starting weight</Text>
-          <View style={[styles.progressBarFill, { width: progressBarWidth }]}></View>
-          <Text style={styles.progressBarTextRight}>Target weight</Text>
-        </View>
+      <View style={styles.progressBarContainer}>
+        <Text style={styles.progressBarTextLeft}>Starting weight</Text>
+        <View style={[styles.progressBarFill, { width: `${progress}%` }]}></View>
+        <Text style={styles.progressBarTextRight}>Target weight</Text>
+      </View>
 
-        <View style={styles.details}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
-            <Text style={[styles.textbelow]}>Target Date: {estimatedDate.toLocaleDateString()}</Text>
-          </View>
+      <View style={styles.details}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
+          <Text style={[styles.textbelow]}>Target Date: {estimatedDate.toLocaleDateString()}</Text>
         </View>
+      </View>
 
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={[styles.button, styles.GalleryButton]} onPress={() => handleNavigation('Gallery')}>
-            <Image source={require('../../Images/GalleryIcon.png')} style={styles.iconImage} />
-            <Text>Gallery</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('Weight')}>
-            <Image source={require('../../Images/WeightIcon.png')} style={styles.iconImage} />
-            <Text>Weight</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('Menu')}>
-            <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
-            <Text>Menu</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('More')}>
-            <Image source={require('../../Images/MoreIcon.png')} style={styles.iconImage} />
-            <Text>More</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.chatContainer}>
-          <View style={styles.chatBox}>
-            <DailyGeminiChat />
-          </View>
-        </View>
-
-        <TouchableOpacity style={styles.pdfButton} onPress={openPDF}>
-          <Text style={styles.pdfButtonText}>Training Program</Text>
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity style={[styles.button, styles.GalleryButton]} onPress={() => handleNavigation('Gallery')}>
+          <Image source={require('../../Images/GalleryIcon.png')} style={styles.iconImage} />
+          <Text>Gallery</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('Weight')}>
+          <Image source={require('../../Images/WeightIcon.png')} style={styles.iconImage} />
+          <Text>Weight</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('Menu')}>
+          <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
+          <Text>Menu</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('More')}>
+          <Image source={require('../../Images/MoreIcon.png')} style={styles.iconImage} />
+          <Text>More</Text>
         </TouchableOpacity>
       </View>
+
+      <View style={styles.chatContainer}>
+        <View style={styles.chatBox}>
+          <DailyGeminiChat />
+        </View>
+      </View>
+
+      <TouchableOpacity style={styles.pdfButton} onPress={openPDF}>
+        <Text style={styles.pdfButtonText}>Training Program</Text>
+      </TouchableOpacity>
+    </View>
     </ScrollView>
   );
 };
@@ -127,25 +124,27 @@ const styles = StyleSheet.create({
     marginTop: 20,
     overflow: 'hidden',
     flexDirection: 'row',
+    position: 'relative', // Ensure proper stacking of child elements
   },
   progressBarFill: {
     backgroundColor: '#3E6613', // Green color for passed progress
   },
   progressBarTextLeft: {
-    position: 'absolute',
-    right: 260,
-    top: 13,
     fontSize: 14,
     color: '#FFFFFF',
-    zIndex:1
+    position: 'absolute',
+    left: 20,
+    top: 13,
+    zIndex: 1
   },
   progressBarTextRight: {
-    position: 'absolute',
-    left: 260,
-    top: 13,
     fontSize: 14,
     fontWeight: 'bold',
     color: '#FFFFFF',
+    position: 'absolute',
+    right: 20,
+    top: 13,
+    zIndex: 1
   },
   buttonsContainer: {
     flexDirection: 'row',

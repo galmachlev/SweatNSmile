@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import * as GoogleGenerativeAI from "@google/generative-ai";
 import FlashMessage, { showMessage } from "react-native-flash-message";
 import { MaterialIcons } from '@expo/vector-icons';
@@ -40,12 +40,6 @@ const DailyGeminiChat: React.FC = () => {
     generateDailyFact();
   }, []);
 
-  const renderMessage = ({ item }: { item: Message }) => (
-    <View style={styles.messageContainer}>
-      <Text style={styles.messageText}>{item.text}</Text>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -54,20 +48,22 @@ const DailyGeminiChat: React.FC = () => {
           <MaterialIcons name="refresh" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         {loading ? (
           <Text>Loading Quick Fact 🌟...</Text>
         ) : reloading ? (
           <Text>Reloading...</Text>
         ) : (
-          <FlatList
-            data={messages}
-            renderItem={renderMessage}
-            keyExtractor={(item, index) => index.toString()}
-            ListEmptyComponent={<Text>No messages</Text>}
-          />
+          <View>
+            {messages.map((message, index) => (
+              <View key={index} style={styles.messageContainer}>
+                <Text style={styles.messageText}>{message.text}</Text>
+              </View>
+            ))}
+            {messages.length === 0 && <Text>No messages</Text>}
+          </View>
         )}
-      </View>
+      </ScrollView>
       <FlashMessage position="top" />
     </View>
   );
@@ -94,16 +90,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
     paddingHorizontal: 15,
   },
   messageContainer: {
     padding: 5,
     alignSelf: "flex-start",
     borderRadius: 10,
+    marginBottom: 10,
   },
   messageText: {
     fontSize: 16,
