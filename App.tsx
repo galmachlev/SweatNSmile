@@ -79,7 +79,7 @@ function TabNavigator() {
           tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)',
           tabBarStyle: {
             backgroundColor: '#9AB28B',
-            borderTopLeftRadius: 50, 
+            borderTopLeftRadius: 50,
             borderTopRightRadius: 50,
             borderTopWidth: 0,
             height: 80,
@@ -87,9 +87,10 @@ function TabNavigator() {
           },
           tabBarLabelStyle: {
             fontSize: 12,
+            marginBottom: -10, // Adjust as needed for spacing between icon and label
           },
           tabBarIconStyle: {
-            marginTop: 5,
+            marginBottom: -10, // Adjust as needed for spacing between icon and label
           },
         })}
       >
