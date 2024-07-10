@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import ProgressBar from './weight/progressBar'; // Ensure the path is correct
+import WaterConsumption from './weight/WaterConsumption';
 
 const DailyWeight = () => {
   return (
@@ -12,7 +13,8 @@ const DailyWeight = () => {
         <Text style={styles.infoTitle}>Current weight</Text>
         <Text style={styles.infoValue}>82.1 KG</Text>
       </View>
-      {/* Add other components here as needed */}
+      <WaterConsumption />  
+      
     </ScrollView>
   );
 };
