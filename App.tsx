@@ -69,7 +69,6 @@ function MoreMenu({ visible, onClose }: MoreMenuProps) {
             <Ionicons name="close" size={24} color="white" style={styles.menuIcon} />
             <Text style={styles.menuText}>Close</Text>
           </TouchableOpacity>
-          <View style={styles.chatBubble} />
         </View>
       </View>
     </Modal>
@@ -191,19 +190,5 @@ const styles = StyleSheet.create({
   menuText: {
     color: 'white',
     fontSize: 16,
-  },
-  chatBubble: {
-    // position: 'absolute',
-    // width: 0,
-    // height: 0,
-    // borderStyle: 'solid',
-    // borderTopWidth: 0,
-    // borderRightWidth: 20,
-    // borderBottomWidth: 20,
-    // borderLeftWidth: 20,
-    // borderRightColor: 'transparent',
-    // borderLeftColor: 'transparent',
-    // right: 20,
-    // bottom: -5,
   },
 });
