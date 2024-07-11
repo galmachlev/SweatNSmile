@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: 'center',
     padding: 20,
+    paddingBottom: 90,
   },
   title: {
     fontSize: 24,

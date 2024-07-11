@@ -1,7 +1,6 @@
-// ProgressBar.js
 import React from 'react';
 import { LineChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
 const ProgressBar = () => {
   return (
@@ -18,20 +17,25 @@ const ProgressBar = () => {
       height={220}
       yAxisSuffix=" kg"
       chartConfig={{
-        backgroundColor: '#e26a00',
-        backgroundGradientFrom: '#fb8c00',
-        backgroundGradientTo: '#ffa726',
+        backgroundColor: '#FFFFFF',
+        backgroundGradientFrom: '#FFFFFF',
+        backgroundGradientTo: '#FFFFFF',
         decimalPlaces: 1,
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+        color: (opacity = 1) => `#C6CAD0`,
+        labelColor: (opacity = 1) => `#808387`,
       }}
       bezier
-      style={{
-        marginVertical: 8,
-        borderRadius: 16,
-      }}
+      style={styles.chart}
     />
   );
 };
+
+const styles = StyleSheet.create({
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+    paddingVertical: 20, 
+  },
+});
 
 export default ProgressBar;

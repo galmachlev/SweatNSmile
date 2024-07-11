@@ -1,8 +1,10 @@
-// WaterConsumption.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button, Image } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import ConfettiCannon from 'react-native-confetti-cannon';
+
+// Define your image source here
+const circleImage = require('../../../Images/water.png');
 
 const WaterConsumption = () => {
   const radius = 50;
@@ -42,6 +44,9 @@ const WaterConsumption = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Daily Water Consumption</Text>
+      <View style={styles.imageContainer}>
+        <Image source={circleImage} style={styles.image} />
+      </View>
       <Svg height="150" width="150" viewBox="0 0 120 120" style={styles.svg}>
         <Circle
           cx="60"
@@ -116,6 +121,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3b5998',
     marginBottom: 15,
+  },
+  imageContainer: {
+    width: 120,
+    height: 120,
+    position: 'absolute',
+    bottom: 165,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   svg: {
     marginBottom: 15,
