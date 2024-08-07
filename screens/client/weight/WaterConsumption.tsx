@@ -72,9 +72,10 @@ const WaterConsumption = () => {
       </TouchableOpacity>
       {showConfetti && (
         <ConfettiCannon
-          count={200}
+          count={300}
           origin={{ x: -10, y: 0 }}
           fadeOut
+          colors={['green', 'blue', 'yellow', 'pink', 'orange', 'purple']}
           onAnimationEnd={() => setShowConfetti(false)}
         />
       )}
