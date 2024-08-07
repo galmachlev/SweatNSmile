@@ -21,7 +21,7 @@ const DailyGeminiChat: React.FC = () => {
       setReloading(true);
       const genAI = new GoogleGenerativeAI.GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = "write the user a fact or advice about food or sport or healthy lifestyle around 25 words. include relative emojis at the end.";
+      const prompt = "write the user a Tip for motivation about food or sport or healthy lifestyle around 25 words. include relative emojis at the end.";
       const result = await model.generateContent(prompt);
       const response = result.response;
       const text = response.text();

@@ -33,7 +33,7 @@ const HomeScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView>
+    <ScrollView style={styles.page}>
     <View style={styles.container}>
       <View style={styles.header}>
         <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
@@ -87,10 +87,13 @@ const HomeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  page: {
+    backgroundColor: '#FFFFFF',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
     padding: 20,
+    paddingBottom: 90,
   },
   header: {
     flexDirection: 'column',
@@ -99,9 +102,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 150,
+    height: 150,
+    borderRadius: 150,
+    borderColor: '#9AB28B',
+    borderWidth: 3,
   },
   greeting: {
     fontSize: 20,

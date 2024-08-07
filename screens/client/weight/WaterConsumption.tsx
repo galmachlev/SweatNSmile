@@ -1,14 +1,16 @@
-// WaterConsumption.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button, Image, Dimensions } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import ConfettiCannon from 'react-native-confetti-cannon';
 
+const circleImage = require('../../../Images/water.png');
+
 const WaterConsumption = () => {
+  const { width } = Dimensions.get('window');
   const radius = 50;
   const strokeWidth = 10;
   const circumference = 2 * Math.PI * radius;
-  const [waterIntake, setWaterIntake] = useState(550); // Initial water intake
+  const [waterIntake, setWaterIntake] = useState(550);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -40,8 +42,11 @@ const WaterConsumption = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { width: width * 0.4 }]}>
       <Text style={styles.title}>Daily Water Consumption</Text>
+      <View style={styles.imageContainer}>
+        <Image source={circleImage} style={styles.image} />
+      </View>
       <Svg height="150" width="150" viewBox="0 0 120 120" style={styles.svg}>
         <Circle
           cx="60"
@@ -65,7 +70,7 @@ const WaterConsumption = () => {
       </Svg>
       <View style={styles.textContainer}>
         <Text style={styles.text}>{`${waterIntake} ml`}</Text>
-        <Text style={styles.subText}>of your 2000 ml goal</Text>
+        <Text style={styles.subText}>Goal: 2000 ml</Text>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleAddGlass}>
         <Text style={styles.buttonText}>Add Glass of Water</Text>
@@ -111,12 +116,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
+    marginHorizontal: 10,
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#3b5998',
     marginBottom: 15,
+    textAlign: 'center',
+  },
+  imageContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    position: 'absolute',
+    top: 25,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   svg: {
     marginBottom: 15,
@@ -125,12 +143,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   text: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#3b5998',
+    textAlign: 'center',
   },
   subText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6c757d',
   },
   button: {
@@ -144,11 +163,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   modalContent: {
     width: 300,

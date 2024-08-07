@@ -31,6 +31,7 @@ const Register = () => {
         'Activity Level',
         'Congratulations'
     ];
+    
     const SendToDb = async () => {
         //לשנות את זה בהתאם לרנדר
         let res = await fetch('http://89.207.132.170:3000/user', {

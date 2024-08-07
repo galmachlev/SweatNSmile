@@ -16,7 +16,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to take photos.",
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to choose photos.",
-        "NSPhotoLibraryAddUsageDescription": "This app needs access to save photos to your library."
+        "NSPhotoLibraryAddUsageDescription": "This app needs access to save photos to your library.",
+        "NSHealthShareUsageDescription": "This app needs access to write step data to the Health app."
       }
     },
     "android": {

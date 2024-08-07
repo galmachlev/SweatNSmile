@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Button, Modal, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, Animated } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons'; // Assuming you're using Expo for icons
+import { Ionicons } from '@expo/vector-icons';
 import Onboarding from './screens/client/OnBoarding';
 import Register from './screens/stack/Register';
 import Gallery from './screens/client/Gallery';
@@ -24,7 +24,6 @@ type RootStackParamList = {
   Profile: undefined;
   AllMenusTable: undefined;
   HomeStore: undefined;
-  // Add other screens as needed
 };
 
 const Tab = createBottomTabNavigator();
@@ -32,9 +31,8 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const menuItems = [
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
-  { name: 'Store', icon: 'cart', routeName: 'HomeStore' }, // Assuming Store screen exists
-  { name: 'All Menus', icon: 'list', routeName: 'AllMenusTable' }, // Assuming AllMenusTable screen exists
-  { name: 'Profile', icon: 'person', routeName: 'Profile' }, // Assuming Profile screen exists
+  { name: 'Store', icon: 'cart', routeName: 'HomeStore' },
+  { name: 'All Menus', icon: 'list', routeName: 'AllMenusTable' },
 ];
 
 type MoreMenuProps = {
@@ -43,49 +41,68 @@ type MoreMenuProps = {
 };
 
 function MoreMenu({ visible, onClose }: MoreMenuProps) {
-  const navigation = useNavigation<any>(); // Use 'any' as a temporary fix
+  const navigation = useNavigation<any>();
+  const [animation] = useState(new Animated.Value(visible ? 1 : 0));
+
+  React.useEffect(() => {
+    Animated.timing(animation, {
+      toValue: visible ? 1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [visible]);
 
   const navigateToScreen = (routeName: keyof RootStackParamList) => {
-    onClose(); // Close the menu first
-    navigation.navigate(routeName); // Navigate to the specified route
+    onClose();
+    navigation.navigate(routeName);
   };
 
+  const translateY = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [300, 0],
+  });
+
   return (
-    <Modal
-      transparent={true}
-      visible={visible}
-      animationType="slide"
-      onRequestClose={onClose}
+    <Animated.View 
+      style={[
+        styles.moreMenuContainer,
+        {
+          transform: [{ translateY }],
+          opacity: animation,
+        }
+      ]}
     >
-      <View style={styles.modalBackground}>
-        <View style={styles.modalContainer}>
-          {menuItems.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.menuItem} onPress={() => navigateToScreen(item.routeName as keyof RootStackParamList)}>
-              <Ionicons name={item.icon as any} size={24} color="white" style={styles.menuIcon} />
-              <Text style={styles.menuText}>{item.name}</Text>
-            </TouchableOpacity>
-          ))}
-          <TouchableOpacity style={styles.menuItem} onPress={onClose}>
-            <Ionicons name="close" size={24} color="white" style={styles.menuIcon} />
-            <Text style={styles.menuText}>Close</Text>
-          </TouchableOpacity>
-          <View style={styles.chatBubble} />
-        </View>
-      </View>
-    </Modal>
+      {menuItems.map((item, index) => (
+        <TouchableOpacity
+          key={index}
+          style={[styles.menuItem, index !== menuItems.length - 1 && styles.menuItemBorder]}
+          onPress={() => navigateToScreen(item.routeName as keyof RootStackParamList)}
+        >
+          <Ionicons name={item.icon as any} size={24} color="#9AB28B" style={styles.menuIcon} />
+          <Text style={styles.menuText}>{item.name}</Text>
+        </TouchableOpacity>
+      ))}
+    </Animated.View>
   );
 }
 
-function MoreScreen() {
-  return null;
-}
+const PlusButton = ({ onPress, isOpen }: { onPress: () => void; isOpen: boolean }) => {
+  return (
+    <TouchableOpacity onPress={onPress} style={styles.plusButtonContainer}>
+      <Ionicons name={isOpen ? "close" : "menu"} size={30} color="#9AB28B" />
+    </TouchableOpacity>
+  );
+};
 
 function TabNavigator() {
   const [moreMenuVisible, setMoreMenuVisible] = useState(false);
 
+  const toggleMoreMenu = () => {
+    setMoreMenuVisible(!moreMenuVisible);
+  };
+
   return (
-    <>
-      <MoreMenu visible={moreMenuVisible} onClose={() => setMoreMenuVisible(false)} />
+    <View style={{ flex: 1, backgroundColor: '#white' }}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) => {
@@ -97,8 +114,8 @@ function TabNavigator() {
               iconName = 'fitness';
             } else if (route.name === 'Menu') {
               iconName = 'restaurant';
-            } else if (route.name === 'More') {
-              iconName = 'ellipsis-horizontal';
+            } else if (route.name === 'Profile') {
+              iconName = 'person';
             }
 
             return <Ionicons name={iconName as any} size={28} color={color} />;
@@ -107,37 +124,40 @@ function TabNavigator() {
           tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)',
           tabBarStyle: {
             backgroundColor: '#9AB28B',
-            borderTopLeftRadius: 50,
-            borderTopRightRadius: 50,
-            borderTopWidth: 0,
-            height: 85,
-            paddingBottom: 20,
-            paddingTop: 10,
+            borderRadius: 50,
+            bottom: 25,
+            marginHorizontal: 15,
+            height: 75,
+            paddingBottom: 10,
+            paddingTop: 20,
+            justifyContent: 'center',
           },
+          tabBarLabelPosition: 'below-icon', // טקסט מתחת לאייקון
           tabBarLabelStyle: {
-            fontSize: 12,
-            marginBottom: 2, // Adjust as needed for spacing between icon and label
+            fontSize: 12,            
           },
           tabBarIconStyle: {
-            marginBottom: 2, // Adjust as needed for spacing between icon and label
+            paddingHorizontal: 10, // מרווח בין האייקונים
+            marginLeft: route.name === 'More' ? 35 : 0, // מרווח מיוחד לאייקון "More"
           },
         })}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Weight" component={DailyWeight} />
-        <Tab.Screen name="Menu" component={DailyMenu} />
-        <Tab.Screen
-          name="More"
-          component={MoreScreen}
-          listeners={{
-            tabPress: e => {
-              e.preventDefault();
-              setMoreMenuVisible(true);
-            },
-          }}
+        <Tab.Screen 
+          name="More" 
+          component={HomeScreen}
+          options={{ 
+            tabBarButton: () => (
+              <PlusButton onPress={toggleMoreMenu} isOpen={moreMenuVisible} />
+            ) 
+          }} 
         />
+        <Tab.Screen name="Menu" component={DailyMenu} />
+        <Tab.Screen name="Profile" component={Profile} />
       </Tab.Navigator>
-    </>
+      <MoreMenu visible={moreMenuVisible} onClose={() => setMoreMenuVisible(false)} />
+    </View>
   );
 }
 
@@ -148,62 +168,66 @@ export default function App() {
         <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
         <Stack.Screen name="HomePage" component={TabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="DailyCalories" component={DailyCalories} />
-        <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details',
-            // headerLeft: () => null, gestureEnabled: false
-          }}
-        />
+        <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
         <Stack.Screen name="Gallery" component={Gallery} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
         <Stack.Screen name="HomeStore" component={HomeStore} />
-
-        {/* Add other stack screens here for Profile, Store, AllMenusTable if needed */}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  modalBackground: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  modalContainer: {
-    backgroundColor: '#9AB28B',
-    paddingHorizontal: 40,
-    paddingVertical: 25,
-    borderRadius: 30,
-    alignSelf: 'flex-end', // Center the container horizontally
-    maxWidth: '90%', // Adjust the width as needed
+  moreMenuContainer: {
     position: 'absolute',
-    bottom: 90,
-    right: 20,
+    bottom: 140,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    paddingVertical: 20,
+    marginHorizontal: 20,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     paddingVertical: 14,
-    justifyContent: 'flex-start', // Center items horizontally
+  },
+  menuItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(154, 178, 139, 0.3)',
   },
   menuIcon: {
     marginRight: 10,
   },
   menuText: {
-    color: 'white',
+    color: '#5F6063',
     fontSize: 16,
+    marginLeft: 10,
   },
-  chatBubble: {
-    // position: 'absolute',
-    // width: 0,
-    // height: 0,
-    // borderStyle: 'solid',
-    // borderTopWidth: 0,
-    // borderRightWidth: 20,
-    // borderBottomWidth: 20,
-    // borderLeftWidth: 20,
-    // borderRightColor: 'transparent',
-    // borderLeftColor: 'transparent',
-    // right: 20,
-    // bottom: -5,
+  plusButtonContainer: {
+    position: 'absolute',
+    bottom: 30,
+    left: '50%',
+    marginLeft: -35,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: '#ffffff',
+    borderColor: '#9AB28B',
+    borderWidth: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
