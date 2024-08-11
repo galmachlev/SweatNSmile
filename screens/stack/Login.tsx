@@ -1,62 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-type RootStackParamList = {
-  OnBoarding: undefined;
-  HomePage: undefined;
-  DailyCalories: undefined;
-  Register: undefined;
-  Gallery: undefined;
-  Profile: undefined;
-  AllMenusTable: undefined;
-  HomeStore: undefined;
-  Login: undefined;
-};
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { useUser } from '../../context/UserContext';
+import { useNavigation } from '@react-navigation/native';
+
 export default function Login() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
-    const handleLogin = async () => {
-        if (!email || !password) {
-            Alert.alert('Error', 'Please fill in both fields.');
-            return;
-        }
-
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            Alert.alert('Error', 'Invalid email address.');
-            return;
-        }
-
-        // Password validation
-        if (password.length < 6) {
-            Alert.alert('Error', 'Password must be at least 6 characters long.');
-            return;
-        }
-
-        try {
-            let res = await fetch('http://89.207.132.170:3000/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            let data = await res.json();
-
-            if (data.success) {
-                navigation.navigate('HomePage');
-            } else {
-                Alert.alert('Error', 'Invalid email or password.');
-            }
-        } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'An error occurred while logging in. Please try again.');
-        }
-    };
+    const { login } = useUser();
+    const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
@@ -78,11 +29,11 @@ export default function Login() {
                 secureTextEntry
                 autoCapitalize="none"
             />
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <TouchableOpacity style={styles.button} onPress={() => login(email, password)}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity
-                onPress={() => navigation.navigate('Register')}
+                onPress={() => navigation.navigate('Register' as never) }
             >
                 <Text style={styles.registerText}>Don't have an account? Register</Text>
             </TouchableOpacity>
