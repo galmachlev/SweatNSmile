@@ -10,7 +10,7 @@ export default function Onboarding() {
   const swiperRef = useRef<Swiper>(null);
 
   const handleSkip = () => {
-    navigation.navigate('HomePage' as never);
+    navigation.navigate('HomeScreen' as never);
   };
 
   const handleNext = () => {

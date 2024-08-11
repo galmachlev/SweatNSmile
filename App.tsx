@@ -13,17 +13,8 @@ import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/DailyMenu';
-
-type RootStackParamList = {
-  OnBoarding: undefined;
-  HomeScreen: undefined;
-  DailyCalories: undefined;
-  Register: undefined;
-  Gallery: undefined;
-  Profile: undefined;
-  AllMenusTable: undefined;
-  HomeStore: undefined;
-};
+import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
+import Login from './screens/stack/Login';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -171,6 +162,8 @@ export default function App() {
         <Stack.Screen name="Gallery" component={Gallery} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
+        <Stack.Screen name="Login" component={Login} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
