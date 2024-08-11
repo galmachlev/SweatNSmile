@@ -13,11 +13,10 @@ import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/DailyMenu';
-import HomeStore from './screens/client/HomeStore';
 
 type RootStackParamList = {
   OnBoarding: undefined;
-  HomePage: undefined;
+  HomeScreen: undefined;
   DailyCalories: undefined;
   Register: undefined;
   Gallery: undefined;
@@ -166,13 +165,12 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="OnBoarding">
         <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
-        <Stack.Screen name="HomePage" component={TabNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name="HomeScreen" component={TabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="DailyCalories" component={DailyCalories} />
         <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
         <Stack.Screen name="Gallery" component={Gallery} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
-        <Stack.Screen name="HomeStore" component={HomeStore} />
       </Stack.Navigator>
     </NavigationContainer>
   );
