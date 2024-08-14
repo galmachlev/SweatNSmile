@@ -15,13 +15,13 @@ const DailyGeminiChat: React.FC = () => {
   const [reloading, setReloading] = useState(false);
 
   const API_KEY = "AIzaSyAEG-hwBmhVBOIz8t7BQRpGOyPhcr3tWiU";
-
+//ליצור אוסף נתונים בדאטה בייס בסרבר - שם לשמור את כל הטיפים ולוודא מול גימיני שהוא לא חוזר על עצמו 
   const generateDailyFact = async () => {
     try {
       setReloading(true);
       const genAI = new GoogleGenerativeAI.GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = "write the user a Tip for motivation about food or sport or healthy lifestyle around 25 words. include relative emojis at the end.";
+      const prompt = "Provide the user a Tip for motivation about food or sport or healthy lifestyle around 25 words. include relative emojis at the end.";
       const result = await model.generateContent(prompt);
       const response = result.response;
       const text = response.text();
@@ -50,7 +50,7 @@ const DailyGeminiChat: React.FC = () => {
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         {loading ? (
-          <Text>Loading Quick Fact 🌟...</Text>
+          <Text>Loading...</Text>
         ) : reloading ? (
           <Text>Reloading...</Text>
         ) : (
