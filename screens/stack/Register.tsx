@@ -2,11 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Swiper from 'react-native-swiper';
 import { useFormik } from 'formik';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 import { RadioButton } from 'react-native-paper';
 import { User } from '../../types/user';
+//import { RootStackParamList } from '../../types/navigationTypes'; 
 
+export type RootStackParamList = {
+    OnBoarding: undefined;
+    HomeScreen: undefined;
+    DailyCalories: undefined;
+    Register: undefined;
+    Gallery: undefined;
+    Profile: undefined;
+    AllMenusTable: undefined;
+    HomeStore: undefined;
+    Login: undefined ;
+};
 const cities = [
     "Tel Aviv", "Jerusalem", "Haifa", "Rishon LeZion", "Petah Tikva",
     "Ashdod", "Netanya", "Beer Sheva", "Bnei Brak", "Holon"
@@ -16,9 +28,7 @@ const streets = [
     "King George", "Beit Habad", "Yaffo", "Bialik", "Haim Ozer"
 ];
 
-
 const Register = () => {
-    
     const [cityPickerOpen, setCityPickerOpen] = useState(false);
     const [streetPickerOpen, setStreetPickerOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -33,7 +43,6 @@ const Register = () => {
     ];
     
     const SendToDb = async () => {
-        //לשנות את זה בהתאם לרנדר
         let res = await fetch('http://89.207.132.170:3000/user', {
             method: 'POST',
             headers: {
@@ -44,7 +53,7 @@ const Register = () => {
         let data = await res.json();
         console.log(data);
         navigation.navigate('Login' as never);
-    }
+    };
 
     useEffect(() => {
         navigation.setOptions({ headerTitle: screenTitles[currentIndex] });
@@ -140,6 +149,7 @@ const Register = () => {
                             onChangeText={formik.handleChange('email')}
                             value={formik.values.email ?? ''}
                             placeholder="Email"
+                            keyboardType="email-address"
                         />
                         <Text style={styles.label}>Phone Number</Text>
                         <TextInput
@@ -147,6 +157,7 @@ const Register = () => {
                             onChangeText={formik.handleChange('phoneNumber')}
                             value={formik.values.phoneNumber ?? ''}
                             placeholder="Phone Number"
+                            keyboardType="phone-pad"
                         />
                         <Text style={styles.label}>Birth Date</Text>
                         <TextInput
@@ -154,6 +165,7 @@ const Register = () => {
                             onChangeText={formik.handleChange('birthDate')}
                             value={formik.values.birthDate ? formik.values.birthDate.toISOString().split('T')[0] : ''}
                             placeholder="YYYY-MM-DD"
+                            keyboardType="numeric"
                         />
                         <Text style={styles.label}>Password</Text>
                         <TextInput
@@ -202,6 +214,7 @@ const Register = () => {
                             onChangeText={formik.handleChange('address.houseNum')}
                             value={formik.values.address?.houseNum?.toString() ?? ''}
                             placeholder="House Number"
+                            keyboardType="numeric"
                         />
                         <Text style={styles.label}>Postal Code</Text>
                         <TextInput
@@ -209,6 +222,7 @@ const Register = () => {
                             onChangeText={formik.handleChange('address.postalCode')}
                             value={formik.values.address?.postalCode?.toString() ?? ''}
                             placeholder="Postal Code"
+                            keyboardType="numeric"
                         />
                         <Text style={styles.label}>Comments</Text>
                         <TextInput
@@ -218,6 +232,12 @@ const Register = () => {
                             placeholder="Comments"
                         />
                         <Button title="Next" onPress={() => swiperRef.current?.scrollBy(1)} />
+                        <TouchableOpacity
+                            style={styles.loginLinkContainer}
+                            onPress={() => navigation.navigate('Login' as never)}
+                        >
+                            <Text style={styles.loginLinkText}>Already have an account? Login</Text>
+                        </TouchableOpacity>
                     </View>
                 </ScrollView>
 
@@ -262,6 +282,7 @@ const Register = () => {
                             onChangeText={formik.handleChange('goalDate')}
                             value={formik.values.goalDate ? formik.values.goalDate.toISOString().split('T')[0] : ''}
                             placeholder="YYYY-MM-DD"
+                            keyboardType="numeric"
                         />
                         <Button title="Next" onPress={() => swiperRef.current?.scrollBy(1)} />
                     </View>
@@ -340,12 +361,13 @@ const Register = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#f9f9f9',
     },
     scrollViewContainer: {
         flexGrow: 1,
         justifyContent: 'center',
         paddingVertical: 20,
-        paddingHorizontal: 10,
+        paddingHorizontal: 20,
     },
     screenContainer: {
         flex: 1,
@@ -355,13 +377,16 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 5,
+        color: '#333',
     },
     input: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#ccc',
         borderWidth: 1,
         marginBottom: 10,
         paddingHorizontal: 10,
+        borderRadius: 5,
+        backgroundColor: '#fff',
     },
     radioButtonContainer: {
         flexDirection: 'row',
@@ -370,10 +395,20 @@ const styles = StyleSheet.create({
     },
     radioButtonLabel: {
         marginLeft: 8,
+        fontSize: 14,
     },
     picker: {
         height: 200,
         width: '100%',
+        backgroundColor: '#fff',
+    },
+    loginLinkContainer: {
+        marginTop: 20,
+        alignItems: 'center',
+    },
+    loginLinkText: {
+        color: '#007bff',
+        textDecorationLine: 'underline',
     },
 });
 

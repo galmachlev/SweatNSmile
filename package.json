@@ -25,6 +25,7 @@
     "@types/moment": "^2.13.0",
     "axios": "^1.7.2",
     "axios-retry": "^4.4.1",
+    "cors": "^2.8.5",
     "date-fns": "^3.6.0",
     "expo": "~51.0.14",
     "expo-camera": "^15.0.13",

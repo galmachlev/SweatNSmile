@@ -13,18 +13,10 @@ import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/DailyMenu';
-import HomeStore from './screens/client/HomeStore';
+import Login from './screens/stack/Login';
+import { RootStackParamList } from './types/navigationTypes'; 
+import { UserProvider } from './context/UserContext';
 
-type RootStackParamList = {
-  OnBoarding: undefined;
-  HomePage: undefined;
-  DailyCalories: undefined;
-  Register: undefined;
-  Gallery: undefined;
-  Profile: undefined;
-  AllMenusTable: undefined;
-  HomeStore: undefined;
-};
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -102,7 +94,7 @@ function TabNavigator() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#white' }}>
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) => {
@@ -164,16 +156,19 @@ function TabNavigator() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="OnBoarding">
-        <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
-        <Stack.Screen name="HomePage" component={TabNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="DailyCalories" component={DailyCalories} />
-        <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
-        <Stack.Screen name="Gallery" component={Gallery} />
-        <Stack.Screen name="Profile" component={Profile} />
-        <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
-        <Stack.Screen name="HomeStore" component={HomeStore} />
-      </Stack.Navigator>
+      <UserProvider>
+        <Stack.Navigator initialRouteName="OnBoarding">
+          <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
+          <Stack.Screen name="HomeScreen" component={TabNavigator} options={{ headerShown: false }} />
+          <Stack.Screen name="DailyCalories" component={DailyCalories} />
+          <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
+          <Stack.Screen name="Gallery" component={Gallery} />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
+          <Stack.Screen name="HomeStore" component={HomeScreen} />
+          <Stack.Screen name="Login" component={Login} />
+        </Stack.Navigator>
+      </UserProvider>
     </NavigationContainer>
   );
 }
