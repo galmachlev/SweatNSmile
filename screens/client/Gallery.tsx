@@ -55,8 +55,7 @@ const GalleryScreen: React.FC = () => {
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.3,
-      base64: true,
+      quality: 1,
     });
 
     handleImageResult(result, index);
@@ -67,27 +66,17 @@ const GalleryScreen: React.FC = () => {
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.3,
-      base64: true,
+      quality: 1,
     });
 
     handleImageResult(result, index);
   };
 
-  const handleImageResult = async (result: ImagePicker.ImagePickerResult, index: number) => {
+  const handleImageResult = (result: ImagePicker.ImagePickerResult, index: number) => {
     if (!result.canceled && result.assets.length > 0) {
       let newGalleryImg = [...galleryImg];
-      newGalleryImg[index] = { uri: result.assets[0].uri }; //לבדוק להמיר את זה לבייס 64
-      //הכתובת אמורה להיות הכתובת שמקבלים מרנדר.קום אחרי שמעלים את זה לשרת
-      let res = await fetch('http://89.207.132.170:3000/upload', {
-        method: 'POST', //לשנות בהתאם
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ uri: result.assets[0].uri })//בהתאם למה שיש באקספרס בתוך הבאדי של הפונקציה
-      })
-      let data = await res.json(); //הדאטה מכיל את כל המידע שמקבלים מהשרת
-      setGalleryImg(newGalleryImg); //data.secure_url - 
+      newGalleryImg[index] = { uri: result.assets[0].uri };
+      setGalleryImg(newGalleryImg);
     }
   };
 

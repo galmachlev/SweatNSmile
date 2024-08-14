@@ -8,13 +8,6 @@ const DailyWeight = () => {
   const screenWidth = Dimensions.get('window').width;
   const componentWidth = (screenWidth - 60) / 2; // 60 for padding and spacing
 
-  // Get current date
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  });
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Daily Weight</Text>
@@ -22,8 +15,6 @@ const DailyWeight = () => {
       <View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>Current weight</Text>
         <Text style={styles.infoValue}>82.1 KG</Text>
-        {/* Add current date here */}
-        <Text style={styles.dateText}>{currentDate}</Text>
       </View>
       {/* Use flexWrap to handle component sizing */}
       <View style={styles.row}>
@@ -62,11 +53,6 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  dateText: {
-    fontSize: 16,
-    color: '#888',
-    marginTop: 5,
   },
   row: {
     flexDirection: 'row',

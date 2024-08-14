@@ -13,34 +13,27 @@ const WaterConsumption = () => {
   const [waterIntake, setWaterIntake] = useState(550);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [isGoalReached, setIsGoalReached] = useState(false);
-  const [showFactModal, setShowFactModal] = useState(false); // State for fact modal
   const animatedValue = useRef(new Animated.Value(0)).current;
   const progress = animatedValue.interpolate({
-    inputRange: [0, 2600],
+    inputRange: [0, 2000],
     outputRange: [0, 1],
   });
 
   useEffect(() => {
     Animated.timing(animatedValue, {
-      toValue: Math.min(waterIntake, 2600), // Cap the animated value at the recommended goal
+      toValue: waterIntake,
       duration: 500,
       useNativeDriver: true,
     }).start();
 
-    if (waterIntake >= 2600 && !isGoalReached) {
+    if (waterIntake >= 2000) {
       setShowConfetti(true);
       setShowModal(true);
-      setIsGoalReached(true); // Set the goal as reached
     }
   }, [waterIntake]);
 
   const handleAddGlass = () => {
-    setWaterIntake(prev => prev + 240);
-  };
-
-  const handleImagePress = () => {
-    setShowFactModal(true);
+    setWaterIntake(prev => Math.min(prev + 240, 2000));
   };
 
   const strokeDashoffset = progress.interpolate({
@@ -51,9 +44,9 @@ const WaterConsumption = () => {
   return (
     <View style={[styles.container, { width: width * 0.4 }]}>
       <Text style={styles.title}>Daily Water Consumption</Text>
-      <TouchableOpacity style={styles.imageContainer} onPress={handleImagePress}>
+      <View style={styles.imageContainer}>
         <Image source={circleImage} style={styles.image} />
-      </TouchableOpacity>
+      </View>
       <Svg height="150" width="150" viewBox="0 0 120 120" style={styles.svg}>
         <Circle
           cx="60"
@@ -77,7 +70,7 @@ const WaterConsumption = () => {
       </Svg>
       <View style={styles.textContainer}>
         <Text style={styles.text}>{`${waterIntake} ml`}</Text>
-        <Text style={styles.subText}>Goal: 2600 ml</Text>
+        <Text style={styles.subText}>Goal: 2000 ml</Text>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleAddGlass}>
         <Text style={styles.buttonText}>Add Glass of Water</Text>
@@ -102,22 +95,6 @@ const WaterConsumption = () => {
             <Text style={styles.congratulationsText}>Congratulations!</Text>
             <Text style={styles.modalText}>You have reached your daily water goal!</Text>
             <Button title="Close" onPress={() => setShowModal(false)} />
-          </View>
-        </View>
-      </Modal>
-      {/* Fact Modal */}
-      <Modal
-        visible={showFactModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowFactModal(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>
-              Did you know? The National Institute of Medicine (IOM) recommends consuming 2.6 liters of fluids for men and 1.8 liters for women (from drinking alone, not from food).
-            </Text>
-            <Button title="Close" onPress={() => setShowFactModal(false)} />
           </View>
         </View>
       </Modal>
@@ -151,7 +128,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10
   },
   image: {
     position: 'absolute',
