@@ -10,7 +10,7 @@ const WaterConsumption = () => {
   const radius = 50;
   const strokeWidth = 10;
   const circumference = 2 * Math.PI * radius;
-  const [waterIntake, setWaterIntake] = useState(550);
+  const [waterIntake, setWaterIntake] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isGoalReached, setIsGoalReached] = useState(false);
@@ -114,8 +114,9 @@ const WaterConsumption = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalText}>
-              Did you know? The National Institute of Medicine (IOM) recommends consuming 2.6 liters of fluids for men and 1.8 liters for women (from drinking alone, not from food).
+            <Text style={styles.modalText}> Did you know? </Text>
+            <Text style={styles.modalText2}>
+              The National Institute of Medicine (IOM) recommends consuming 2.6 liters of fluids for men and 1.8 liters for women (from drinking alone, not from food).
             </Text>
             <Button title="Close" onPress={() => setShowFactModal(false)} />
           </View>
@@ -210,6 +211,14 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     color: '#6c757d',
+    marginVertical: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText2: {
+    fontSize: 14,
+    color: '#6c757d',
+    lineHeight: 20,
     marginVertical: 10,
     textAlign: 'center',
   },
