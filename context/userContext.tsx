@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
@@ -91,3 +92,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         </UserContext.Provider>
     );
 };
+=======
+// import { createContext } from "react";
+
+// export const userContext= createContext({});
+
+// export default function UserContextProvider({ children }) {
+//     return(
+//         <userContext.Provider value={{}}>
+//             {children}
+//         </userContext.Provider>
+//     )
+// }
+>>>>>>> 8ccfa37b3606a645af310a10d144b436144d6664
