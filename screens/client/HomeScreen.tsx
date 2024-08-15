@@ -1,10 +1,16 @@
-import React from 'react';
+import React, {useContext, useState} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, FlatList } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
 import { ScrollView } from 'react-native-gesture-handler';
+import { useUser } from '../../context/UserContext';
+import { User } from '../../types/user';
 
 const HomeScreen: React.FC = () => {
-  const userName = "John Doe";
+  const {currentUser} = useUser();
+  console.log('currentUser ==> ', currentUser)
+  const [user, setUser] = useState<User | null>(currentUser)
+
+  const userName = currentUser?.email;
   const startDate = new Date('2024-02-07'); // Example start date, one month ago
   const currentDate = new Date(); // Current date
   const estimatedDate = new Date('2024-09-08'); // Example target date
@@ -37,7 +43,7 @@ const HomeScreen: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
-        <Text style={styles.greeting}>Hello, {userName}</Text>
+        <Text style={styles.greeting}>Hello, {user? user.email : 'User'}</Text>
       </View>
 
       <View style={styles.progressBarContainer}>

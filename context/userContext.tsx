@@ -1,11 +1,12 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { User } from '../types/user';
 
 // Define the RootStackParamList type for navigation
 type RootStackParamList = {
     OnBoarding: undefined;
-    HomePage: undefined;
+    HomeScreen: undefined;
     DailyCalories: undefined;
     Register: undefined;
     Gallery: undefined;
@@ -17,7 +18,8 @@ type RootStackParamList = {
 
 // Define the context type
 type UserContextType = {
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<void>
+    currentUser: User | null
 };
 
 // Create the UserContext
@@ -40,7 +42,7 @@ type UserProviderProps = {
 // Create the UserProvider component
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const login = async (email: string, password: string) => {
         if (!email || !password) {
             Alert.alert('Error', 'Please fill in both fields.');
@@ -69,10 +71,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
                 body: JSON.stringify({ email, password }),
             });
 
-            let data = await res.json();
-
-            if (data.success) {
-                navigation.navigate('HomePage');
+            if (res.ok) {
+                let data = await res.json();
+                setCurrentUser(data);
+                Alert.alert('Success', 'Login successful.');
+                navigation.navigate('HomeScreen');
             } else {
                 Alert.alert('Error', 'Invalid email or password.');
             }
@@ -83,7 +86,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ login }}>
+        <UserContext.Provider value={{ login, currentUser }}>
             {children}
         </UserContext.Provider>
     );
