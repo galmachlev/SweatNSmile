@@ -15,6 +15,7 @@ import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
+import { UserProvider } from './context/UserContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -154,17 +155,19 @@ function TabNavigator() {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="OnBoarding">
-        <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
-        <Stack.Screen name="HomeScreen" component={TabNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="DailyCalories" component={DailyCalories} />
-        <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
-        <Stack.Screen name="Gallery" component={Gallery} />
-        <Stack.Screen name="Profile" component={Profile} />
-        <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
-        <Stack.Screen name="Login" component={Login} />
-
-      </Stack.Navigator>
+            <UserProvider>
+        <Stack.Navigator initialRouteName="OnBoarding">
+          <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
+          <Stack.Screen name="HomeScreen" component={TabNavigator} options={{ headerShown: false }} />
+          <Stack.Screen name="DailyCalories" component={DailyCalories} />
+          <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
+          <Stack.Screen name="Gallery" component={Gallery} />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
+          <Stack.Screen name="HomeStore" component={HomeScreen} />
+          <Stack.Screen name="Login" component={Login} />
+        </Stack.Navigator>
+      </UserProvider>
     </NavigationContainer>
   );
 }

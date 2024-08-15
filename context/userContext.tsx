@@ -43,6 +43,8 @@ type UserProviderProps = {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+    
     const login = async (email: string, password: string) => {
         if (!email || !password) {
             Alert.alert('Error', 'Please fill in both fields.');
@@ -91,6 +93,30 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         </UserContext.Provider>
     );
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import { createContext } from "react";
 
 // export const userContext= createContext({});
