@@ -4,7 +4,6 @@ import Swiper from 'react-native-swiper';
 import { useFormik } from 'formik';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
-import { RadioButton } from 'react-native-paper';
 import { User } from '../../types/user';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 
@@ -28,16 +27,19 @@ const streets = [
     "King George", "Beit Habad", "Yaffo", "Bialik", "Haim Ozer"
 ];
 
-const CustomCheckbox = ({ checked, onPress }) => {
-    return (
-      <TouchableOpacity onPress={onPress}>
-        <View style={[styles.checkbox, checked && styles.checked]}>
-          {checked && <Icon name="check" size={16} color="#FFFFFF" />}
-        </View>
-      </TouchableOpacity>
-    );
+type CustomCheckboxProps = {
+    checked: boolean;
+    onPress: () => void;
   };
   
+const CustomCheckbox = ({ checked, onPress }: CustomCheckboxProps) => (
+    <TouchableOpacity onPress={onPress}>
+      <View style={[styles.checkbox, checked && styles.checked]}>
+        {checked && <Icon name="check" size={16} color="#FFFFFF" />}
+      </View>
+    </TouchableOpacity>
+);  
+
 const Register = () => {
     const [cityPickerOpen, setCityPickerOpen] = useState(false);
     const [streetPickerOpen, setStreetPickerOpen] = useState(false);
@@ -366,9 +368,10 @@ const Register = () => {
                     <View style={styles.screenContainer}>
                         
                         <View style={styles.screenTitleContainer}>
-                            <Text style={styles.questionText}>What is your baseline activity level?</Text>
+                            <Text style={styles.screenPageTitle1}>What is your baseline activity level?</Text>
                             <Text style={styles.screenPageTitle2}>Please select the one that best describes you</Text>
-                        </View>               
+                        </View>              
+
                         {['notVeryActive', 'lightlyActive', 'active', 'veryActive'].map((level) => (
                             <TouchableOpacity 
                                 key={level}
@@ -470,12 +473,13 @@ const styles = StyleSheet.create({
     },
     screenTitleContainer: {
         marginTop: 20,
-        marginBottom: 40
+        marginBottom: 80
     },
     screenPageTitle1: {
         fontSize: 18,
+        fontWeight: 'bold',
         textAlign: 'center',
-        marginBottom: 20,
+        marginBottom: 10,
         color: '#696B6D',
     },
     screenPageTitle2: {
