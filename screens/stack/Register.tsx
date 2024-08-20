@@ -141,6 +141,7 @@ const Register = () => {
 
                 <ScrollView contentContainerStyle={styles.scrollViewContainer}>
                     <View style={styles.screenContainer}>
+                        
                         {/* page intro */}
                         <View style={styles.screenTitleContainer}>
                             <Text style={styles.screenPageTitle1}>Hey new user! </Text>
@@ -267,8 +268,8 @@ const Register = () => {
                         {/* login link */}
                         <TouchableOpacity style={styles.loginLinkContainer} onPress={() => navigation.navigate('Login' as never)}>
                             <Text style={styles.loginLinkText1}>Already have an account?   <Text style={styles.loginLinkText2}>Login</Text></Text>
-
                         </TouchableOpacity>
+
                     </View>
                 </ScrollView>
 
@@ -359,6 +360,7 @@ const Register = () => {
                         <TouchableOpacity style={styles.nextButton} onPress={() => swiperRef.current?.scrollBy(1)}>
                             <Text style={styles.nextButtonText}>Next</Text>
                         </TouchableOpacity>
+
                     </View>
                 </ScrollView>
 
@@ -366,12 +368,13 @@ const Register = () => {
 
                 <ScrollView contentContainerStyle={styles.scrollViewContainer}>
                     <View style={styles.screenContainer}>
-                        
+
+                        {/* page intro */}
                         <View style={styles.screenTitleContainer}>
                             <Text style={styles.screenPageTitle1}>What is your baseline activity level?</Text>
                             <Text style={styles.screenPageTitle2}>Please select the one that best describes you</Text>
                         </View>              
-
+                        {/* activity level options */}
                         {['notVeryActive', 'lightlyActive', 'active', 'veryActive'].map((level) => (
                             <TouchableOpacity 
                                 key={level}
@@ -401,12 +404,10 @@ const Register = () => {
                             </TouchableOpacity>
                         ))}
                         {/* next button */}
-                        <TouchableOpacity 
-                            style={styles.nextButton}
-                            onPress={() => swiperRef.current?.scrollBy(1)}
-                        >
+                        <TouchableOpacity  style={styles.nextButton} onPress={() => swiperRef.current?.scrollBy(1)}>
                             <Text style={styles.nextButtonText}>NEXT</Text>
                         </TouchableOpacity>
+
                     </View>
                 </ScrollView>
 
@@ -472,8 +473,8 @@ const styles = StyleSheet.create({
         paddingBottom: 90,
     },
     screenTitleContainer: {
-        marginTop: 20,
-        marginBottom: 80
+        marginTop: 10,
+        marginBottom: 50
     },
     screenPageTitle1: {
         fontSize: 18,
