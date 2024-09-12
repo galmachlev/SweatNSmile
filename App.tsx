@@ -18,7 +18,7 @@ import { RootStackParamList } from './types/navigationTypes'; // Adjust the impo
 import Login from './screens/stack/Login';
 import { UserProvider } from './context/UserContext';
 import StoreComingSoonScreen from './screens/client/StoreComingSoon';
-
+import HealthyRecipesScreen from './screens/client/HealthyRecipesScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -26,7 +26,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const menuItems = [
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
   { name: 'Store', icon: 'cart', routeName: 'StoreComingSoonScreen' },
-  { name: 'All Menus', icon: 'list', routeName: 'AllMenusTable' },
+  { name: 'Recpies', icon: 'nutrition', routeName: 'HealthyRecipesScreen' },
 ];
 
 type MoreMenuProps = {
@@ -50,7 +50,7 @@ function MoreMenu({ visible, onClose }: MoreMenuProps) {
     onClose();
     navigation.navigate(routeName);
   };
-  
+
   const translateY = animation.interpolate({
     inputRange: [0, 1],
     outputRange: [300, 0],
@@ -166,16 +166,15 @@ export default function App() {
           <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
           <Stack.Screen name="Gallery" component={Gallery} />
           <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
+          <Stack.Screen name="HealthyRecipesScreen" component={HealthyRecipesScreen} />
           <Stack.Screen name="HomeStore" component={HomeScreen} />
-          <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} options={{ headerTitle: '' }}  />
+          <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} />
           <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
   );
 }
-
 
 const styles = StyleSheet.create({
   moreMenuContainer: {

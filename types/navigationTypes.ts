@@ -8,5 +8,6 @@ export type RootStackParamList = {
     AllMenusTable: undefined;
     HomeStore: undefined;
     StoreComingSoonScreen: undefined;
+    HealthyRecipesScreen: undefined;
     Login: undefined ;
 };
