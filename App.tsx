@@ -12,17 +12,20 @@ import AllMenusTable from './screens/client/AllMenusTable';
 import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
+import StoreComingSoon from './screens/client/StoreComingSoon';
 import DailyMenu from './screens/client/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
 import { UserProvider } from './context/UserContext';
+import StoreComingSoonScreen from './screens/client/StoreComingSoon';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
 
 const menuItems = [
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
-  { name: 'Store', icon: 'cart', routeName: 'HomeStore' },
+  { name: 'Store', icon: 'cart', routeName: 'StoreComingSoonScreen' },
   { name: 'All Menus', icon: 'list', routeName: 'AllMenusTable' },
 ];
 
@@ -47,7 +50,7 @@ function MoreMenu({ visible, onClose }: MoreMenuProps) {
     onClose();
     navigation.navigate(routeName);
   };
-
+  
   const translateY = animation.interpolate({
     inputRange: [0, 1],
     outputRange: [300, 0],
@@ -165,12 +168,14 @@ export default function App() {
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
           <Stack.Screen name="HomeStore" component={HomeScreen} />
+          <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} options={{ headerTitle: '' }}  />
           <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
   );
 }
+
 
 const styles = StyleSheet.create({
   moreMenuContainer: {

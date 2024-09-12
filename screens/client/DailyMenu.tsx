@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
+
+const API_URL = 'https://data.gov.il/api/3/action/datastore_search';
 
 // Types
 interface Macros {
@@ -24,7 +27,7 @@ interface MealSectionProps {
   title: string;
   data: MealItem[];
   borderColor: string;
-  onRefresh: (title: string) => void;  // הוסף פרופס לפונקציה שתשנה את הערכים
+  onRefresh: (title: string) => void;
 }
 
 const DailyMenu: React.FC = () => {
@@ -55,7 +58,7 @@ const DailyMenu: React.FC = () => {
       ))}
     </View>
   );
-  
+
   const getBorderColor = (title: string) => {
     switch (title) {
       case 'Breakfast':
@@ -65,11 +68,10 @@ const DailyMenu: React.FC = () => {
       case 'Dinner':
         return '#FDE598';
       default:
-        return '#FBF783'; 
+        return '#FBF783';
     }
   };
 
-  // Simulated API fetch
   const fetchMealData = async () => {
     // Replace with real API call
     const data = {
@@ -103,16 +105,34 @@ const DailyMenu: React.FC = () => {
 
   const handleOutsidePress = () => {
     setShowSearch(false);
-    setSearchQuery(''); // Reset the search query if needed
+    setSearchQuery('');
   };
 
-  // Function to refresh meal data
-  const refreshMealData = (title: string) => {
-    // Replace with logic to refresh the meal data
-    console.log(`Refreshing ${title}`);
-    // For now, let's simulate refreshing by re-fetching the data
+  const refreshAllMeals = () => {
+    console.log('Refreshing all meals');
     fetchMealData();
   };
+
+  const refreshMealData = (title: string) => {
+    console.log(`Refreshing ${title}`);
+    fetchMealData();
+  };
+
+  // Prepare data for FlatList
+  const mealSections = Object.entries(meals).map(([title, data]) => ({
+    title,
+    data,
+    borderColor: getBorderColor(title),
+    type: 'meal' as const
+  }));
+  
+  // Add feedback section as the last item
+  mealSections.push({
+    title: '',
+    data: [],
+    borderColor: '#FFF', // Placeholder value
+    type: 'feedback' as const
+  });
 
   return (
     <View style={styles.container}>
@@ -156,19 +176,32 @@ const DailyMenu: React.FC = () => {
 
       {/* Meal Sections */}
       <FlatList
-        data={Object.entries(meals)}
-        keyExtractor={(item) => item[0]}
+        data={mealSections}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => {
-          const [title, data] = item;
-          const borderColor = getBorderColor(title);
-          return (
-            <MealSection 
-              title={title} 
-              data={data} 
-              borderColor={borderColor} 
-              onRefresh={refreshMealData} 
-            />
-          );
+          if (item.type === 'meal') {
+            return (
+              <MealSection 
+                title={item.title} 
+                data={item.data} 
+                borderColor={item.borderColor} 
+                onRefresh={refreshMealData} 
+              />
+            );
+          } else if (item.type === 'feedback') {
+            return (
+              <View style={styles.feedbackSection}>
+                <Text style={styles.feedbackText}>
+                  Didn't like the menu?
+                </Text>
+                <TouchableOpacity onPress={refreshAllMeals} style={styles.refreshAllButton}>
+                  <FontAwesome name="refresh" size={20} color="#FFF" />
+                  <Text style={styles.refreshAllText}>Create different</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }
+          return null;
         }}
       />
 
@@ -211,7 +244,6 @@ const styles = StyleSheet.create({
   },
   caloriesContainer: {
     alignItems: 'center',
-    marginVertical: 10,
   },
   outerCircle: {
     width: 140,
@@ -261,8 +293,12 @@ const styles = StyleSheet.create({
   },
   macros: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     marginVertical: 20,
+    alignContent: 'center',
+    width: '80%',
+    justifyContent: 'space-between',
+    marginLeft: '8%',
+
   },
   macroItem: {
     alignItems: 'center',
@@ -271,6 +307,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#696B6D',
     marginBottom: 5,
+    textAlign: 'center',
   },
   macroValueContainer: {
     backgroundColor: '#696B6D', // The gray color from your image
@@ -316,6 +353,31 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5E5',
   },
+  feedbackSection: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#fffff',
+    borderRadius: 10,
+  },
+  feedbackText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  refreshAllButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#696B6D',
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  refreshAllText: {
+    marginLeft: 10,
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
+
   searchInput: {
     borderWidth: 1,
     borderColor: '#D0D0D0',
