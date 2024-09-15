@@ -1,16 +1,13 @@
-import React, {useContext, useState} from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, FlatList } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
-import { ScrollView } from 'react-native-gesture-handler';
 import { useUser } from '../../context/UserContext';
-import { User } from '../../types/user';
 
 const HomeScreen: React.FC = () => {
-  const {currentUser} = useUser();
-  console.log('currentUser ==> ', currentUser)
-  const [user, setUser] = useState<User | null>(currentUser)
+  const { currentUser } = useUser();  // Use context directly
+  console.log('currentUser ==> ', currentUser);
 
-  const userName = currentUser?.email;
+  const userName = currentUser?.firstName;
   const startDate = new Date('2024-02-07'); // Example start date, one month ago
   const currentDate = new Date(); // Current date
   const estimatedDate = new Date('2024-09-08'); // Example target date
@@ -40,54 +37,62 @@ const HomeScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.page}>
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
-        <Text style={styles.greeting}>Hello, {user? user.email : 'User'}</Text>
-      </View>
-
-      <View style={styles.progressBarContainer}>
-        <Text style={styles.progressBarTextLeft}>Starting weight</Text>
-        <View style={[styles.progressBarFill, { width: `${progress}%` }]}></View>
-        <Text style={styles.progressBarTextRight}>Target weight</Text>
-      </View>
-
-      <View style={styles.details}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
-          <Text style={[styles.textbelow]}>Target Date: {estimatedDate.toLocaleDateString()}</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
+          {/* Wrap the greeting text in <Text> */}
+          <Text style={styles.greeting}>Hello, {currentUser ? currentUser.firstName : 'User'}</Text>
         </View>
-      </View>
 
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={[styles.button, styles.GalleryButton]} onPress={() => handleNavigation('Gallery')}>
-          <Image source={require('../../Images/GalleryIcon.png')} style={styles.iconImage} />
-          <Text>Gallery</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('Weight')}>
-          <Image source={require('../../Images/WeightIcon.png')} style={styles.iconImage} />
-          <Text>Weight</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('Menu')}>
-          <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
-          <Text>Menu</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('More')}>
-          <Image source={require('../../Images/MoreIcon.png')} style={styles.iconImage} />
-          <Text>More</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.chatContainer}>
-        <View style={styles.chatBox}>
-          <DailyGeminiChat />
+        <View style={styles.progressBarContainer}>
+          {/* Wrap text inside progress bar in <Text> */}
+          <Text style={styles.progressBarTextLeft}>Starting weight</Text>
+          <View style={[styles.progressBarFill, { width: `${progress}%` }]}></View>
+          <Text style={styles.progressBarTextRight}>Target weight</Text>
         </View>
-      </View>
 
-      <TouchableOpacity style={styles.pdfButton} onPress={openPDF}>
-        <Text style={styles.pdfButtonText}>Training Program</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.details}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            {/* Wrap dynamic text in <Text> */}
+            <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
+            <Text style={styles.textbelow}>Target Date: {estimatedDate.toLocaleDateString()}</Text>
+          </View>
+        </View>
+
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={[styles.button, styles.GalleryButton]} onPress={() => handleNavigation('Gallery')}>
+            <Image source={require('../../Images/GalleryIcon.png')} style={styles.iconImage} />
+            {/* Wrap button text in <Text> */}
+            <Text>Gallery</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('Weight')}>
+            <Image source={require('../../Images/WeightIcon.png')} style={styles.iconImage} />
+            {/* Wrap button text in <Text> */}
+            <Text>Weight</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('Menu')}>
+            <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
+            {/* Wrap button text in <Text> */}
+            <Text>Menu</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('More')}>
+            <Image source={require('../../Images/MoreIcon.png')} style={styles.iconImage} />
+            {/* Wrap button text in <Text> */}
+            <Text>More</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.chatContainer}>
+          <View style={styles.chatBox}>
+            <DailyGeminiChat />
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.pdfButton} onPress={openPDF}>
+          {/* Wrap PDF button text in <Text> */}
+          <Text style={styles.pdfButtonText}>Training Program</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -135,10 +140,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     overflow: 'hidden',
     flexDirection: 'row',
-    position: 'relative', // Ensure proper stacking of child elements
+    position: 'relative',
   },
   progressBarFill: {
-    backgroundColor: '#3E6613', // Green color for passed progress
+    backgroundColor: '#3E6613',
   },
   progressBarTextLeft: {
     fontSize: 14,
@@ -163,9 +168,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: '#F0F0F0',
     paddingVertical: 30,
-    paddingHorizontal: 20, // Added paddingHorizontal to maintain inner content spacing
-    width: '111%', // Ensure full width of the parent container
-    marginLeft: -20, // Compensate for the main container padding
+    paddingHorizontal: 20,
+    width: '111%',
+    marginLeft: -20,
   },
   button: {
     flex: 1,
@@ -209,8 +214,8 @@ const styles = StyleSheet.create({
   chatBox: {
     minHeight: 140,
   },
-  pdfButton: {
-    backgroundColor: '#FBF783', // Yellow color
+  pdfButton: {  // Ensure this style is correctly defined
+    backgroundColor: '#FBF783',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
