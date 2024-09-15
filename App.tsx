@@ -8,17 +8,30 @@ import Onboarding from './screens/client/OnBoarding';
 import Register from './screens/stack/Register';
 import Gallery from './screens/client/Gallery';
 import Profile from './screens/client/Profile';
-import AllMenusTable from './screens/client/AllMenusTable';
 import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
-import StoreComingSoon from './screens/client/StoreComingSoon';
 import DailyMenu from './screens/client/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
 import { UserProvider } from './context/UserContext';
 import StoreComingSoonScreen from './screens/client/StoreComingSoon';
 import HealthyRecipesScreen from './screens/client/HealthyRecipesScreen';
+
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+} from '@apollo/client';
+
+const client = new ApolloClient({
+  uri: 'https://oneonta.stepzen.net/api/belligerent-waterbuffalo/__graphql',
+  cache: new InMemoryCache(),
+  headers: {
+    Authorization:
+      'apikey oneonta::stepzen.io+1000::f1fd564cbba026853eeedfbb05322edfe26263d2973848915d962dd16878e937',
+  },
+});
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -157,8 +170,9 @@ function TabNavigator() {
 
 export default function App() {
   return (
+    <ApolloProvider client={client}>
     <NavigationContainer>
-            <UserProvider>
+      <UserProvider>
         <Stack.Navigator initialRouteName="OnBoarding">
           <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
           <Stack.Screen name="HomeScreen" component={TabNavigator} options={{ headerShown: false }} />
@@ -173,6 +187,7 @@ export default function App() {
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
+    </ApolloProvider>
   );
 }
 

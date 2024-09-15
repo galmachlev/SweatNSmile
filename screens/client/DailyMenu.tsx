@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import axios from 'axios';
+import { gql, useLazyQuery } from '@apollo/client';
 
-const API_URL = 'https://data.gov.il/api/3/action/datastore_search';
+const SEARCH_QUERY = gql`
+  query search($ingr: String, $upc: String) {
+    search(ingr: $ingr, upc: $upc) {
+      text
+      hints {
+        food {
+          label
+          brand
+          foodId
+          nutrients {
+            ENERC_KCAL
+            FAT
+            CHOCDF
+            PROCNT
+          }
+        }
+      }
+    }
+  }
+`;
 
-// Types
 interface Macros {
   protein: number;
   carbs: number;
@@ -21,6 +39,7 @@ interface Meals {
   Breakfast: MealItem[];
   Lunch: MealItem[];
   Dinner: MealItem[];
+  Snacks: MealItem[]; // Added Snacks
 }
 
 interface MealSectionProps {
@@ -36,11 +55,18 @@ const DailyMenu: React.FC = () => {
   const [meals, setMeals] = useState<Meals>({
     Breakfast: [],
     Lunch: [],
-    Dinner: []
+    Dinner: [],
+    Snacks: []
   });
 
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [performSearch, { loading: searchLoading, error: searchError }] = useLazyQuery(SEARCH_QUERY, {
+    onCompleted: (data) => {
+      setSearchResults(data?.search?.hints || []);
+    }
+  });
 
   const MealSection: React.FC<MealSectionProps> = ({ title, data, borderColor, onRefresh }) => (
     <View style={[styles.mealSection, { borderLeftColor: borderColor }]}>
@@ -67,34 +93,49 @@ const DailyMenu: React.FC = () => {
         return '#F8D675';
       case 'Dinner':
         return '#FDE598';
+      case 'Snacks':
+        return '#E8A54B';
       default:
         return '#FBF783';
     }
   };
 
-  const fetchMealData = async () => {
-    // Replace with real API call
-    const data = {
-      Breakfast: [
-        { name: 'Eggs', calories: 200 },
-        { name: 'Light bread', calories: 150 },
-        { name: 'Cucumber', calories: 70 }
-      ],
-      Lunch: [
-        { name: 'Chicken breast', calories: 350 },
-        { name: 'Rice', calories: 270 },
-        { name: 'Sweet pepper', calories: 50 }
-      ],
-      Dinner: [
-        { name: 'Salmon', calories: 400 },
-        { name: 'Broccoli', calories: 90 },
-        { name: 'Quinoa', calories: 120 }
-      ]
-    };
 
+  const getRandomItem = (items: any[]) => items[Math.floor(Math.random() * items.length)];
+
+  const calculatePortionSize = (calories: number, item: any) => {
+    const portionSize = (calories / item.calories) * 100;
+    return {
+      name: item.name,
+      portionSize,
+      protein: (portionSize / 100) * item.protein,
+      fat: (portionSize / 100) * item.fat,
+      carbs: (portionSize / 100) * item.carbohydrates,
+      calories: portionSize * item.calories / 100,
+    };
+  };
+  
+  const generateRandomMealData = (): Meals => {
+    const randomMealItem = (): MealItem => ({
+      name: `Food ${Math.floor(Math.random() * 100)}`,
+      calories: Math.floor(Math.random() * 500) + 100,
+    });
+
+    return {
+      Breakfast: [randomMealItem(), randomMealItem(), randomMealItem()],
+      Lunch: [randomMealItem(), randomMealItem(), randomMealItem()],
+      Dinner: [randomMealItem(), randomMealItem(), randomMealItem()],
+      Snacks: [],
+    };
+  };
+
+  const fetchMealData = () => {
+    // Simulate fetching data with random values
+    const data = generateRandomMealData();
     setMeals(data);
   };
 
+  
   useEffect(() => {
     fetchMealData();
   }, []);
@@ -106,6 +147,29 @@ const DailyMenu: React.FC = () => {
   const handleOutsidePress = () => {
     setShowSearch(false);
     setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      performSearch({ variables: { ingr: searchQuery } });
+    }
+  };
+
+  const handleAddToSnacks = (item: any) => {
+    const newSnack: MealItem = {
+      name: item.food.label,
+      calories: item.food.nutrients.ENERC_KCAL,
+    };
+    
+    setMeals(prevMeals => ({
+      ...prevMeals,
+      Snacks: [...prevMeals.Snacks, newSnack],
+    }));
+
+    setShowSearch(false);
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
   const refreshAllMeals = () => {
@@ -118,7 +182,6 @@ const DailyMenu: React.FC = () => {
     fetchMealData();
   };
 
-  // Prepare data for FlatList
   const mealSections = Object.entries(meals).map(([title, data]) => ({
     title,
     data,
@@ -126,14 +189,17 @@ const DailyMenu: React.FC = () => {
     type: 'meal' as const
   }));
   
+  // Filter out the empty Snacks section
+  const filteredMealSections = mealSections.filter(section => !(section.title === 'Snacks' && section.data.length === 0));
+  
   // Add feedback section as the last item
-  mealSections.push({
+  filteredMealSections.push({
     title: '',
     data: [],
     borderColor: '#FFF', // Placeholder value
     type: 'feedback' as const
   });
-
+  
   return (
     <View style={styles.container}>
       {/* Circular progress for daily calories */}
@@ -153,21 +219,21 @@ const DailyMenu: React.FC = () => {
       {/* Macros information */}
       <View style={styles.macros}>
         <View style={styles.macroItem}>
-          <Text style={styles.macroLabel}>protein(g)</Text>
+          <Text style={styles.macroLabel}>Protein (g)</Text>
           <View style={styles.macroValueContainer}>
             <Text style={styles.macroValue}>{macros.protein}</Text>
           </View>
         </View>
         
         <View style={styles.macroItem}>
-          <Text style={styles.macroLabel}>carbohydrates(g)</Text>
+          <Text style={styles.macroLabel}>Carbohydrates (g)</Text>
           <View style={styles.macroValueContainer}>
             <Text style={styles.macroValue}>{macros.carbs}</Text>
           </View>
         </View>
         
         <View style={styles.macroItem}>
-          <Text style={styles.macroLabel}>Fat(g)</Text>
+          <Text style={styles.macroLabel}>Fat (g)</Text>
           <View style={styles.macroValueContainer}>
             <Text style={styles.macroValue}>{macros.fat}</Text>
           </View>
@@ -176,7 +242,7 @@ const DailyMenu: React.FC = () => {
 
       {/* Meal Sections */}
       <FlatList
-        data={mealSections}
+        data={filteredMealSections}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => {
           if (item.type === 'meal') {
@@ -204,7 +270,6 @@ const DailyMenu: React.FC = () => {
           return null;
         }}
       />
-
       {/* Search Modal */}
       {showSearch && (
         <TouchableWithoutFeedback onPress={handleOutsidePress}>
@@ -218,17 +283,46 @@ const DailyMenu: React.FC = () => {
                   style={styles.searchInput}
                   autoFocus
                 />
+                <TouchableOpacity onPress={handleSearch} style={styles.searchButton}>
+                  <Text style={styles.searchButtonText}>Search</Text>
+                </TouchableOpacity>
+                {searchLoading && <ActivityIndicator />}
+                {searchError && <Text style={styles.errorText}>Error: {searchError.message}</Text>}
+                <FlatList
+                  data={searchResults}
+                  keyExtractor={(item) => item.food.foodId.toString()}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity 
+                      style={styles.resultItem} 
+                      onPress={() => handleAddToSnacks(item)}
+                    >
+                      <Text style={styles.resultText}>
+                        {item.food.label}
+                      </Text>
+                      <Text style={styles.resultDetail}>
+                        Calories: {item.food.nutrients.ENERC_KCAL} kcal
+                      </Text>
+                      <Text style={styles.resultDetail}>
+                        Carbohydrates: {item.food.nutrients.CHOCDF} g
+                      </Text>
+                      <Text style={styles.resultDetail}>
+                        Fat: {item.food.nutrients.FAT} g
+                      </Text>
+                      <Text style={styles.resultDetail}>
+                        Protein: {item.food.nutrients.PROCNT} g
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  ListEmptyComponent={() => <Text>No results found</Text>}
+                />
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       )}
 
-      {/* Floating Button */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={handleSearchIconPress}
-      >
+      {/* Search Icon */}
+      <TouchableOpacity onPress={handleSearchIconPress} style={styles.floatingButton}>
         <FontAwesome name="plus" size={24} color="#FFF" />
       </TouchableOpacity>
     </View>
@@ -377,19 +471,6 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: 'bold',
   },
-
-  searchInput: {
-    borderWidth: 1,
-    borderColor: '#D0D0D0',
-    borderRadius: 10,
-    padding: 20,
-    backgroundColor: '#FFF',
-    width: '80%',
-  },
-  searchContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
   overlay: {
     position: 'absolute',
     top: 0,
@@ -415,6 +496,56 @@ const styles = StyleSheet.create({
   refreshButton: {
     padding: 5,
   },
+  searchContainer: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+    maxHeight: '80%'
+  },
+  searchInput: {
+    borderBottomWidth: 1,
+    borderColor: '#CCC',
+    marginBottom: 10,
+    padding: 5
+  },
+  searchButton: {
+    backgroundColor: '#E8A54B',
+    borderRadius: 20,
+    padding: 10,
+    alignItems: 'center'
+  },
+  searchButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold'
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 10
+  },
+  resultItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#DDD'
+  },
+  resultText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  resultDetail: {
+    fontSize: 14,
+    color: '#696B6D',
+    marginTop: 5,
+  },
+  searchIcon: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#E8A54B',
+    borderRadius: 30,
+    padding: 10
+  },
+
 });
 
 export default DailyMenu;
