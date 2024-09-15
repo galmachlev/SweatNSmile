@@ -7,5 +7,7 @@ export type RootStackParamList = {
     Profile: undefined;
     AllMenusTable: undefined;
     HomeStore: undefined;
+    StoreComingSoonScreen: undefined;
+    HealthyRecipesScreen: undefined;
     Login: undefined ;
 };

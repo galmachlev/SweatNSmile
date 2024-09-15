@@ -12,18 +12,21 @@ import AllMenusTable from './screens/client/AllMenusTable';
 import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
+import StoreComingSoon from './screens/client/StoreComingSoon';
 import DailyMenu from './screens/client/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
 import { UserProvider } from './context/UserContext';
+import StoreComingSoonScreen from './screens/client/StoreComingSoon';
+import HealthyRecipesScreen from './screens/client/HealthyRecipesScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
 
 const menuItems = [
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
-  { name: 'Store', icon: 'cart', routeName: 'HomeStore' },
-  { name: 'All Menus', icon: 'list', routeName: 'AllMenusTable' },
+  { name: 'Store', icon: 'cart', routeName: 'StoreComingSoonScreen' },
+  { name: 'Recpies', icon: 'nutrition', routeName: 'HealthyRecipesScreen' },
 ];
 
 type MoreMenuProps = {
@@ -163,8 +166,9 @@ export default function App() {
           <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
           <Stack.Screen name="Gallery" component={Gallery} />
           <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
+          <Stack.Screen name="HealthyRecipesScreen" component={HealthyRecipesScreen} />
           <Stack.Screen name="HomeStore" component={HomeScreen} />
+          <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} />
           <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </UserProvider>

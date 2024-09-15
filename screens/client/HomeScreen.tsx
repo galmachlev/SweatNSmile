@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   pdfButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#696B6D',
   },
 });
 

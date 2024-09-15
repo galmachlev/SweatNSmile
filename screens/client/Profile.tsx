@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Alert, Modal, TouchableOpacity, SafeAreaView, Image, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Avatar, Icon, Button } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -82,7 +83,7 @@ export default function Profile() {
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.headerText}>Profile settings</Text>
-            <Button title="Logout" type="clear" titleStyle={styles.logoutButton} />
+            <Button title="Logout" type="clear" titleStyle={styles.logoutButton} onPress={() => Alert.alert('Logout', 'Are you sure you want to logout?', [{ text: 'Cancel', style: 'cancel' }, { text: 'OK', onPress: () => navigation.navigate('Login') }], { cancelable: false })}/>
           </View>
           <View style={styles.profileSection}>
             <Avatar
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
-    paddingBottom: 90,
+    paddingBottom: 60,
   },
   header: {
     flexDirection: 'row',

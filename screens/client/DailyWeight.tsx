@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   addButton: {
-    backgroundColor: '#9AB28B',
+    backgroundColor: '#3E6613',
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -189,8 +189,6 @@ const styles = StyleSheet.create({
   weightInputContainer: {
     backgroundColor: 'white',
     padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
     marginBottom: 10,
     borderRadius: 10,
   },
