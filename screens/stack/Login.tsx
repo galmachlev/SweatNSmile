@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { useUser } from '../../context/userContext';
+import { useUser } from '../../context/UserContext';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Login() {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
-import { useUser } from '../../context/userContext';
+import { useUser } from '../../context/UserContext';
 
 const HomeScreen: React.FC = () => {
   const { currentUser } = useUser();  // Use context directly

@@ -14,7 +14,7 @@ import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
-import { UserProvider } from './context/userContext';
+import { UserProvider } from './context/UserContext';
 import StoreComingSoonScreen from './screens/client/StoreComingSoon';
 import HealthyRecipesScreen from './screens/client/HealthyRecipesScreen';
 
