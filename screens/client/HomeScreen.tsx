@@ -2,8 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
 import { useUser } from '../../context/UserContext';
+import { createStackNavigator } from '@react-navigation/stack';
+import { RootStackParamList } from '../stack/Register';
 
-const HomeScreen: React.FC = () => {
+
+const Stack = createStackNavigator<RootStackParamList>();
+
+const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { currentUser } = useUser();  // Use context directly
   console.log('currentUser ==> ', currentUser);
 
@@ -26,8 +31,8 @@ const HomeScreen: React.FC = () => {
     progress = Math.min(progress, 100); // Ensure progress does not exceed 100%
   }
 
-  const handleNavigation = (screenName: string) => {
-    console.log(`Navigating to ${screenName}`);
+  const handleNavigation = (componentName: string) => {
+    navigation.navigate(componentName);
   };
 
   const openPDF = () => {
@@ -40,12 +45,10 @@ const HomeScreen: React.FC = () => {
       <View style={styles.container}>
         <View style={styles.header}>
           <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
-          {/* Wrap the greeting text in <Text> */}
           <Text style={styles.greeting}>Hello, {userName}</Text>
         </View>
 
         <View style={styles.progressBarContainer}>
-          {/* Wrap text inside progress bar in <Text> */}
           <Text style={styles.progressBarTextLeft}>Starting weight</Text>
           <View style={[styles.progressBarFill, { width: `${progress}%` }]}></View>
           <Text style={styles.progressBarTextRight}>Target weight</Text>
@@ -53,7 +56,6 @@ const HomeScreen: React.FC = () => {
 
         <View style={styles.details}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            {/* Wrap dynamic text in <Text> */}
             <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
             <Text style={styles.textbelow}>Target Date: {estimatedDate.toLocaleDateString()}</Text>
           </View>
@@ -62,22 +64,18 @@ const HomeScreen: React.FC = () => {
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={[styles.button, styles.GalleryButton]} onPress={() => handleNavigation('Gallery')}>
             <Image source={require('../../Images/GalleryIcon.png')} style={styles.iconImage} />
-            {/* Wrap button text in <Text> */}
             <Text>Gallery</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('Weight')}>
+          <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('DailyWeight')}>
             <Image source={require('../../Images/WeightIcon.png')} style={styles.iconImage} />
-            {/* Wrap button text in <Text> */}
             <Text>Weight</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('Menu')}>
+          <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('DailyMenu')}>
             <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
-            {/* Wrap button text in <Text> */}
             <Text>Menu</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('More')}>
             <Image source={require('../../Images/MoreIcon.png')} style={styles.iconImage} />
-            {/* Wrap button text in <Text> */}
             <Text>More</Text>
           </TouchableOpacity>
         </View>
@@ -89,7 +87,6 @@ const HomeScreen: React.FC = () => {
         </View>
 
         <TouchableOpacity style={styles.pdfButton} onPress={openPDF}>
-          {/* Wrap PDF button text in <Text> */}
           <Text style={styles.pdfButtonText}>Training Program</Text>
         </TouchableOpacity>
       </View>

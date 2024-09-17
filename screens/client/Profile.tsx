@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Avatar, Icon, Button } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 
-const FullSizeImage = ({ visible, image, onClose }:any) => {
+const FullSizeImage = ({ visible, image, onClose }: any) => {
   return (
     <Modal visible={visible} transparent={true} animationType="fade">
       <SafeAreaView style={styles.modalContainer}>
@@ -20,8 +20,9 @@ const FullSizeImage = ({ visible, image, onClose }:any) => {
 export default function Profile() {
   const [profileImage, setProfileImage] = useState(require('../../Images/profile_img.jpg'));
   const [fullSizeVisible, setFullSizeVisible] = useState(false);
+  const navigation = useNavigation();
 
-  const handleImageOptions = async() => {
+  const handleImageOptions = async () => {
     Alert.alert(
       'Profile Picture Options',
       'Choose an option',
@@ -42,7 +43,6 @@ export default function Profile() {
           text: 'Cancel',
           style: 'cancel',
         },
-        
       ],
       { cancelable: true }
     );
@@ -77,13 +77,25 @@ export default function Profile() {
     }
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', onPress: () => navigation.navigate({ name: 'Login' } as never)},
+      ],
+      { cancelable: false }
+    );
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.headerText}>Profile settings</Text>
-            <Button title="Logout" type="clear" titleStyle={styles.logoutButton} onPress={() => Alert.alert('Logout', 'Are you sure you want to logout?', [{ text: 'Cancel', style: 'cancel' }, { text: 'OK', onPress: () => navigation.navigate('Login') }], { cancelable: false })}/>
+            <Button title="Logout" type="clear" titleStyle={styles.logoutButton} onPress={handleLogout} />
           </View>
           <View style={styles.profileSection}>
             <Avatar
@@ -110,33 +122,33 @@ export default function Profile() {
             </View>
           </View>
           <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Full Name</Text>
-              <TextInput style={styles.input} placeholder="Enter your full name" value="John Doe" />
-              
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput 
-                style={styles.input} 
-                placeholder="Enter your email" 
-                value="JonDoe1234@gmail.com" 
-                keyboardType="email-address" 
-              />
-              
-              <Text style={styles.inputLabel}>Age</Text>
-              <TextInput 
-                style={styles.input} 
-                placeholder="Enter your age" 
-                value="32" 
-                keyboardType="numeric" 
-              />
-              
-              <Text style={styles.inputLabel}>Current Weight</Text>
-              <TextInput 
-                style={styles.input} 
-                placeholder="Enter your current weight" 
-                value="82.1 KG" 
-                keyboardType="numeric" 
-              />
-            </View>
+            <Text style={styles.inputLabel}>Full Name</Text>
+            <TextInput style={styles.input} placeholder="Enter your full name" value="John Doe" />
+            
+            <Text style={styles.inputLabel}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email"
+              value="JonDoe1234@gmail.com"
+              keyboardType="email-address"
+            />
+            
+            <Text style={styles.inputLabel}>Age</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your age"
+              value="32"
+              keyboardType="numeric"
+            />
+            
+            <Text style={styles.inputLabel}>Current Weight</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your current weight"
+              value="82.1 KG"
+              keyboardType="numeric"
+            />
+          </View>
           <FullSizeImage
             visible={fullSizeVisible}
             image={profileImage}

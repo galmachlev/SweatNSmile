@@ -6,8 +6,10 @@ export type RootStackParamList = {
     Gallery: undefined;
     Profile: undefined;
     AllMenusTable: undefined;
+    DailyWeight: undefined;
+    DailyMenu: undefined;
     HomeStore: undefined;
     StoreComingSoonScreen: undefined;
     HealthyRecipesScreen: undefined;
-    Login: undefined ;
+    Login: undefined;
 };

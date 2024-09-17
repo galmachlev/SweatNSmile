@@ -174,16 +174,18 @@ export default function App() {
     <NavigationContainer>
       <UserProvider>
         <Stack.Navigator initialRouteName="OnBoarding">
+          <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
           <Stack.Screen name="HomeScreen" component={TabNavigator} options={{ headerShown: false }} />
           <Stack.Screen name="DailyCalories" component={DailyCalories} />
           <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
           <Stack.Screen name="Gallery" component={Gallery} />
+          <Stack.Screen name="DailyMenu" component={DailyMenu} />
+          <Stack.Screen name="DailyWeight" component={DailyWeight} />
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="HealthyRecipesScreen" component={HealthyRecipesScreen} />
           <Stack.Screen name="HomeStore" component={HomeScreen} />
           <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} />
-          <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
