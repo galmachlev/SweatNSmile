@@ -16,7 +16,9 @@ import { RootStackParamList } from './types/navigationTypes'; // Adjust the impo
 import Login from './screens/stack/Login';
 import { UserProvider } from './context/UserContext';
 import StoreComingSoonScreen from './screens/client/StoreComingSoon';
-import HealthyRecipesScreen from './screens/client/HealthyRecipesScreen';
+import HealthyRecipesScreen from './screens/client/recipes/HealthyRecipesScreen';
+import GeminiRecipes from './screens/client/recipes/GeminiRecipes';
+import RecipeCategoryScreen from './screens/client/recipes/RecipeCategoryScreen';
 
 import {
   ApolloClient,
@@ -183,9 +185,11 @@ export default function App() {
           <Stack.Screen name="DailyMenu" component={DailyMenu} />
           <Stack.Screen name="DailyWeight" component={DailyWeight} />
           <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="HealthyRecipesScreen" component={HealthyRecipesScreen} />
+          <Stack.Screen name="HealthyRecipesScreen" component={HealthyRecipesScreen}  options={{ headerTitle: '' }}/>
           <Stack.Screen name="HomeStore" component={HomeScreen} />
           <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} />
+          <Stack.Screen name="GeminiRecipes" component={GeminiRecipes} options={{ headerTitle: '' }}/>
+          <Stack.Screen name="RecipeCategoryScreen" component={RecipeCategoryScreen} options={{ headerTitle: '' }}/>
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>

@@ -12,4 +12,6 @@ export type RootStackParamList = {
     StoreComingSoonScreen: undefined;
     HealthyRecipesScreen: undefined;
     Login: undefined;
+    GeminiRecipes: undefined;
+    RecipeCategoryScreen: undefined;
 };
