@@ -75,7 +75,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
             if (res.ok) {
                 let data = await res.json();
-                setCurrentUser(data);
+                setCurrentUser(data.user);
                 Alert.alert('Success', 'Login successful.');
                 navigation.navigate('HomeScreen');
             } else {

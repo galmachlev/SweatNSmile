@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
-import { useUser } from '../../context/userContext';
+import { useUser } from '../../context/UserContext';
 
 const HomeScreen: React.FC = () => {
   const { currentUser } = useUser();  // Use context directly
@@ -41,7 +41,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.header}>
           <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
           {/* Wrap the greeting text in <Text> */}
-          <Text style={styles.greeting}>Hello, {currentUser ? currentUser.firstName : 'User'}</Text>
+          <Text style={styles.greeting}>Hello, {userName}</Text>
         </View>
 
         <View style={styles.progressBarContainer}>

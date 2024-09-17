@@ -8,51 +8,25 @@ export type User= {
     birthDate: Date,
     birthDateValidate?: string,
     phoneNumber: string,
-    address: { 
-        country:string,
-        city:string,
-        street:string,
-        houseNum: number,
-        postalCode: number,
-        comments?: string
-    },
     img?: string,
 
     //***************/
 
-    gender: string,
-    height: number,
+    gender?: string,
+    height?: number,
     currentWeight: number,
-    goalWeight: number,
-    goalDate: Date,
-    dailyCalories: number,
+    goalWeight?: number,
+    goalDate?: Date,
+    dailyCalories?: number,
 
     //***************/
  
-    activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very active';
+    activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very active',
 
     //***************/
     
-    isActive?: boolean
-    shippmentAddress?: {
-        country:string,
-        city:string,
-        street:string,
-        houseNum: number,
-        postalCode: number,
-        comments?: string 
-    },
-    purchase_history?: {
-        date: Date,
-        items: { 
-            productName: string;
-            quantity: number;
-            price: number;
-        }[],
-        totalPrice: number;
-        status: string; //Pending/Processing/Shipped/Delivered/Cancelled
-        
-    }[],
+    isActive?: boolean,
+
     measurements?: {
         date: Date; 
         weight: number; //DailyWeight
