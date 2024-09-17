@@ -109,14 +109,6 @@ const Register = () => {
             birthDate: new Date(),
             birthDateValidate: '',
             phoneNumber: '',
-            address: {
-                country: '',
-                city: '',
-                street: '',
-                houseNum: 0,
-                postalCode: 0,
-                comments: ''
-            },
             img: '',
         },
         validate,
@@ -198,68 +190,6 @@ const Register = () => {
                             value={formik.values.password ?? ''}
                             placeholder="********"
                             secureTextEntry
-                        />
-                        {/* country */}
-                        <Text style={styles.label}>Country</Text>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={formik.handleChange('address.country')}
-                            value={formik.values.address?.country ?? ''}
-                            placeholder="Israel"
-                        />
-                        {/* city */}
-                        <TouchableOpacity onPress={() => setCityPickerOpen(!cityPickerOpen)}>
-                            <Text style={styles.label}>City</Text>
-                            <Text style={styles.input}>{formik.values.address?.city ?? ''}</Text>
-                        </TouchableOpacity>
-                        {cityPickerOpen && (
-                            <Picker
-                                selectedValue={formik.values.address?.city}
-                                onValueChange={value => formik.setFieldValue('address.city', value)}
-                                style={styles.picker}
-                            >
-                                {cities.map(city => <Picker.Item key={city} label={city} value={city} />)}
-                            </Picker>
-                        )}
-                        {/* street */}
-                        <TouchableOpacity onPress={() => setStreetPickerOpen(!streetPickerOpen)}>
-                            <Text style={styles.label}>Street</Text>
-                            <Text style={styles.input}>{formik.values.address?.street ?? ''}</Text>
-                        </TouchableOpacity>
-                        {streetPickerOpen && (
-                            <Picker
-                                selectedValue={formik.values.address?.street}
-                                onValueChange={value => formik.setFieldValue('address.street', value)}
-                                style={styles.picker}
-                            >
-                                {streets.map(street => <Picker.Item key={street} label={street} value={street} />)}
-                            </Picker>
-                        )}
-                        {/* house num */}
-                        <Text style={styles.label}>House Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={formik.handleChange('address.houseNum')}
-                            value={formik.values.address?.houseNum?.toString() ?? ''}
-                            placeholder="12"
-                            keyboardType="numeric"
-                        />
-                        {/* postal code */}
-                        <Text style={styles.label}>Postal Code</Text>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={formik.handleChange('address.postalCode')}
-                            value={formik.values.address?.postalCode?.toString() ?? ''}
-                            placeholder="6461554"
-                            keyboardType="numeric"
-                        />
-                        {/* comments */}
-                        <Text style={styles.label}>Comments</Text>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={formik.handleChange('address.comments')}
-                            value={formik.values.address?.comments ?? ''}
-                            placeholder="Comments..."
                         />
                         {/* next button */}
                         <TouchableOpacity style={styles.nextButton} onPress={() => swiperRef.current?.scrollBy(1)}>
@@ -424,9 +354,9 @@ const Register = () => {
                         <Text style={styles.calorieInfoText}>
                             Your daily net calorie goal is:
                         </Text>
-                        <Text style={styles.calorieNumber}>
+                        {/* <Text style={styles.calorieNumber}>
                             {formik.values.caloricIntake}1710 <Text style={styles.calorieUnit}>calories</Text>
-                        </Text>
+                        </Text> */}
                         
                         <View style={styles.optionsContainer}>
                             {/* <View style={styles.optionRow}>
@@ -437,10 +367,10 @@ const Register = () => {
                                 <Text style={styles.optionText}>Use my phone to track my steps</Text>
                             </View> */}
                             <View style={styles.optionRow}>
-                                <CustomCheckbox
+                                {/* <CustomCheckbox
                                     checked={formik.values.receiveEmails}
                                     onPress={() => formik.setFieldValue('receiveEmails', !formik.values.receiveEmails)}
-                                />
+                                /> */}
                                 <Text style={styles.optionText}>Would you like to receive our emails?</Text>
                             </View>
                         </View>
@@ -450,7 +380,6 @@ const Register = () => {
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
-
             </Swiper>
         </View>
     );
