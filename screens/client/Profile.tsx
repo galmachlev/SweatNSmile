@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Alert, Modal, TouchableOpacity, SafeAreaView, Image, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Avatar, Icon, Button } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
+import { useUser } from '../../context/UserContext'; // Import the useUser hook
 
 const FullSizeImage = ({ visible, image, onClose }: any) => {
   return (
@@ -18,9 +19,17 @@ const FullSizeImage = ({ visible, image, onClose }: any) => {
 };
 
 export default function Profile() {
+  const { currentUser } = useUser();
   const [profileImage, setProfileImage] = useState(require('../../Images/profile_img.jpg'));
   const [fullSizeVisible, setFullSizeVisible] = useState(false);
   const navigation = useNavigation();
+
+  // Update profile image if user has a profile image URL
+  useEffect(() => {
+    if (currentUser?.img) {
+      setProfileImage({ uri: currentUser.img });
+    }
+  }, [currentUser]);
 
   const handleImageOptions = async () => {
     Alert.alert(
@@ -83,7 +92,7 @@ export default function Profile() {
       'Are you sure you want to logout?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: () => navigation.navigate({ name: 'Login' } as never)},
+        { text: 'OK', onPress: () => navigation.navigate('Login') },
       ],
       { cancelable: false }
     );
@@ -110,11 +119,11 @@ export default function Profile() {
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <Icon name="language" type="font-awesome" color="#517fa4" />
-              <Text style={styles.infoText}>Language: English</Text>
+              <Text style={styles.infoText}>Language: {currentUser?.language || 'English'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Icon name="balance-scale" type="font-awesome" color="#517fa4" />
-              <Text style={styles.infoText}>Weight unit: KG</Text>
+              <Text style={styles.infoText}>Weight unit: {currentUser?.weightUnit || 'KG'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Icon name="lock" type="font-awesome" color="#517fa4" />
@@ -123,13 +132,17 @@ export default function Profile() {
           </View>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Full Name</Text>
-            <TextInput style={styles.input} placeholder="Enter your full name" value="John Doe" />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your full name"
+              value={`${currentUser?.firstName || ''} ${currentUser?.lastName || ''}`}
+            />
             
             <Text style={styles.inputLabel}>Email</Text>
             <TextInput
               style={styles.input}
               placeholder="Enter your email"
-              value="JonDoe1234@gmail.com"
+              value={currentUser?.email || ''}
               keyboardType="email-address"
             />
             
@@ -137,7 +150,7 @@ export default function Profile() {
             <TextInput
               style={styles.input}
               placeholder="Enter your age"
-              value="32"
+              value={currentUser?.birthDate ? `${new Date().getFullYear() - new Date(currentUser.birthDate).getFullYear()}` : ''}
               keyboardType="numeric"
             />
             
@@ -145,7 +158,7 @@ export default function Profile() {
             <TextInput
               style={styles.input}
               placeholder="Enter your current weight"
-              value="82.1 KG"
+              value={currentUser?.currentWeight ? `${currentUser.currentWeight} KG` : ''}
               keyboardType="numeric"
             />
           </View>

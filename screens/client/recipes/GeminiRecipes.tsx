@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator, Image } from "react-native";
 import * as GoogleGenerativeAI from "@google/generative-ai";
 import { MaterialIcons } from '@expo/vector-icons';
+import { useUser } from "../../../context/UserContext";
 
 interface Message {
   text: string;
@@ -9,7 +10,11 @@ interface Message {
 }
 
 const RecipeChat: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { currentUser } = useUser();  // Use context directly
+  const userName = currentUser?.firstName;
+  const [messages, setMessages] = useState<Message[]>([
+    { text: `🌟 Hello ${userName}! 🌟\n\nGot some ingredients in your kitchen and not sure what to make? 🥕🍅\n\nJust list the ingredients you have, and we'll send you a detailed and delicious recipe that perfectly matches what you have on hand!`, user: false }
+  ]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
   const [isFirstMessage, setIsFirstMessage] = useState(true);
@@ -25,7 +30,7 @@ const RecipeChat: React.FC = () => {
     setLoading(true);
     try {
       const prompt = isFirstMessage 
-        ? `Based on the user's current input: ${inputText}, create a detailed and easy-to-follow recipe.`
+        ? `Based on the user's current input: ${inputText}, create a detailed and easy-to-follow recipe with detailed calorie intake.`
         : `You have previously received the following information: ${messages.filter((msg) => !msg.user).map((msg) => msg.text).join(" ")} Now, based on the user's current input: ${inputText}, create a detailed and easy-to-follow recipe.`;
 
       const genAI = new GoogleGenerativeAI.GoogleGenerativeAI(API_KEY);
@@ -50,7 +55,9 @@ const RecipeChat: React.FC = () => {
   };
 
   const startNewConversation = () => {
-    setMessages([]);
+    setMessages([
+      { text: `🌟 Hello ${userName}! 🌟\n\nGot some ingredients in your kitchen and not sure what to make? 🥕🍅\n\nJust list the ingredients you have, and we'll send you a detailed and delicious recipe that perfectly matches what you have on hand!`, user: false }
+    ]);
     setIsFirstMessage(true);
     setInputText("");
   };
@@ -76,7 +83,7 @@ const RecipeChat: React.FC = () => {
       <View style={styles.header}>
         <Text style={styles.title}>Recipe Chat</Text>
         <TouchableOpacity style={styles.newConversationButton} onPress={startNewConversation}>
-          <Text style={styles.newConversationText}>Start New Conversation</Text>
+          <Text style={styles.newConversationText}>New Conversation</Text>
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -86,16 +93,37 @@ const RecipeChat: React.FC = () => {
         onScroll={() => Keyboard.dismiss()} // Dismiss keyboard on scroll
       >
         {loading ? (
-          <ActivityIndicator size="large" color="#6200EE" />
+          <ActivityIndicator size="large" color="#3E6613" />
         ) : (
-          <View>
-            {messages.map((message, index) => (
-              <View key={index} style={[styles.message, message.user ? styles.userMessage : styles.aiMessage]}>
-                <Text style={styles.messageText}>{message.text}</Text>
-              </View>
-            ))}
-            {messages.length === 0 && !loading && <Text style={styles.startMessage}>Hey! What ingredients do you have?</Text>}
-          </View>
+        <View>
+          {messages.map((message, index) => (
+            <View key={index} style={styles.messageContainer}>
+              {message.user ? (
+                <View style={styles.userMessageContainer}>
+                  <View style={styles.userMessageBubble}>
+                    <Text style={styles.messageText}>{message.text}</Text>
+                    <View style={styles.speechBubbleTailUser} />
+                  </View>
+                  <Image
+                    source={currentUser?.img ? { uri: currentUser.img } : require('../../../Images/profile_img.jpg')}
+                    style={styles.profileImage}
+                  />
+                </View>
+              ) : (
+                <View style={styles.aiMessageContainer}>
+                  <Image
+                    source={{ uri: 'https://images.assetsdelivery.com/compings_v2/vasilyrosca/vasilyrosca1902/vasilyrosca190200036.jpg' }}
+                    style={styles.profileImage}
+                  />
+                  <View style={styles.aiMessageBubble}>
+                    <Text style={styles.messageText}>{message.text}</Text>
+                    <View style={styles.speechBubbleTailAi} />
+                  </View>
+                </View>
+              )}
+            </View>
+          ))}
+        </View>
         )}
       </ScrollView>
       <View style={styles.footer}>
@@ -146,25 +174,75 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
   },
-  message: {
-    maxWidth: '80%',
+  messageContainer: {
+    flexDirection: 'row',
     marginBottom: 10,
-    padding: 10,
-    borderRadius: 10,
+    alignItems: 'flex-end',
   },
-  userMessage: {
-    alignSelf: 'flex-start',
+  userMessageContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginBottom: 10,
+    marginLeft: 'auto',
+  },
+  aiMessageContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginBottom: 10,
+  },
+  userMessageBubble: {
     backgroundColor: "#E0E0E0",
+    padding: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    maxWidth: '75%',
+    position: 'relative',
+    marginRight: 10,
   },
-  aiMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: "#FFCE76",
+  speechBubbleTailUser: {
+    position: 'absolute',
+    bottom: 5,
+    right: -18,
+    width: 0,
+    height: 0,
+    borderWidth: 10,
+    borderColor: 'transparent',
+    borderTopColor: '#E0E0E0',
+    borderBottomWidth: 0,
+    borderRightWidth: 25,
+    borderLeftWidth: 0,
+    borderTopWidth: 20,
   },
+  aiMessageBubble: {
+    backgroundColor: "#FFFFFF",
+    padding: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    maxWidth: '75%',
+    marginLeft: 10,
+  },
+  speechBubbleTailAi: {
+    position: 'absolute',
+    bottom: 5,
+    left: -18, 
+    width: 0,
+    height: 0,
+    borderWidth: 10,
+    borderColor: 'transparent',
+    borderTopColor: '#FFFFFF',
+    borderBottomWidth: 0,
+    borderRightWidth: 0,
+    borderLeftWidth: 25,
+    borderTopWidth: 20,
+  },
+
   messageText: {
     fontSize: 16,
   },
-  startMessage: {
-    fontSize: 18,
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   footer: {
     flexDirection: 'row',

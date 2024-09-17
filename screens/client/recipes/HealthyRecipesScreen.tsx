@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#696B6D',
     marginBottom: 50,
     textAlign: 'center',
   },
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginVertical: 10,
+    color: '#696B6D',
   },
   chatButton: {
     flexDirection: 'row',
