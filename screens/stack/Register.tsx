@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     },
     nextButton: {
         marginTop: 25,
-        backgroundColor: '#9AB28B',
+        backgroundColor: '#3E6613',
         paddingVertical: 12,
         borderRadius: 7,
         alignItems: 'center',
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
         color: '#808387',
     },
     selectedButton: {
-        backgroundColor: '#3E6613',
+        backgroundColor: '#9AB28B',
     },
     selectedButtonText: {
         color: '#fff',
