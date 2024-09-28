@@ -1,3 +1,10 @@
+/*
+ * This component renders a screen with a list of recipes in the selected category.
+ * The recipes are displayed as a FlatList with a title and an image.
+ * When the user presses a recipe, the component navigates to the RecipeDetailsScreen
+ * with the selected recipe as a parameter.
+ */
+
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 

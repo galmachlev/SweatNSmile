@@ -1,3 +1,13 @@
+/*
+ * This component is a gallery of images.
+ * The user can pick an image from their gallery,
+ * take a new photo, or view an image from the gallery.
+ * The images are displayed in a flat list.
+ * The user can only pick one image at a time.
+ * The selected image is displayed at the top of the screen.
+ * The user can also delete an image from the gallery.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Alert, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';

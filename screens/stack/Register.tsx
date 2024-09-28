@@ -1,3 +1,13 @@
+/*
+ * This component is the registration screen of the app.
+ * It displays a swiper with 4 slides.
+ * The first slide is a welcome message.
+ * The second slide is a form to input the user's first name, last name, email and password.
+ * The third slide is a form to input the user's gender, height and weight.
+ * The fourth slide is a form to input the user's birth date and activity level.
+ * After the user fills in all the forms, the component navigates to the HomeScreen.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Swiper from 'react-native-swiper';

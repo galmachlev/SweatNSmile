@@ -1,3 +1,14 @@
+/*
+ * This component renders a line chart that displays the user's weight
+ * measurements over time. It receives a callback function as a prop that
+ * is called when the component mounts, and passes the last weight measurement
+ * to it.
+ *
+ * The chart is rendered using the 'react-native-chart-kit' library.
+ * The data for the chart is hardcoded for now, but it will be replaced with
+ * actual data from the user's weight measurements in the future.
+ */
+
 import React, { useEffect } from 'react';
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions, StyleSheet } from 'react-native';
