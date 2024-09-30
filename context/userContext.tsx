@@ -14,6 +14,7 @@ type RootStackParamList = {
     AllMenusTable: undefined;
     HomeStore: undefined;
     Login: undefined;
+    HomeAdmin: undefined;
 };
 
 // Define the context type
@@ -50,21 +51,29 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             Alert.alert('Error', 'Please fill in both fields.');
             return;
         }
-
+    
         // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             Alert.alert('Error', 'Invalid email address.');
             return;
         }
-
+    
         // Password validation
         if (password.length < 6) {
             Alert.alert('Error', 'Password must be at least 6 characters long.');
             return;
         }
-
+    
         try {
+            // Check if the login is for the admin
+            if (email === 'admin@gmail.com' && password === 'admin1234321!') {
+                Alert.alert('Success', 'Welcome Admin!');
+                navigation.navigate('HomeAdmin');
+                return;
+            }
+    
+            // Proceed with normal user login
             let res = await fetch('https://database-s-smile.onrender.com/api/users/login', {
                 method: 'POST',
                 headers: {
@@ -72,7 +81,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-
+    
             if (res.ok) {
                 let data = await res.json();
                 setCurrentUser(data.user);
@@ -86,6 +95,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             Alert.alert('Error', 'An error occurred while logging in. Please try again.');
         }
     };
+    
 
     return (
         <UserContext.Provider value={{ login, currentUser }}>

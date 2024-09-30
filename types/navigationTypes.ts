@@ -14,4 +14,7 @@ export type RootStackParamList = {
     Login: undefined;
     GeminiRecipes: undefined;
     RecipeCategoryScreen: undefined;
+    HomeAdmin: undefined;
+    AddUser: undefined;
+    UserTable: undefined;
 };

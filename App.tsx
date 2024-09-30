@@ -25,6 +25,10 @@ import {
   InMemoryCache,
   ApolloProvider,
 } from '@apollo/client';
+import AdminPage from './screens/admin/HomeAdmin';
+import AddUser from './screens/admin/AddUser';
+import UserTable from './screens/admin/UserTable';
+import HomeAdmin from './screens/admin/HomeAdmin';
 
 const client = new ApolloClient({
   uri: 'https://oneonta.stepzen.net/api/belligerent-waterbuffalo/__graphql',
@@ -190,6 +194,9 @@ export default function App() {
           <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} />
           <Stack.Screen name="GeminiRecipes" component={GeminiRecipes} options={{ headerTitle: '' }}/>
           <Stack.Screen name="RecipeCategoryScreen" component={RecipeCategoryScreen} options={{ headerTitle: '' }}/>
+          <Stack.Screen name="HomeAdmin" component={HomeAdmin} options={{ headerTitle: 'HomeAdmin' }} />
+          <Stack.Screen name="AddUser" component={AddUser} options={{ headerTitle: 'AddUser' }}/>
+          <Stack.Screen name="UserTable" component={UserTable} options={{ headerTitle: 'UserTable' }}/>
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
