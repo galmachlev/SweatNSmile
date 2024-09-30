@@ -25,17 +25,13 @@ import {
   InMemoryCache,
   ApolloProvider,
 } from '@apollo/client';
-import AdminPage from './screens/admin/HomeAdmin';
-import AddUser from './screens/admin/AddUser';
-import UserTable from './screens/admin/UserTable';
-import HomeAdmin from './screens/admin/HomeAdmin';
 
+// יצירת Apollo Client
 const client = new ApolloClient({
-  uri: 'https://oneonta.stepzen.net/api/belligerent-waterbuffalo/__graphql',
-  cache: new InMemoryCache(),
+  uri: 'https://unjeodong.us-east-a.ibm.stepzen.net/api/vetoed-badger/__graphql', // URI של IBM StepZen
+  cache: new InMemoryCache(), // הגדרת מערכת המטמון
   headers: {
-    Authorization:
-      'apikey oneonta::stepzen.io+1000::f1fd564cbba026853eeedfbb05322edfe26263d2973848915d962dd16878e937',
+    Authorization: 'apikey unjeodong::local.net+1000::a153c90641a79f856725e561471dee0eb3892335d13eb1b252d4c328c805ada7', // מפתח ה-API שלך
   },
 });
 
@@ -194,9 +190,6 @@ export default function App() {
           <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} />
           <Stack.Screen name="GeminiRecipes" component={GeminiRecipes} options={{ headerTitle: '' }}/>
           <Stack.Screen name="RecipeCategoryScreen" component={RecipeCategoryScreen} options={{ headerTitle: '' }}/>
-          <Stack.Screen name="HomeAdmin" component={HomeAdmin} options={{ headerTitle: 'HomeAdmin' }} />
-          <Stack.Screen name="AddUser" component={AddUser} options={{ headerTitle: 'AddUser' }}/>
-          <Stack.Screen name="UserTable" component={UserTable} options={{ headerTitle: 'UserTable' }}/>
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>

@@ -20,13 +20,13 @@ import {
 } from '@apollo/client';
 
 const client = new ApolloClient({
-  uri: 'https://oneonta.stepzen.net/api/belligerent-waterbuffalo/__graphql',
-  cache: new InMemoryCache(),
+  uri: 'https://unjeodong.us-east-a.ibm.stepzen.net/api/vetoed-badger/__graphql', // URI של IBM StepZen
+  cache: new InMemoryCache(), // הגדרת מערכת המטמון
   headers: {
-    Authorization:
-      'apikey oneonta::stepzen.io+1000::f1fd564cbba026853eeedfbb05322edfe26263d2973848915d962dd16878e937',
+    Authorization: 'apikey unjeodong::local.net+1000::a153c90641a79f856725e561471dee0eb3892335d13eb1b252d4c328c805ada7', // מפתח ה-API שלך
   },
 });
+
 
 const SEARCH_QUERY = gql`
   query search($ingr: String, $upc: String) {
@@ -124,80 +124,119 @@ const DailyMenu: React.FC = () => {
     }
   };
 
+  type MealType = 'breakfast' | 'lunch' | 'dinner';
 
   const getRandomItem = (items: any[]) => items[Math.floor(Math.random() * items.length)];
-
-  const foodCategories = {
-    protein: ["chicken", "beef", "tofu", "fish", "egg"], // דוגמאות לחלבון
-    carbs: ["rice", "pasta", "bread", "potato", "quinoa"], // דוגמאות לפחמימה
-    vegetables: ["cucumber", "tomato", "carrot", "spinach", "broccoli"], // דוגמאות לירק
+  
+  const foodCategories: Record<MealType, { protein: string[]; carbs: string[]; fats: string[] }> = {
+    breakfast: {
+      protein: ["egg", "yogurt", "cheese", "smoked salmon", "tuna"],
+      carbs: ["oats", "whole grain bread", "banana", "berries", "granola"],
+      fats: ["avocado", "almond butter", "peanut butter", "chia seeds", "honey"],
+    },
+    lunch: {
+      protein: ["chicken", "beef", "tofu", "veal", "chickpeas", "fish"],
+      carbs: ["rice", "quinoa", "pasta", "sweet potato", "whole grain wraps"],
+      fats: ["olive oil", "nuts", "cheese", "hummus", "sunflower seeds"],
+    },
+    dinner: {
+      protein: ["fish", "chicken", "tofu", "lean beef", "lentils", "egg"],
+      carbs: ["brown rice", "sweet potato", "pasta", "rice"],
+      fats: ["butter", "olive oil", "avocado", "pesto", "pumpkin seeds"],
+    },
   };
   
-  const fetchFoodItems = async (category: keyof typeof foodCategories): Promise<any[]> => {
-    const ingr = foodCategories[category].join(','); // מחברים את המילים עם פסיקים
-  
-    const response = await client.query({
-      query: SEARCH_QUERY,
-      variables: { ingr: ingr }, // שימוש במילת המפתח לכל קטגוריה
-    });
-  
-    return response.data.search.hints.map((hint: any) => hint.food)
-      .filter(food => {
-        // סינון חכם כדי לוודא שאנחנו לא מקבלים מרכיבים לא רצויים
-        const labels = [food.label.toLowerCase()];
-        return labels.some(label => foodCategories[category].some(term => label.includes(term)));
+  const fetchFoodItems = async (ingredients: string): Promise<any[]> => {
+    try {
+      const response = await client.query({
+        query: SEARCH_QUERY,
+        variables: { ingr: ingredients },
       });
+  
+      return response.data.search.hints
+        .map((hint: any) => hint.food)
+        .filter((food: any) => {
+          // ודא שהאובייקט food לא ריק
+          if (!food) {
+            return false; // החזר false אם food ריק
+          }
+  
+          // בדוק אם יש תיאור
+          const name = food.label || ''; // אם אין תיאור, קח מחרוזת ריקה
+          const wordCount = name.split(' ').length;
+  
+          const isValidItem = wordCount <= 3;
+  
+          return isValidItem;
+        });
+    } catch (error) {
+      console.error('Error fetching food items from Gemini:', error);
+      return []; // Return empty array in case of error
+    }
   };
+  
+  
+// Function to create random meal data
+const generateRandomMealData = async (mealType: MealType): Promise<any> => {
+  const categories = foodCategories[mealType]; // TypeScript now knows this is safe
+  const proteins = await fetchFoodItems(categories.protein.join(','));
+  const carbs = await fetchFoodItems(categories.carbs.join(','));
+  const fats = await fetchFoodItems(categories.fats.join(','));
+
+  const randomMealItem = (items: any[]): any => {
+    const randomItem = getRandomItem(items);
+    return {
+      name: randomItem.label,
+      calories: randomItem.nutrients.ENERC_KCAL,
+      protein: randomItem.nutrients.PROCNT,
+      fat: randomItem.nutrients.FAT,
+      carbohydrates: randomItem.nutrients.CHOCDF,
+    };
+  };
+
+  return {
+    [mealType.charAt(0).toUpperCase() + mealType.slice(1)]: [
+      randomMealItem(proteins), // Protein
+      randomMealItem(carbs),    // Carbs
+      randomMealItem(fats),     // Fats
+    ],
+  };
+};
+
+// Function to fetch meal data
+const fetchMealData = async (mealType?: string) => {
+  try {
+    let mealData;
     
-  const calculatePortionSize = (calories: number, item: any) => {
-    const portionSize = (calories / item.calories) * 100;
-    return {
-      name: item.name,
-      portionSize,
-      protein: (portionSize / 100) * item.protein,
-      fat: (portionSize / 100) * item.fat,
-      carbs: (portionSize / 100) * item.carbohydrates,
-      calories: portionSize * item.calories / 100,
-    };
-  };
+    // בדוק אם יש סוג ארוחה שניתן לטעון
+    if (mealType) {
+      mealData = await generateRandomMealData(mealType);
+    } else {
+      // טען את כל הארוחות
+      const breakfast = await generateRandomMealData("breakfast");
+      const lunch = await generateRandomMealData("lunch");
+      const dinner = await generateRandomMealData("dinner");
 
-  
-  const generateRandomMealData = async (): Promise<Meals> => {
-    // Fetch food items for each category
-    const proteins = await fetchFoodItems("protein");
-    const carbs = await fetchFoodItems("carbs");
-    const vegetables = await fetchFoodItems("vegetables");
-  
-    const randomMealItem = (items: any[]): MealItem => {
-      const randomItem = getRandomItem(items);
-      return {
-        name: randomItem.label,
-        calories: randomItem.nutrients.ENERC_KCAL,
-        protein: randomItem.nutrients.PROCNT,
-        fat: randomItem.nutrients.FAT,
-        carbohydrates: randomItem.nutrients.CHOCDF,
+      mealData = {
+        ...breakfast,
+        ...lunch,
+        ...dinner,
+        Extras: [], // אפשרות לפריטים נוספים
       };
-    };
-  
-    return {
-      Breakfast: [randomMealItem(proteins), randomMealItem(carbs), randomMealItem(vegetables)],
-      Lunch: [randomMealItem(proteins), randomMealItem(carbs), randomMealItem(vegetables)],
-      Dinner: [randomMealItem(proteins), randomMealItem(carbs), randomMealItem(vegetables)],
-      Extras: [],
-    };
-  };
+    }
 
-  
-  const fetchMealData = async () => {
-    // Simulate fetching data with random values
-    const data = await generateRandomMealData();
-    setMeals(data);
-  };
-  
-  useEffect(() => {
-    fetchMealData();
-  }, []);
-  
+    // עדכן את המצב
+    setMeals(mealData);
+  } catch (error) {
+    console.error('Error fetching meal data:', error);
+  }
+};
+
+// Effect to load data on component mount
+useEffect(() => {
+  fetchMealData();
+}, []);
+
   const handleSearchIconPress = () => {
     setShowSearch(true);
   };
@@ -246,7 +285,7 @@ const DailyMenu: React.FC = () => {
     borderColor: getBorderColor(title),
     type: 'meal' as const
   }));
-  
+    
   // Filter out the empty Extras section
   const filteredMealSections = mealSections.filter(section => !(section.title === 'Extras' && section.data.length === 0));
   
