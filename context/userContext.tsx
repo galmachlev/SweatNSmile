@@ -1,12 +1,3 @@
-/*
- * This component creates a context for user login and register.
- * It uses the useNavigation hook to get the navigation object.
- * It also exports a UserProvider component that wraps the UserContext.Provider component.
- * The UserProvider component receives children as a prop and renders them.
- * The UserProvider component also exports a useUser hook that returns the login and currentUser states and functions.
- * The login function is used to login the user and the currentUser state is used to store the user's information.
- */
-
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
@@ -28,8 +19,10 @@ type RootStackParamList = {
 
 // Define the context type
 type UserContextType = {
-    login: (email: string, password: string) => Promise<void>
-    currentUser: User | null
+    login: (email: string, password: string) => Promise<void>;
+    currentUser: User | null;
+    users: User[]; // Add users array to store the fetched users
+    fetchUsers: () => Promise<void>; // Add function to fetch users
 };
 
 // Create the UserContext
@@ -53,8 +46,9 @@ type UserProviderProps = {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [users, setUsers] = useState<User[]>([]); // Add state for storing users
 
-    
+    // Login function
     const login = async (email: string, password: string) => {
         if (!email || !password) {
             Alert.alert('Error', 'Please fill in both fields.');
@@ -104,16 +98,25 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             Alert.alert('Error', 'An error occurred while logging in. Please try again.');
         }
     };
-    
+
+    // Fetch users from the API
+    const fetchUsers = async () => {
+        try {
+            let res = await fetch('https://database-s-smile.onrender.com/api/users/');
+            if (res.ok) {
+                let data = await res.json();
+                setUsers(data); // Store users in the state
+            } else {
+                console.error('Failed to fetch users');
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
 
     return (
-        <UserContext.Provider value={{ login, currentUser }}>
+        <UserContext.Provider value={{ login, currentUser, users, fetchUsers }}>
             {children}
         </UserContext.Provider>
     );
 };
-
-
-
-
-
