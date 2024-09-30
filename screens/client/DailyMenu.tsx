@@ -13,6 +13,21 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Touchabl
 import { FontAwesome } from '@expo/vector-icons';
 import { gql, useLazyQuery } from '@apollo/client';
 
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+} from '@apollo/client';
+
+const client = new ApolloClient({
+  uri: 'https://oneonta.stepzen.net/api/belligerent-waterbuffalo/__graphql',
+  cache: new InMemoryCache(),
+  headers: {
+    Authorization:
+      'apikey oneonta::stepzen.io+1000::f1fd564cbba026853eeedfbb05322edfe26263d2973848915d962dd16878e937',
+  },
+});
+
 const SEARCH_QUERY = gql`
   query search($ingr: String, $upc: String) {
     search(ingr: $ingr, upc: $upc) {
@@ -20,7 +35,6 @@ const SEARCH_QUERY = gql`
       hints {
         food {
           label
-          brand
           foodId
           nutrients {
             ENERC_KCAL
@@ -49,7 +63,7 @@ interface Meals {
   Breakfast: MealItem[];
   Lunch: MealItem[];
   Dinner: MealItem[];
-  Snacks: MealItem[]; // Added Snacks
+  Extras: MealItem[]; // Added Extras
 }
 
 interface MealSectionProps {
@@ -66,7 +80,7 @@ const DailyMenu: React.FC = () => {
     Breakfast: [],
     Lunch: [],
     Dinner: [],
-    Snacks: []
+    Extras: []
   });
 
   const [showSearch, setShowSearch] = useState<boolean>(false);
@@ -103,7 +117,7 @@ const DailyMenu: React.FC = () => {
         return '#F8D675';
       case 'Dinner':
         return '#FDE598';
-      case 'Snacks':
+      case 'Extras':
         return '#E8A54B';
       default:
         return '#FBF783';
@@ -113,6 +127,28 @@ const DailyMenu: React.FC = () => {
 
   const getRandomItem = (items: any[]) => items[Math.floor(Math.random() * items.length)];
 
+  const foodCategories = {
+    protein: ["chicken", "beef", "tofu", "fish", "egg"], // דוגמאות לחלבון
+    carbs: ["rice", "pasta", "bread", "potato", "quinoa"], // דוגמאות לפחמימה
+    vegetables: ["cucumber", "tomato", "carrot", "spinach", "broccoli"], // דוגמאות לירק
+  };
+  
+  const fetchFoodItems = async (category: keyof typeof foodCategories): Promise<any[]> => {
+    const ingr = foodCategories[category].join(','); // מחברים את המילים עם פסיקים
+  
+    const response = await client.query({
+      query: SEARCH_QUERY,
+      variables: { ingr: ingr }, // שימוש במילת המפתח לכל קטגוריה
+    });
+  
+    return response.data.search.hints.map((hint: any) => hint.food)
+      .filter(food => {
+        // סינון חכם כדי לוודא שאנחנו לא מקבלים מרכיבים לא רצויים
+        const labels = [food.label.toLowerCase()];
+        return labels.some(label => foodCategories[category].some(term => label.includes(term)));
+      });
+  };
+    
   const calculatePortionSize = (calories: number, item: any) => {
     const portionSize = (calories / item.calories) * 100;
     return {
@@ -124,32 +160,44 @@ const DailyMenu: React.FC = () => {
       calories: portionSize * item.calories / 100,
     };
   };
-  
-  const generateRandomMealData = (): Meals => {
-    const randomMealItem = (): MealItem => ({
-      name: `Food ${Math.floor(Math.random() * 100)}`,
-      calories: Math.floor(Math.random() * 500) + 100,
-    });
 
+  
+  const generateRandomMealData = async (): Promise<Meals> => {
+    // Fetch food items for each category
+    const proteins = await fetchFoodItems("protein");
+    const carbs = await fetchFoodItems("carbs");
+    const vegetables = await fetchFoodItems("vegetables");
+  
+    const randomMealItem = (items: any[]): MealItem => {
+      const randomItem = getRandomItem(items);
+      return {
+        name: randomItem.label,
+        calories: randomItem.nutrients.ENERC_KCAL,
+        protein: randomItem.nutrients.PROCNT,
+        fat: randomItem.nutrients.FAT,
+        carbohydrates: randomItem.nutrients.CHOCDF,
+      };
+    };
+  
     return {
-      Breakfast: [randomMealItem(), randomMealItem(), randomMealItem()],
-      Lunch: [randomMealItem(), randomMealItem(), randomMealItem()],
-      Dinner: [randomMealItem(), randomMealItem(), randomMealItem()],
-      Snacks: [],
+      Breakfast: [randomMealItem(proteins), randomMealItem(carbs), randomMealItem(vegetables)],
+      Lunch: [randomMealItem(proteins), randomMealItem(carbs), randomMealItem(vegetables)],
+      Dinner: [randomMealItem(proteins), randomMealItem(carbs), randomMealItem(vegetables)],
+      Extras: [],
     };
   };
 
-  const fetchMealData = () => {
+  
+  const fetchMealData = async () => {
     // Simulate fetching data with random values
-    const data = generateRandomMealData();
+    const data = await generateRandomMealData();
     setMeals(data);
   };
-
   
   useEffect(() => {
     fetchMealData();
   }, []);
-
+  
   const handleSearchIconPress = () => {
     setShowSearch(true);
   };
@@ -174,7 +222,7 @@ const DailyMenu: React.FC = () => {
     
     setMeals(prevMeals => ({
       ...prevMeals,
-      Snacks: [...prevMeals.Snacks, newSnack],
+      Extras: [...prevMeals.Extras, newSnack],
     }));
 
     setShowSearch(false);
@@ -199,8 +247,8 @@ const DailyMenu: React.FC = () => {
     type: 'meal' as const
   }));
   
-  // Filter out the empty Snacks section
-  const filteredMealSections = mealSections.filter(section => !(section.title === 'Snacks' && section.data.length === 0));
+  // Filter out the empty Extras section
+  const filteredMealSections = mealSections.filter(section => !(section.title === 'Extras' && section.data.length === 0));
   
   // Add feedback section as the last item
   filteredMealSections.push({
