@@ -1,3 +1,9 @@
+/*
+ * This component is a placeholder for the store feature.
+ * It displays a blinking text and a logo image.
+ * The blinking animation is done using the `Animated` API.
+ */
+
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, Animated, Image } from 'react-native';
 

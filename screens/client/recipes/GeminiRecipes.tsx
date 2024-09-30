@@ -1,3 +1,11 @@
+/*
+ * This component is a chat screen for the user to communicate with the Gemini AI.
+ * The user can input text and press the "Send" button to send a message to the AI.
+ * The AI will respond with a message and the component will display the entire conversation.
+ * The component uses the 'react-native-gifted-chat' library to display the conversation.
+ * The component also uses the 'react-native-flash-message' library to display error messages.
+ */
+
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator, Image } from "react-native";
 import * as GoogleGenerativeAI from "@google/generative-ai";

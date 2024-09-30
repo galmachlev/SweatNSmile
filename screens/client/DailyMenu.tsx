@@ -1,3 +1,13 @@
+/*
+ * This component renders a search bar for the user to search for food items.
+ * It uses the `useLazyQuery` hook to fetch the search results from the server.
+ * The search results are displayed in a `FlatList` below the search bar.
+ * The component also renders a loading indicator while the search is being performed.
+ *
+ * The component requires the `navigation` prop, which is a reference to the navigation object.
+ * The component uses the `navigation` prop to navigate to the `DailyMenuDetails` screen when a search result is selected.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';

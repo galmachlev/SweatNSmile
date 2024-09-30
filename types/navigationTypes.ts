@@ -1,3 +1,10 @@
+/*
+ * This file defines the types of the navigation stack.
+ * It is used in the RootStack.Navigator component.
+ * The keys of the object are the names of the screens.
+ * The values are the types of the props that are passed to each screen.
+ */
+
 export type RootStackParamList = {
     OnBoarding: undefined;
     HomeScreen: undefined;

@@ -1,3 +1,9 @@
+/*
+ * This component is the main screen of the client app.
+ * It displays a chat component with a daily gemini horoscope.
+ * It also displays a navigation link to the Register screen.
+ */
+
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure

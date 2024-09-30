@@ -1,3 +1,11 @@
+/*
+ * This component is the onboarding screen of the app.
+ * It displays 3 slides with images and text.
+ * The user can navigate between the slides using the buttons at the bottom of the screen.
+ * The user can also skip the onboarding process by pressing the "Skip" button.
+ * The component uses the 'react-native-swiper' library to create the swiper.
+ */
+
 import React, { useRef } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Button, Text, Card } from 'react-native-paper';

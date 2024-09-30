@@ -1,3 +1,12 @@
+/*
+ * This component creates a context for user login and register.
+ * It uses the useNavigation hook to get the navigation object.
+ * It also exports a UserProvider component that wraps the UserContext.Provider component.
+ * The UserProvider component receives children as a prop and renders them.
+ * The UserProvider component also exports a useUser hook that returns the login and currentUser states and functions.
+ * The login function is used to login the user and the currentUser state is used to store the user's information.
+ */
+
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';

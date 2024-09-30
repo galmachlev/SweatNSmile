@@ -1,3 +1,8 @@
+/*
+ * This component allows the user to enter their personal information and activity level.
+ * Based on the given information, the component calculates the user's daily calorie needs and displays them.
+ */
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Picker } from '@react-native-picker/picker';

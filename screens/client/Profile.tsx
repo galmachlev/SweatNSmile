@@ -1,3 +1,11 @@
+/*
+ * This component renders a profile screen for the user.
+ * It displays a username, a profile image, and a button to select a new profile image.
+ * The component also renders a text input for the user to change their username.
+ * The component will update the user's profile image and username in the UserContext
+ * when the user presses the "Save" button.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Alert, Modal, TouchableOpacity, SafeAreaView, Image, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';

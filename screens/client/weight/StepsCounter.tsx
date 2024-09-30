@@ -1,3 +1,10 @@
+/*
+ * This component displays a graph of the user's step count over the past 5 hours.
+ * It uses the Expo Pedometer API to get the step count data.
+ * The graph is rendered as a bar chart with 5 bars, each representing the number of steps taken in the past 5 hours.
+ * On press, the user is presented with a modal containing the number of steps taken in the last hour and the total number of steps taken in the past 24 hours.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Button, Dimensions } from 'react-native';
 import Svg, { Rect, Text as SvgText, Line, Defs, LinearGradient, Stop } from 'react-native-svg';

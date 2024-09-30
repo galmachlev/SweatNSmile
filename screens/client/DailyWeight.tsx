@@ -1,3 +1,11 @@
+/*
+ * This component is the main screen for the user's daily weight tracking.
+ * It displays the user's last recorded weight, a form to add a new weight measurement,
+ * and a bar chart displaying the user's weight measurements over time.
+ * The component is wrapped in a KeyboardAvoidingView so that the form is not hidden
+ * by the keyboard when the user is typing.
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import ProgressBar from './weight/progressBar';

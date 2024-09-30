@@ -1,3 +1,10 @@
+/*
+ * This component renders a screen with a list of recipe categories.
+ * Each category is represented as a tile with an image and a title.
+ * When the user presses a category, the component navigates to the RecipeCategoryScreen
+ * with the selected category as a parameter.
+ */
+
 import React from 'react';
 import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

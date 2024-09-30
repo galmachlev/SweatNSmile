@@ -1,3 +1,12 @@
+/*
+ * This component renders a login screen for the user.
+ * It consists of a form with two TextInput fields for the user's email and password,
+ * a Button to submit the form,
+ * and a TouchableOpacity to navigate to the Register screen.
+ * The component uses the useUser hook to get the login function from the UserContext,
+ * and the useNavigation hook to get the navigation object.
+ */
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useUser } from '../../context/UserContext';

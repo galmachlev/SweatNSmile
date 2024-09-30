@@ -1,3 +1,9 @@
+/*
+ * This component displays a circle representing the user's daily water consumption goal.
+ * When the user presses the circle, a modal appears with a button to add 240ml of water to their daily consumption.
+ * The component also displays a confetti animation when the user reaches their daily goal of 2600ml.
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button, Image, Dimensions } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
