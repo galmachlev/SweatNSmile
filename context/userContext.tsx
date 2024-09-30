@@ -71,7 +71,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         try {
             // Check if the login is for the admin
             if (email === 'admin@gmail.com' && password === 'admin1234321!') {
-                Alert.alert('Success', 'Welcome Admin!');
                 navigation.navigate('HomeAdmin');
                 return;
             }
