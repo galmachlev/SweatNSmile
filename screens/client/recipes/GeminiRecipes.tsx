@@ -10,7 +10,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator, Image } from "react-native";
 import * as GoogleGenerativeAI from "@google/generative-ai";
 import { MaterialIcons } from '@expo/vector-icons';
-import { useUser } from "../../../context/UserContext";
+import { useUser } from "../../../context/userContext";
 
 interface Message {
   text: string;

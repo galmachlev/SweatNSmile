@@ -14,11 +14,15 @@ import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
-import { UserProvider } from './context/UserContext';
+import { UserProvider } from './context/userContext';
 import StoreComingSoonScreen from './screens/client/StoreComingSoon';
 import HealthyRecipesScreen from './screens/client/recipes/HealthyRecipesScreen';
 import GeminiRecipes from './screens/client/recipes/GeminiRecipes';
 import RecipeCategoryScreen from './screens/client/recipes/RecipeCategoryScreen';
+import AdminPage from './screens/admin/HomeAdmin';
+import AddUser from './screens/admin/AddUser';
+import UserTable from './screens/admin/UserTable';
+import HomeAdmin from './screens/admin/HomeAdmin';
 
 import {
   ApolloClient,
@@ -190,6 +194,9 @@ export default function App() {
           <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} />
           <Stack.Screen name="GeminiRecipes" component={GeminiRecipes} options={{ headerTitle: '' }}/>
           <Stack.Screen name="RecipeCategoryScreen" component={RecipeCategoryScreen} options={{ headerTitle: '' }}/>
+          <Stack.Screen name="HomeAdmin" component={HomeAdmin} options={{ headerTitle: 'HomeAdmin' }} />
+          <Stack.Screen name="AddUser" component={AddUser} options={{ headerTitle: 'AddUser' }}/>
+          <Stack.Screen name="UserTable" component={UserTable} options={{ headerTitle: 'UserTable' }}/>
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>

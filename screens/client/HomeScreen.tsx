@@ -7,7 +7,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../../context/userContext';
 import { createStackNavigator } from '@react-navigation/stack';
 import { RootStackParamList } from '../stack/Register';
 

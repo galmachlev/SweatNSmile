@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../../context/userContext';
 import { useNavigation } from '@react-navigation/native';
 import { color } from 'react-native-elements/dist/helpers';
 

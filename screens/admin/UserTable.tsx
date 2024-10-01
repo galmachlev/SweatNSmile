@@ -1,26 +1,51 @@
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../../context/userContext';
 
 export default function UserTable() {
-  const { users, fetchUsers } = useUser(); 
-  const [loading, setLoading] = useState<boolean>(true); 
+  const { users, fetchUsers, deleteUser } = useUser();
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const loadUsers = async () => {
       setLoading(true);
-      await fetchUsers(); 
+      await fetchUsers();
       setLoading(false);
     };
 
-    loadUsers(); 
+    loadUsers();
   }, []);
+
+  const handleDeletePress = (firstName: string, lastName: string, email: string) => {
+    Alert.alert(
+      'Delete User',
+      `Are you sure you want to delete ${firstName} ${lastName}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => deleteUser(email),
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const renderUser = ({ item }: { item: any }) => (
     <View style={styles.userRow}>
       <Text style={styles.userText}>{item.firstName}</Text>
       <Text style={styles.userText}>{item.lastName}</Text>
       <Text style={styles.userText}>{item.email}</Text>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDeletePress(item.firstName, item.lastName, item.email)}
+      >
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -35,11 +60,12 @@ export default function UserTable() {
         <Text style={styles.headerText}>First Name</Text>
         <Text style={styles.headerText}>Last Name</Text>
         <Text style={styles.headerText}>Email</Text>
+        <Text style={styles.headerText}>Actions</Text>
       </View>
       <FlatList
         data={users}
         renderItem={renderUser}
-        keyExtractor={(item) => item.user_id} 
+        keyExtractor={(item) => item.user_id}
       />
     </View>
   );
@@ -54,7 +80,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#3E6613', 
+    color: '#3E6613',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -74,14 +100,27 @@ const styles = StyleSheet.create({
   userRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center', 
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#3E6613', 
+    borderBottomColor: '#3E6613',
   },
   userText: {
     fontSize: 14,
     color: '#3E6613',
     flex: 1,
+    textAlign: 'center',
+  },
+  deleteButton: {
+    backgroundColor: '#FF6347',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
     textAlign: 'center',
   },
 });

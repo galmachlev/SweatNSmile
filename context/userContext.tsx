@@ -23,6 +23,7 @@ type UserContextType = {
     currentUser: User | null;
     users: User[]; // Add users array to store the fetched users
     fetchUsers: () => Promise<void>; // Add function to fetch users
+    deleteUser: (email: string) => Promise<void>; // Add function to delete user
 };
 
 // Create the UserContext
@@ -113,8 +114,31 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
     };
 
+    // Delete user function
+    const deleteUser = async (email: string) => {
+        try {
+            let res = await fetch('https://database-s-smile.onrender.com/api/users/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            if (res.ok) {
+                setUsers((prevUsers) => prevUsers.filter((user) => user.email !== email));
+                Alert.alert('Success', 'User deleted successfully.');
+            } else {
+                Alert.alert('Error', 'Failed to delete user.');
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            Alert.alert('Error', 'An error occurred while deleting the user. Please try again.');
+        }
+    };
+
     return (
-        <UserContext.Provider value={{ login, currentUser, users, fetchUsers }}>
+        <UserContext.Provider value={{ login, currentUser, users, fetchUsers, deleteUser }}>
             {children}
         </UserContext.Provider>
     );

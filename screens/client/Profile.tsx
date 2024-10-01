@@ -11,7 +11,7 @@ import { View, Text, StyleSheet, TextInput, Alert, Modal, TouchableOpacity, Safe
 import { useNavigation } from '@react-navigation/native';
 import { Avatar, Icon, Button } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
-import { useUser } from '../../context/UserContext'; // Import the useUser hook
+import { useUser } from '../../context/userContext'; // Import the useUser hook
 
 const FullSizeImage = ({ visible, image, onClose }: any) => {
   return (
