@@ -65,8 +65,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     
         // Password validation
         if (password.length < 6) {
-            Alert.alert('Error', 'Password must be at least 6 characters long.');
+            Alert.alert('Error', 'Password must be at least 6 characters long');
             return;
+
         }
     
         try {
