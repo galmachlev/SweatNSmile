@@ -1,52 +1,7 @@
-/*
- * This component renders a search bar for the user to search for food items.
- * It uses the `useLazyQuery` hook to fetch the search results from the server.
- * The search results are displayed in a `FlatList` below the search bar.
- * The component also renders a loading indicator while the search is being performed.
- *
- * The component requires the `navigation` prop, which is a reference to the navigation object.
- * The component uses the `navigation` prop to navigate to the `DailyMenuDetails` screen when a search result is selected.
- */
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { gql, useLazyQuery } from '@apollo/client';
-
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-} from '@apollo/client';
-
-const client = new ApolloClient({
-  uri: 'https://unjeodong.us-east-a.ibm.stepzen.net/api/vetoed-badger/__graphql', // URI של IBM StepZen
-  cache: new InMemoryCache(), // הגדרת מערכת המטמון
-  headers: {
-    Authorization: 'apikey unjeodong::local.net+1000::a153c90641a79f856725e561471dee0eb3892335d13eb1b252d4c328c805ada7', // מפתח ה-API שלך
-  },
-});
-
-
-const SEARCH_QUERY = gql`
-  query search($ingr: String, $upc: String) {
-    search(ingr: $ingr, upc: $upc) {
-      text
-      hints {
-        food {
-          label
-          foodId
-          nutrients {
-            ENERC_KCAL
-            FAT
-            CHOCDF
-            PROCNT
-          }
-        }
-      }
-    }
-  }
-`;
+import { searchFood } from './edamamApi';
 
 interface Macros {
   protein: number;
@@ -63,7 +18,7 @@ interface Meals {
   Breakfast: MealItem[];
   Lunch: MealItem[];
   Dinner: MealItem[];
-  Extras: MealItem[]; // Added Extras
+  Extras: MealItem[];
 }
 
 interface MealSectionProps {
@@ -76,21 +31,13 @@ interface MealSectionProps {
 const DailyMenu: React.FC = () => {
   const [dailyCalories, setDailyCalories] = useState<number>(1800);
   const [macros, setMacros] = useState<Macros>({ protein: 180, carbs: 175, fat: 30 });
-  const [meals, setMeals] = useState<Meals>({
-    Breakfast: [],
-    Lunch: [],
-    Dinner: [],
-    Extras: []
-  });
-
+  const [meals, setMeals] = useState<Meals>({ Breakfast: [], Lunch: [], Dinner: [], Extras: [] });
+  
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [performSearch, { loading: searchLoading, error: searchError }] = useLazyQuery(SEARCH_QUERY, {
-    onCompleted: (data) => {
-      setSearchResults(data?.search?.hints || []);
-    }
-  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   const MealSection: React.FC<MealSectionProps> = ({ title, data, borderColor, onRefresh }) => (
     <View style={[styles.mealSection, { borderLeftColor: borderColor }]}>
@@ -100,12 +47,16 @@ const DailyMenu: React.FC = () => {
           <FontAwesome name="refresh" size={20} color="#696B6D" />
         </TouchableOpacity>
       </View>
-      {data.map((item, index) => (
-        <View key={index} style={styles.mealItem}>
-          <Text>{item.name}</Text>
-          <Text>{item.calories} kcal</Text>
-        </View>
-      ))}
+      {data.length > 0 ? (
+        data.map((item, index) => (
+          <View key={index} style={styles.mealItem}>
+            <Text>{item.name}</Text>
+            <Text>{item.calories} kcal</Text>
+          </View>
+        ))
+      ) : (
+        <Text>No meals available.</Text>
+      )}
     </View>
   );
 
@@ -124,132 +75,117 @@ const DailyMenu: React.FC = () => {
     }
   };
 
-  type MealType = 'breakfast' | 'lunch' | 'dinner';
-
   const getRandomItem = (items: any[]) => items[Math.floor(Math.random() * items.length)];
   
-  const foodCategories: Record<MealType, { protein: string[]; carbs: string[]; fats: string[] }> = {
-    breakfast: {
-      protein: ["egg", "yogurt", "cheese", "smoked salmon", "tuna"],
-      carbs: ["oats", "whole grain bread", "banana", "berries", "granola"],
-      fats: ["avocado", "almond butter", "peanut butter", "chia seeds", "honey"],
-    },
-    lunch: {
-      protein: ["chicken", "beef", "tofu", "veal", "chickpeas", "fish"],
-      carbs: ["rice", "quinoa", "pasta", "sweet potato", "whole grain wraps"],
-      fats: ["olive oil", "nuts", "cheese", "hummus", "sunflower seeds"],
-    },
-    dinner: {
-      protein: ["fish", "chicken", "tofu", "lean beef", "lentils", "egg"],
-      carbs: ["brown rice", "sweet potato", "pasta", "rice"],
-      fats: ["butter", "olive oil", "avocado", "pesto", "pumpkin seeds"],
-    },
-  };
-  
-  const fetchFoodItems = async (ingredients: string): Promise<any[]> => {
-    try {
-      const response = await client.query({
-        query: SEARCH_QUERY,
-        variables: { ingr: ingredients },
-      });
-  
-      return response.data.search.hints
-        .map((hint: any) => hint.food)
-        .filter((food: any) => {
-          // ודא שהאובייקט food לא ריק
-          if (!food) {
-            return false; // החזר false אם food ריק
-          }
-  
-          // בדוק אם יש תיאור
-          const name = food.label || ''; // אם אין תיאור, קח מחרוזת ריקה
-          const wordCount = name.split(' ').length;
-  
-          const isValidItem = wordCount <= 3;
-  
-          return isValidItem;
-        });
-    } catch (error) {
-      console.error('Error fetching food items from Gemini:', error);
-      return []; // Return empty array in case of error
-    }
-  };
-  
-  
-// Function to create random meal data
+    
+type MealType = 'breakfast' | 'lunch' | 'dinner';
+
+const foodCategories: Record<MealType, { protein: string[]; carbs: string[]; fats: string[] }> = {
+  breakfast: {
+    protein: ["egg", "yogurt", "cheese", "smoked salmon", "tuna"],
+    carbs: ["oats", "whole grain bread", "banana", "berries", "granola"],
+    fats: ["avocado", "almond butter", "peanut butter", "chia seeds", "honey"],
+  },
+  lunch: {
+    protein: ["chicken", "beef", "tofu", "veal", "chickpeas", "fish"],
+    carbs: ["rice", "quinoa", "pasta", "sweet potato", "whole grain wraps"],
+    fats: ["olive oil", "nuts", "cheese", "hummus", "sunflower seeds"],
+  },
+  dinner: {
+    protein: ["fish", "chicken", "tofu", "lean beef", "lentils", "egg"],
+    carbs: ["brown rice", "sweet potato", "pasta", "rice"],
+    fats: ["butter", "olive oil", "avocado", "pesto", "pumpkin seeds"],
+  },
+};
+
+// Fetch food items based on ingredients
+const fetchFoodItems = async (ingredients: string): Promise<any[]> => {
+  // Here, you'd implement your fetch logic for the Edamam API
+  return await fetchFoodItems(ingredients); // Replace with your actual fetch call
+};
+
+// Generate random meal data
 const generateRandomMealData = async (mealType: MealType): Promise<any> => {
-  const categories = foodCategories[mealType]; // TypeScript now knows this is safe
-  const proteins = await fetchFoodItems(categories.protein.join(','));
-  const carbs = await fetchFoodItems(categories.carbs.join(','));
-  const fats = await fetchFoodItems(categories.fats.join(','));
+  const categories = foodCategories[mealType];
+  const proteinItems = await fetchFoodItems(categories.protein.join(','));
+  const carbItems = await fetchFoodItems(categories.carbs.join(','));
+  const fatItems = await fetchFoodItems(categories.fats.join(','));
 
   const randomMealItem = (items: any[]): any => {
     const randomItem = getRandomItem(items);
     return {
       name: randomItem.label,
       calories: randomItem.nutrients.ENERC_KCAL,
-      protein: randomItem.nutrients.PROCNT,
-      fat: randomItem.nutrients.FAT,
-      carbohydrates: randomItem.nutrients.CHOCDF,
     };
   };
 
   return {
     [mealType.charAt(0).toUpperCase() + mealType.slice(1)]: [
-      randomMealItem(proteins), // Protein
-      randomMealItem(carbs),    // Carbs
-      randomMealItem(fats),     // Fats
+      randomMealItem(proteinItems),
+      randomMealItem(carbItems),
+      randomMealItem(fatItems),
     ],
   };
 };
 
-// Function to fetch meal data
-const fetchMealData = async (mealType?: string) => {
-  try {
-    let mealData;
-    
-    // בדוק אם יש סוג ארוחה שניתן לטעון
-    if (mealType) {
-      mealData = await generateRandomMealData(mealType);
-    } else {
-      // טען את כל הארוחות
-      const breakfast = await generateRandomMealData("breakfast");
-      const lunch = await generateRandomMealData("lunch");
-      const dinner = await generateRandomMealData("dinner");
+// Generate daily menu based on target calories
+const generateDailyMenu = async (targetCalories: number) => {
+  const caloriesPerMeal = targetCalories / 3;
+  const meals: Record<MealType, any[]> = {};
 
-      mealData = {
-        ...breakfast,
-        ...lunch,
-        ...dinner,
-        Extras: [], // אפשרות לפריטים נוספים
-      };
+  for (const mealType of ['breakfast', 'lunch', 'dinner'] as MealType[]) {
+    let totalCalories = 0;
+    meals[mealType] = []; // Initialize the meal type array
+
+    while (totalCalories < caloriesPerMeal) {
+      const mealData = await generateRandomMealData(mealType);
+      const mealCalories = mealData[mealType].reduce((acc, item) => acc + item.calories, 0);
+
+      if (totalCalories + mealCalories <= caloriesPerMeal) {
+        meals[mealType].push(...mealData[mealType]); // Use spread operator to add items
+        totalCalories += mealCalories;
+      }
     }
+  }
 
-    // עדכן את המצב
+  return meals;
+};
+
+// Fetch meal data and set state
+const fetchMealData = async (targetCalories: number) => {
+  try {
+    const mealData = await generateDailyMenu(targetCalories);
     setMeals(mealData);
   } catch (error) {
     console.error('Error fetching meal data:', error);
   }
 };
 
-// Effect to load data on component mount
+// Fetch meal data on component mount
 useEffect(() => {
-  fetchMealData();
-}, []);
+  fetchMealData(dailyCalories);
+}, [dailyCalories]);
 
-  const handleSearchIconPress = () => {
-    setShowSearch(true);
-  };
-
+  const handleSearchIconPress = () => setShowSearch(true);
+  
   const handleOutsidePress = () => {
     setShowSearch(false);
     setSearchQuery('');
     setSearchResults([]);
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (searchQuery.trim()) {
-      performSearch({ variables: { ingr: searchQuery } });
+      setLoading(true);
+      setError('');
+      try {
+        const data = await searchFood(searchQuery);
+        setSearchResults(data.hints || []); 
+      } catch (err) {
+        setError('Error fetching data. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -258,7 +194,7 @@ useEffect(() => {
       name: item.food.label,
       calories: item.food.nutrients.ENERC_KCAL,
     };
-    
+
     setMeals(prevMeals => ({
       ...prevMeals,
       Extras: [...prevMeals.Extras, newSnack],
@@ -269,37 +205,28 @@ useEffect(() => {
     setSearchResults([]);
   };
 
-  const refreshAllMeals = () => {
-    console.log('Refreshing all meals');
-    fetchMealData();
-  };
+  const refreshAllMeals = () => fetchMealData(dailyCalories); // Ensure to pass the current dailyCalories
 
-  const refreshMealData = (title: string) => {
-    console.log(`Refreshing ${title}`);
-    fetchMealData();
-  };
+  const refreshMealData = (title: string) => fetchMealData(dailyCalories);
 
   const mealSections = Object.entries(meals).map(([title, data]) => ({
     title,
     data,
     borderColor: getBorderColor(title),
-    type: 'meal' as const
+    type: 'meal' as const,
   }));
-    
-  // Filter out the empty Extras section
+
   const filteredMealSections = mealSections.filter(section => !(section.title === 'Extras' && section.data.length === 0));
   
-  // Add feedback section as the last item
   filteredMealSections.push({
     title: '',
     data: [],
-    borderColor: '#FFF', // Placeholder value
-    type: 'feedback' as const
+    borderColor: '#FFF',
+    type: 'feedback' as const,
   });
-  
+
   return (
     <View style={styles.container}>
-      {/* Circular progress for daily calories */}
       <View style={styles.caloriesContainer}>
         <View style={styles.outerCircle}>
           <View style={styles.middleCircle}>
@@ -313,7 +240,6 @@ useEffect(() => {
         </View>
       </View>
 
-      {/* Macros information */}
       <View style={styles.macros}>
         <View style={styles.macroItem}>
           <Text style={styles.macroLabel}>Protein (g)</Text>
@@ -337,91 +263,91 @@ useEffect(() => {
         </View>
       </View>
 
-      {/* Meal Sections */}
-      <FlatList
-        data={filteredMealSections}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => {
-          if (item.type === 'meal') {
-            return (
-              <MealSection 
-                title={item.title} 
-                data={item.data} 
-                borderColor={item.borderColor} 
-                onRefresh={refreshMealData} 
-              />
-            );
-          } else if (item.type === 'feedback') {
-            return (
-              <View style={styles.feedbackSection}>
-                <Text style={styles.feedbackText}>
-                  Didn't like the menu?
-                </Text>
-                <TouchableOpacity onPress={refreshAllMeals} style={styles.refreshAllButton}>
+     {/* Meal Sections */}
+    <FlatList
+      data={filteredMealSections}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item }) => {
+        if (item.type === 'meal') {
+          return (
+            <MealSection 
+              title={item.title} 
+              data={item.data} 
+              borderColor={item.borderColor} 
+              onRefresh={refreshMealData} 
+            />
+          );
+        } else if (item.type === 'feedback') {
+          return (
+            <View style={styles.feedbackSection}>
+              <Text style={styles.feedbackText}>
+                Didn't like the menu?
+              </Text>
+              <TouchableOpacity onPress={refreshAllMeals} style={styles.refreshAllButton}>
                   <FontAwesome name="refresh" size={20} color="#FFF" />
                   <Text style={styles.refreshAllText}>Create different</Text>
                 </TouchableOpacity>
-              </View>
-            );
-          }
-          return null;
-        }}
-      />
-      {/* Search Modal */}
+            </View>
+          );
+        }
+        return null;
+      }}
+    />      
+
+     {/* Search Icon */}
+     <TouchableOpacity onPress={handleSearchIconPress} style={styles.floatingButton}>
+        <FontAwesome name="plus" size={24} color="#FFF" />
+      </TouchableOpacity>
+
       {showSearch && (
         <TouchableWithoutFeedback onPress={handleOutsidePress}>
           <View style={styles.overlay}>
             <TouchableWithoutFeedback>
               <View style={styles.searchContainer}>
                 <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search for food to add"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
-                  placeholder="Search food to add"
-                  style={styles.searchInput}
+                  onSubmitEditing={handleSearch} 
                   autoFocus
                 />
-                <TouchableOpacity onPress={handleSearch} style={styles.searchButton}>
-                  <Text style={styles.searchButtonText}>Search</Text>
-                </TouchableOpacity>
-                {searchLoading && <ActivityIndicator />}
-                {searchError && <Text style={styles.errorText}>Error: {searchError.message}</Text>}
-                <FlatList
-                  data={searchResults}
-                  keyExtractor={(item) => item.food.foodId.toString()}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity 
-                      style={styles.resultItem} 
-                      onPress={() => handleAddToSnacks(item)}
-                    >
-                      <Text style={styles.resultText}>
-                        {item.food.label}
-                      </Text>
-                      <Text style={styles.resultDetail}>
-                        Calories: {item.food.nutrients.ENERC_KCAL} kcal
-                      </Text>
-                      <Text style={styles.resultDetail}>
-                        Carbohydrates: {item.food.nutrients.CHOCDF} g
-                      </Text>
-                      <Text style={styles.resultDetail}>
-                        Fat: {item.food.nutrients.FAT} g
-                      </Text>
-                      <Text style={styles.resultDetail}>
-                        Protein: {item.food.nutrients.PROCNT} g
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  ListEmptyComponent={() => <Text>No results found</Text>}
-                />
+                {loading ? (
+                  <ActivityIndicator size="small" color="#0000ff" />
+                ) : error ? (
+                  <Text style={styles.errorText}>{error}</Text>
+                ) : (
+                  <FlatList
+                    data={searchResults}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity 
+                        style={styles.resultItem} 
+                        onPress={() => handleAddToSnacks(item)}
+                      >
+                        <Text style={styles.resultText}>{item.food.label}</Text>
+                        <Text style={styles.resultDetail}>
+                          Calories: {Number(item.food.nutrients.ENERC_KCAL).toFixed(2)} kcal
+                        </Text>
+                        <Text style={styles.resultDetail}>
+                          Carbohydrates: {Number(item.food.nutrients.CHOCDF).toFixed(2)} g
+                        </Text>
+                        <Text style={styles.resultDetail}>
+                          Fat: {Number(item.food.nutrients.FAT).toFixed(2)} g
+                        </Text>
+                        <Text style={styles.resultDetail}>
+                          Protein: {Number(item.food.nutrients.PROCNT).toFixed(2)} g
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    keyExtractor={(item) => item.food.foodId.toString()} 
+                    ListEmptyComponent={() => <Text>No results found</Text>}
+                  />
+                )}
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       )}
-
-      {/* Search Icon */}
-      <TouchableOpacity onPress={handleSearchIconPress} style={styles.floatingButton}>
-        <FontAwesome name="plus" size={24} color="#FFF" />
-      </TouchableOpacity>
     </View>
   );
 };

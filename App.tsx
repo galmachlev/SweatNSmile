@@ -11,7 +11,7 @@ import Profile from './screens/client/Profile';
 import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyWeight from './screens/client/DailyWeight';
-import DailyMenu from './screens/client/DailyMenu';
+import DailyMenu from './screens/client/Menus/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
 import { UserProvider } from './context/userContext';
@@ -23,21 +23,6 @@ import AdminPage from './screens/admin/HomeAdmin';
 import AddUser from './screens/admin/AddUser';
 import UserTable from './screens/admin/UserTable';
 import HomeAdmin from './screens/admin/HomeAdmin';
-
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-} from '@apollo/client';
-
-// יצירת Apollo Client
-const client = new ApolloClient({
-  uri: 'https://unjeodong.us-east-a.ibm.stepzen.net/api/vetoed-badger/__graphql', // URI של IBM StepZen
-  cache: new InMemoryCache(), // הגדרת מערכת המטמון
-  headers: {
-    Authorization: 'apikey unjeodong::local.net+1000::a153c90641a79f856725e561471dee0eb3892335d13eb1b252d4c328c805ada7', // מפתח ה-API שלך
-  },
-});
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -176,7 +161,6 @@ function TabNavigator() {
 
 export default function App() {
   return (
-    <ApolloProvider client={client}>
     <NavigationContainer>
       <UserProvider>
         <Stack.Navigator initialRouteName="OnBoarding">
@@ -200,7 +184,6 @@ export default function App() {
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
-    </ApolloProvider>
   );
 }
 
