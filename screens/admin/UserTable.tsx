@@ -65,7 +65,7 @@ export default function UserTable() {
       <FlatList
         data={users}
         renderItem={renderUser}
-        keyExtractor={(item) => item.user_id}
+        keyExtractor={(item) => item.email} // Using email as the unique key
       />
     </View>
   );
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   userRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', 
+    alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#3E6613',

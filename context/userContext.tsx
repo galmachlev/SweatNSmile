@@ -124,18 +124,21 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
                 },
                 body: JSON.stringify({ email }),
             });
-
+    
             if (res.ok) {
-                setUsers((prevUsers) => prevUsers.filter((user) => user.email !== email));
+                // Fetch the updated list of users after successful deletion
+                await fetchUsers(); // Re-fetch users from the backend to get the updated data
                 Alert.alert('Success', 'User deleted successfully.');
             } else {
-                Alert.alert('Error', 'Failed to delete user.');
+                const errorResponse = await res.json();
+                throw new Error(errorResponse.message || 'Failed to delete user');
             }
         } catch (error) {
             console.error('Error deleting user:', error);
             Alert.alert('Error', 'An error occurred while deleting the user. Please try again.');
         }
     };
+    
 
     return (
         <UserContext.Provider value={{ login, currentUser, users, fetchUsers, deleteUser }}>

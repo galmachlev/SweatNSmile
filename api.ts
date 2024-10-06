@@ -44,7 +44,8 @@ export async function GET(url:string){
     }catch(error){
         console.log(error);
     }
-};
+}; 
+
 export async function PUT(url:string, obj:Object){
     try{
         let res= await fetch(`${BASE_URL}/${url}`, {
