@@ -4,7 +4,7 @@ import { Button, Text } from 'react-native-paper';
 import Swiper from 'react-native-swiper';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Video } from 'expo-av'; // Importing the Video component
+import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av'; // Importing the Video component
 
 const { width, height } = Dimensions.get('window');
 
@@ -46,12 +46,12 @@ const Onboarding = () => {
     handleNext();
   };
 
-  const handlePlaybackStatusUpdate = async (status: { didJustFinish: any; }) => {
-    if (status.didJustFinish) {
+  const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
+    if (status.isLoaded && status.durationMillis !== undefined && status.positionMillis >= status.durationMillis) {
       handleNext();
     }
   };
-
+  
   const toggleMute = () => {
     setIsMuted((prev) => !prev); // Toggle mute state
   };
@@ -70,18 +70,17 @@ const Onboarding = () => {
       >
         {/* Video slide */}
         <View style={styles.slide}>
-          <Video
-            ref={videoRef}
-            source={require('../../Images/video.mp4')}
-            rate={1.0}
-            volume={1.0}
-            isMuted={isMuted} // Use the mute state
-            resizeMode="cover"
-            shouldPlay
-            isLooping={false}
-            style={styles.video}
-            onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-          />
+        <Video
+          ref={videoRef}
+          source={require('../../Images/video.mp4')}
+          rate={1.0}
+          isMuted={isMuted} // השתמש במצב המוטה
+          resizeMode={ResizeMode.COVER}
+          shouldPlay
+          isLooping={false}
+          style={styles.video}
+          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+        />
           <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
             <Text style={styles.skipText}>Skip</Text>
           </TouchableOpacity>
