@@ -130,8 +130,12 @@ const generateRandomMealData = async (mealType: MealType): Promise<any> => {
 
 // Generate daily menu based on target calories
 const generateDailyMenu = async (targetCalories: number) => {
-  const caloriesPerMeal = targetCalories / 3;
-  const meals: Record<MealType, any[]> = {};
+  const caloriesPerMeal = (targetCalories-200) / 3;
+  const meals: Record<MealType, any[]> = {
+    breakfast: [],
+    lunch: [],
+    dinner: []
+  };
 
   for (const mealType of ['breakfast', 'lunch', 'dinner'] as MealType[]) {
     let totalCalories = 0;
