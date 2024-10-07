@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Avatar, Icon, Button } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 import { useUser } from '../../context/userContext'; // Import the useUser hook
+import axios from 'axios'; // Import axios
 
 const FullSizeImage = ({ visible, image, onClose }: any) => {
   return (
@@ -27,17 +28,19 @@ const FullSizeImage = ({ visible, image, onClose }: any) => {
 };
 
 export default function Profile() {
-  const { currentUser } = useUser();
-  const [profileImage, setProfileImage] = useState(require('../../Images/profile_img.jpg'));
+  const { currentUser, setCurrentUser } = useUser();
+  const defaultProfileImage = require('../../Images/profile_img.jpg');
+  const [profileImage, setProfileImage] = useState(defaultProfileImage);
   const [fullSizeVisible, setFullSizeVisible] = useState(false);
   const navigation = useNavigation();
 
-  // Update profile image if user has a profile image URL
   useEffect(() => {
     if (currentUser?.img) {
-      setProfileImage({ uri: currentUser.img });
+        setProfileImage({ uri: currentUser.img });
+    } else {
+        setProfileImage(defaultProfileImage);
     }
-  }, [currentUser]);
+}, [currentUser]);
 
   const handleImageOptions = async () => {
     Alert.alert(
@@ -78,7 +81,9 @@ export default function Profile() {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      setProfileImage({ uri: result.assets[0].uri });
+      const selectedImage = result.assets[0].uri;
+      setProfileImage({ uri: selectedImage });
+      uploadImageToCloudinary(selectedImage);
     }
   };
 
@@ -90,7 +95,32 @@ export default function Profile() {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      setProfileImage({ uri: result.assets[0].uri });
+      const selectedImage = result.assets[0].uri;
+      setProfileImage({ uri: selectedImage });
+      uploadImageToCloudinary(selectedImage);
+    }
+  };
+
+  const uploadImageToCloudinary = async (imageUri: string) => {
+    const data = new FormData();
+    const fileType = imageUri.split('.').pop(); // Extract file type
+    const fileName = `profile_img.${fileType}`; // Generate file name
+
+    data.append('file', {
+      uri: imageUri,
+      name: fileName,
+      type: `image/${fileType}`, // Use the correct mime type
+    });
+    data.append('upload_preset', 'GALMACH'); // Add your upload preset
+
+    try {
+      const response = await axios.post(`https://api.cloudinary.com/v1_1/duiifdn9s/image/upload`, data);
+      const cloudinaryUrl = response.data.secure_url; // Get the secure URL
+      console.log('Image uploaded to Cloudinary:', cloudinaryUrl);
+      // Update user profile with new image URL
+      setCurrentUser((prev) => ({ ...prev, img: cloudinaryUrl }));
+    } catch (error) {
+      console.error('Error uploading image to Cloudinary:', error);
     }
   };
 
@@ -109,20 +139,20 @@ export default function Profile() {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.container}>
+      <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.headerText}>Profile settings</Text>
             <Button title="Logout" type="clear" titleStyle={styles.logoutButton} onPress={handleLogout} />
           </View>
           <View style={styles.profileSection}>
-            <Avatar
+          <Avatar
               rounded
               size="xlarge"
               source={profileImage}
               containerStyle={styles.avatar}
-            >
+          >
               <Avatar.Accessory size={35} onPress={handleImageOptions} />
-            </Avatar>
+          </Avatar>
           </View>
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>

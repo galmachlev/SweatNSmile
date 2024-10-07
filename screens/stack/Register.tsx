@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
         color: '#808387',
     },
     selectedButton: {
-        backgroundColor: '#9AB28B',
+        backgroundColor: '#3E6613',
     },
     selectedButtonText: {
         color: '#fff',

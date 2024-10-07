@@ -93,7 +93,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         <TouchableOpacity style={styles.pdfButton} onPress={openPDF}>
-          <Text style={styles.pdfButtonText}>Training Program</Text>
+          <Text style={styles.pdfButtonText}>Open Training Program</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     minHeight: 140,
   },
   pdfButton: {  // Ensure this style is correctly defined
-    backgroundColor: '#FBF783',
+    backgroundColor: '#CB783B',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   pdfButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#696B6D',
+    color: '#ffffff',
   },
 });
 

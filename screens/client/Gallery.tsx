@@ -1,20 +1,14 @@
-/*
- * This component is a gallery of images.
- * The user can pick an image from their gallery,
- * take a new photo, or view an image from the gallery.
- * The images are displayed in a flat list.
- * The user can only pick one image at a time.
- * The selected image is displayed at the top of the screen.
- * The user can also delete an image from the gallery.
- */
-
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Alert, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react'; 
+import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Alert, Dimensions, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
+import axios from 'axios';
+import { useUser } from '../../context/userContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface GalleryImage {
   uri: string | null;
+  cloudinaryUrl?: string;
 }
 
 const numColumns = 3;
@@ -22,10 +16,27 @@ const screenWidth = Dimensions.get('window').width;
 const itemSize = (screenWidth - 20) / numColumns;
 
 const GalleryScreen: React.FC = () => {
+  const { currentUser } = useUser();
   const defaultImage = require('../../Images/gallery_img.png');
-  const [galleryImg, setGalleryImg] = useState<GalleryImage[]>(
-    Array(50).fill({ uri: Image.resolveAssetSource(defaultImage).uri })
-  );
+  const [fullSizeImageUri, setFullSizeImageUri] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+
+  // קריאת תמונות מ-AsyncStorage
+  const loadImages = async () => {
+    const userId = currentUser ? currentUser.email : 'defaultUserEmail'; // משתמש באימייל או כתובת ברירת מחדל
+    try {
+      const savedImages = await AsyncStorage.getItem(`galleryImages_${userId}`);
+      if (savedImages !== null) {
+        return JSON.parse(savedImages);
+      }
+    } catch (error) {
+      console.error('Error loading images', error);
+    }
+    return Array(50).fill({ uri: Image.resolveAssetSource(defaultImage).uri });
+  };
+
+  const [galleryImg, setGalleryImg] = useState<GalleryImage[]>([]);
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -40,7 +51,17 @@ const GalleryScreen: React.FC = () => {
     };
 
     requestPermissions();
-  }, []);
+    loadImages().then(images => setGalleryImg(images));
+  }, [currentUser]); // הוסף את currentUser כתלות
+
+  const saveImages = async (images: GalleryImage[]) => {
+    const userId = currentUser ? currentUser.email : 'defaultUserEmail'; // משתמש באימייל או כתובת ברירת מחדל
+    try {
+      await AsyncStorage.setItem(`galleryImages_${userId}`, JSON.stringify(images));
+    } catch (error) {
+      console.error('Error saving images', error);
+    }
+  };
 
   const pickImage = async (index: number) => {
     Alert.alert(
@@ -48,13 +69,26 @@ const GalleryScreen: React.FC = () => {
       'Do you want to take a new photo or pick from gallery?',
       [
         {
-          text: 'Camera',
+          text: 'Take a new photo',
           onPress: () => takePhoto(index),
         },
         {
-          text: 'Gallery',
+          text: 'Upload from Gallery',
           onPress: () => pickFromGallery(index),
         },
+        {
+          text: 'View Full Size',
+          onPress: () => viewFullSize(galleryImg[index].uri),
+        },
+        {
+          text: 'Delete Image',
+          onPress: () => deleteImage(index),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+
       ],
       { cancelable: true }
     );
@@ -82,13 +116,69 @@ const GalleryScreen: React.FC = () => {
     handleImageResult(result, index);
   };
 
-  const handleImageResult = (result: ImagePicker.ImagePickerResult, index: number) => {
+  const handleImageResult = async (result: ImagePicker.ImagePickerResult, index: number) => {
     if (!result.canceled && result.assets.length > 0) {
+      const imageUri = result.assets[0].uri;
+      const cloudinaryUrl = await uploadImageToCloudinary(imageUri);
       let newGalleryImg = [...galleryImg];
-      newGalleryImg[index] = { uri: result.assets[0].uri };
+      newGalleryImg[index] = { uri: imageUri, cloudinaryUrl };
       setGalleryImg(newGalleryImg);
+      saveImages(newGalleryImg); // שמירה של התמונות ב-AsyncStorage
     }
   };
+
+  const uploadImageToCloudinary = async (imageUri: string) => {
+    const cloudName = 'duiifdn9s';
+    const uploadPreset = 'GALMACH';
+    const userId = currentUser ? currentUser.email : 'defaultUserEmail'; // משתמש באימייל
+
+    const formData = new FormData();
+    formData.append('file', {
+      uri: imageUri,
+      name: 'image.jpg',
+      type: 'image/jpeg',
+    });
+    formData.append('upload_preset', uploadPreset);
+    formData.append('folder', `user_images/${userId}`);
+    formData.append('resource_type', 'image');
+
+    try {
+      const response = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData);
+      return response.data.secure_url;
+    } catch (error) {
+      console.error('Upload failed', error);
+      Alert.alert('Upload failed', 'Could not upload the image to Cloudinary.');
+      return null;
+    }
+  };
+
+  const viewFullSize = (uri: string | null) => {
+    setFullSizeImageUri(uri);
+    setModalVisible(true);
+  };
+
+  const deleteImage = (index: number) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this image?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            const newGalleryImg = [...galleryImg];
+            newGalleryImg.splice(index, 1); // Remove the image
+            setGalleryImg(newGalleryImg);
+            saveImages(newGalleryImg); // Save updated images
+          },
+        },
+      ]
+    );
+  };
+
 
   return (
     <View style={styles.container}>
@@ -113,6 +203,24 @@ const GalleryScreen: React.FC = () => {
         )}
         keyExtractor={(item, index) => index.toString()}
       />
+
+            {/* Modal for Full Size Image */}
+            <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalVisible(false)}>
+            <Text style={styles.closeButtonText}>X</Text>
+          </TouchableOpacity>
+          {fullSizeImageUri && (
+            <Image source={{ uri: fullSizeImageUri }} style={styles.fullSizeImage} resizeMode="contain" />
+          )}
+        </View>
+      </Modal>
+
     </View>
   );
 };
@@ -164,6 +272,30 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
   },
+  fullSizeImage: {
+    width: '100%',
+    height: '100%',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    top: 50,
+    right: 30,
+    backgroundColor: '#fff',
+    borderRadius: 1000,
+    padding: 10,
+    zIndex: 1
+  },
+  closeButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
 });
 
 export default GalleryScreen;
