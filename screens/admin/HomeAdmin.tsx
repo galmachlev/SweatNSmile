@@ -1,4 +1,4 @@
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -25,11 +25,15 @@ export default function AdminPage() {
       <Text style={styles.header}>Admin Dashboard</Text>
 
       <View style={styles.buttonContainer}>
-        <Button title="Add User" onPress={handleAddUser} />
+        <TouchableOpacity style={styles.button} onPress={handleAddUser}>
+          <Text style={styles.buttonText}>Add User</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button title="View All Users" onPress={handleViewUsers} />
+        <TouchableOpacity style={styles.button} onPress={handleViewUsers}>
+          <Text style={styles.buttonText}>View All Users</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -41,15 +45,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f0f4f7',
+    backgroundColor: '#ffffff',
   },
   header: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 40,
+    color: '#333',
+    textAlign: 'center',
   },
   buttonContainer: {
-    marginVertical: 10,
+    marginVertical: 15,
     width: '80%',
+  },
+  button: {
+    backgroundColor: '#3E6613', // צבע ירוק
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    elevation: 3, // השפעת צל
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
