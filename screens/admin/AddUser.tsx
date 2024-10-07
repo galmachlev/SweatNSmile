@@ -17,7 +17,7 @@ export default function AddUser() {
     }
 
     try {
-      const response = await fetch('http://your-backend-url.com/register', {
+      const response = await fetch('https://database-s-smile.onrender.com/api/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ export default function AddUser() {
           lastName,
           birthDate,
           isAdmin,
-          currentWeight: parseFloat(currentWeight), // Ensure weight is sent as a number
+          currentWeight: parseFloat(currentWeight),
         }),
       });
 

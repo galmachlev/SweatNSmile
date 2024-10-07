@@ -1,12 +1,3 @@
-/*
- * This component is the registration screen of the app.
- * It displays a swiper with 4 slides.
- * The first slide is a welcome message.
- * The second slide is a form to input the user's first name, last name, email and password.
- * The third slide is a form to input the user's gender, height and weight.
- * The fourth slide is a form to input the user's birth date and activity level.
- * After the user fills in all the forms, the component navigates to the HomeScreen.
- */
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
@@ -65,17 +56,56 @@ const Register = () => {
     ];
 
     const SendToDb = async () => {
-        let res = await fetch('http://89.207.132.170:3000/user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formik.values)
-        });
-        let data = await res.json();
-        console.log(data);
-        navigation.navigate('Login' as never);
+        try {
+            // Collect the necessary fields from formik.values
+            const user = {
+                firstName: formik.values.firstName,
+                lastName: formik.values.lastName,
+                email: formik.values.email,
+                password: formik.values.password,
+                birthDate: formik.values.birthDate ? formik.values.birthDate.toISOString().split('T')[0] : '',
+                phoneNumber: formik.values.phoneNumber,
+                currentWeight: formik.values.currentWeight ? parseFloat(formik.values.currentWeight.toString()) : 0, // Ensure currentWeight is a number
+                isAdmin: false, 
+            };
+    
+            // Send a POST request to the backend
+            let res = await fetch('https://database-s-smile.onrender.com/api/users/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(user), // Send the user object
+            });
+    
+            // Log the raw response for debugging
+            const contentType = res.headers.get('content-type');
+            console.log('Response Content-Type:', contentType);
+    
+            if (contentType && contentType.includes('application/json')) {
+                let data = await res.json();
+    
+                // Check if the request was successful
+                if (res.status === 201) {
+                    console.log('User added:', data);
+                    navigation.navigate('Login' as never); // Navigate to the login screen
+                } else {
+                    console.error('Error adding user:', data);
+                    alert(`Error: ${data.error || 'Failed to add user'}`);
+                }
+            } else {
+                // Handle non-JSON response (likely an error page or a server issue)
+                const text = await res.text(); // Get the raw text response
+                console.error('Non-JSON response received:', text);
+                alert('An error occurred. Please check the server.');
+            }
+        } catch (error) {
+            console.error('Error in SendToDb:', error);
+            alert('An error occurred while adding the user.');
+        }
     };
+    
+    
 
     useEffect(() => {
         navigation.setOptions({ headerTitle: screenTitles[currentIndex] });
@@ -182,15 +212,6 @@ const Register = () => {
                             value={formik.values.phoneNumber ?? ''}
                             placeholder="054-1234567"
                             keyboardType="phone-pad"
-                        />
-                        {/* birth date */}
-                        <Text style={styles.label}>Birth Date</Text>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={formik.handleChange('birthDate')}
-                            value={formik.values.birthDate ? formik.values.birthDate.toISOString().split('T')[0] : ''}
-                            placeholder="YYYY-MM-DD"
-                            keyboardType="numeric"
                         />
                         {/* password */}
                         <Text style={styles.label}>Password</Text>
@@ -356,7 +377,7 @@ const Register = () => {
                 <ScrollView contentContainerStyle={styles.scrollViewContainer}>
                     <View style={styles.screenContainer}>
                         <Text style={styles.congratulationsText}>Congratulations!</Text>
-                        <Text style={styles.greetingText}>Nice to meet you <Text style={styles.userName}>John Doe{formik.values.firstName} {formik.values.lastName}</Text></Text>
+                        <Text style={styles.greetingText}>Nice to meet you <Text style={styles.userName}>{formik.values.firstName} {formik.values.lastName}</Text></Text>
                         <Text style={styles.infoText}>
                             Your custom diet plan is ready and you're one{'\n'}
                             step closer to reach your goal!
