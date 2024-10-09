@@ -4,18 +4,21 @@
  * It also displays a navigation link to the Register screen.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
 import { useUser } from '../../context/userContext';
 import { createStackNavigator } from '@react-navigation/stack';
 import { RootStackParamList } from '../stack/Register';
+import { AsyncStorage } from 'react-native';
 
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { currentUser } = useUser();  // Use context directly
+  const { profileImage } = useUser();
+
   console.log('currentUser ==> ', currentUser);
 
   const userName = currentUser?.firstName;
@@ -46,11 +49,19 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     Linking.openURL(pdfUrl);
   };
 
+  useEffect(() => {
+    console.log("Profile image updated in HomeScreen:", profileImage);
+}, [profileImage]); // התמונה תתעדכן אוטומטית כאשר היא משתנה
+
   return (
     <ScrollView style={styles.page}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} />
+        {profileImage ? (
+                <Image source={{ uri: profileImage }} style={styles.profileImage} />
+            ) : (
+                <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} /> // תמונה חלופית
+            )}
           <Text style={styles.greeting}>Hello, {userName}</Text>
         </View>
 

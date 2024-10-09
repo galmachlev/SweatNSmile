@@ -24,6 +24,8 @@ type UserContextType = {
     users: User[]; // Add users array to store the fetched users
     fetchUsers: () => Promise<void>; // Add function to fetch users
     deleteUser: (email: string) => Promise<void>; // Add function to delete user
+    profileImage: string | null; // Add the profile image property
+    updateProfileImage: (imageUri: string) => void; // Add function to update profile image
 };
 
 // Create the UserContext
@@ -115,6 +117,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
     };
 
+    const defaultProfileImage = require('../Images/profile_img.jpg');
+    const [profileImage, setProfileImage] = useState(defaultProfileImage);
+
+    const updateProfileImage = (imageUri: string) => {
+    setProfileImage(imageUri);
+    };
+
+
     // Delete user function
     const deleteUser = async (email: string) => {
         try {
@@ -142,7 +152,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     
 
     return (
-        <UserContext.Provider value={{ login, currentUser, users, fetchUsers, deleteUser }}>
+        <UserContext.Provider value={{ login, currentUser, users, fetchUsers, deleteUser, profileImage, updateProfileImage }}>
             {children}
         </UserContext.Provider>
     );
