@@ -24,7 +24,7 @@ const Onboarding = () => {
   }, [currentIndex]);
 
   const handleSkip = () => {
-    navigation.navigate('HomeScreen' as never);
+    navigation.navigate('Login' as never);
     setIsMuted((prev) => !prev);
   };
 

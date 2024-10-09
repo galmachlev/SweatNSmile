@@ -37,6 +37,10 @@ export default function AdminPage() {
     navigation.navigate('UserTable');
   };
 
+  const handleViewUserWeights = () => {
+    navigation.navigate('UserWeights'); // This should navigate to the component that shows the user weights (graph or avg)
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Admin Dashboard</Text>
@@ -63,6 +67,13 @@ export default function AdminPage() {
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleViewUsers}>
           <Text style={styles.buttonText}>View All Users</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* New Button for Viewing User Weights */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleViewUserWeights}>
+          <Text style={styles.buttonText}>View User Weights</Text>
         </TouchableOpacity>
       </View>
     </View>

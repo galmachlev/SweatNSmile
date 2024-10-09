@@ -23,6 +23,7 @@ import AdminPage from './screens/admin/HomeAdmin';
 import AddUser from './screens/admin/AddUser';
 import UserTable from './screens/admin/UserTable';
 import HomeAdmin from './screens/admin/HomeAdmin';
+import UserWeights from './screens/admin/UserWeights';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -181,6 +182,7 @@ export default function App() {
           <Stack.Screen name="HomeAdmin" component={HomeAdmin} options={{ headerTitle: 'HomeAdmin' }} />
           <Stack.Screen name="AddUser" component={AddUser} options={{ headerTitle: 'AddUser' }}/>
           <Stack.Screen name="UserTable" component={UserTable} options={{ headerTitle: 'UserTable' }}/>
+          <Stack.Screen name="UserWeights" component={UserWeights} options={{ headerTitle: 'UserWeights' }}/>
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
