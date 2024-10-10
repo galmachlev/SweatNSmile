@@ -63,10 +63,14 @@ const Register = () => {
                 lastName: formik.values.lastName,
                 email: formik.values.email,
                 password: formik.values.password,
-                birthDate: formik.values.birthDate ? formik.values.birthDate.toISOString().split('T')[0] : '',
                 phoneNumber: formik.values.phoneNumber,
                 currentWeight: formik.values.currentWeight ? parseFloat(formik.values.currentWeight.toString()) : 0, // Ensure currentWeight is a number
-                isAdmin: false, 
+                goalWeight: formik.values.goalWeight ? parseFloat(formik.values.goalWeight.toString()) : undefined, // Add goalWeight if provided
+                gender: formik.values.gender ?? '', // Add gender
+                height: formik.values.height ? parseFloat(formik.values.height.toString()) : undefined, // Add height if provided
+                targetDate: formik.values.targetDate ? formik.values.targetDate.toISOString().split('T')[0] : undefined, // Add targetDate in ISO format
+                activityLevel: formik.values.activityLevel ?? '', // Add activityLevel
+                isAdmin: false, // Assuming user is not an admin
             };
     
             // Send a POST request to the backend
@@ -126,13 +130,6 @@ const Register = () => {
             errors.phoneNumber = 'Invalid phone number';
         }
 
-        const today = new Date();
-        const minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-        const selectedDate = new Date(values.birthDate ?? '');
-        if (selectedDate > minDate) {
-            errors.birthDateValidate = 'Invalid birth date';
-        }
-
         if (!/^[a-zA-Z0-9!@#$%^&*]+$/.test(values.password ?? '')) {
             errors.password = 'Invalid password';
         }
@@ -146,8 +143,6 @@ const Register = () => {
             lastName: '',
             email: '',
             password: '',
-            birthDate: new Date(),
-            birthDateValidate: '',
             phoneNumber: '',
             img: '',
         },
@@ -313,7 +308,7 @@ const Register = () => {
                         <TextInput
                             style={styles.input}
                             onChangeText={formik.handleChange('goalDate')}
-                            value={formik.values.goalDate ? formik.values.goalDate.toISOString().split('T')[0] : ''}
+                            value={formik.values.targetDate ? formik.values.targetDate.toISOString().split('T')[0] : ''}
                             placeholder="YYYY-MM-DD"
                             keyboardType="numeric"
                         />

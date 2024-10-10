@@ -1,17 +1,9 @@
-/*
- * This component is the main screen of the client app.
- * It displays a chat component with a daily gemini horoscope.
- * It also displays a navigation link to the Register screen.
- */
-
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
 import { useUser } from '../../context/userContext';
 import { createStackNavigator } from '@react-navigation/stack';
 import { RootStackParamList } from '../stack/Register';
-import { AsyncStorage } from 'react-native';
-
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -21,8 +13,12 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   console.log('currentUser ==> ', currentUser);
 
+  // Fetch startingWeight and targetWeight from currentUser
+  const startingWeight = currentUser?.currentWeight || 0;
+  const targetWeight = currentUser?.goalWeight || 0;
+
   const userName = currentUser?.firstName;
-  const startDate = new Date('2024-02-07'); // Example start date, one month ago
+  const startDate = new Date('2024-02-07'); // Example start date
   const currentDate = new Date(); // Current date
   const estimatedDate = new Date('2024-09-08'); // Example target date
 
@@ -51,24 +47,25 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   useEffect(() => {
     console.log("Profile image updated in HomeScreen:", profileImage);
-}, [profileImage]); // התמונה תתעדכן אוטומטית כאשר היא משתנה
+  }, [profileImage]); // Image will auto-update when it changes
 
   return (
     <ScrollView style={styles.page}>
       <View style={styles.container}>
         <View style={styles.header}>
-        {profileImage ? (
-                <Image source={{ uri: profileImage }} style={styles.profileImage} />
-            ) : (
-                <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} /> // תמונה חלופית
-            )}
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          ) : (
+            <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} /> // Placeholder image
+          )}
           <Text style={styles.greeting}>Hello, {userName}</Text>
         </View>
 
         <View style={styles.progressBarContainer}>
-          <Text style={styles.progressBarTextLeft}>Starting weight</Text>
+          {/* Show the starting weight and target weight */}
+          <Text style={styles.progressBarTextLeft}>Starting Weight: {startingWeight} kg</Text>
           <View style={[styles.progressBarFill, { width: `${progress}%` }]}></View>
-          <Text style={styles.progressBarTextRight}>Target weight</Text>
+          <Text style={styles.progressBarTextRight}>Target Weight: {targetWeight} kg</Text>
         </View>
 
         <View style={styles.details}>
@@ -136,7 +133,7 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 20,
     marginTop: 25,
-    marginBottom: 30
+    marginBottom: 30,
   },
   details: {
     marginTop: 20,
@@ -145,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     paddingHorizontal: 8,
     marginTop: -15,
-    marginBottom: 30
+    marginBottom: 30,
   },
   progressBarContainer: {
     backgroundColor: '#9AB28B',
@@ -165,7 +162,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 20,
     top: 13,
-    zIndex: 1
+    zIndex: 1,
   },
   progressBarTextRight: {
     fontSize: 14,
@@ -174,7 +171,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     top: 13,
-    zIndex: 1
+    zIndex: 1,
   },
   buttonsContainer: {
     flexDirection: 'row',
@@ -197,27 +194,27 @@ const styles = StyleSheet.create({
   iconImage: {
     width: 45,
     height: 45,
-    marginBottom: 7
+    marginBottom: 7,
   },
   GalleryButton: {
     backgroundColor: '#FFCE76',
     paddingVertical: 35,
-    paddingHorizontal: 23
+    paddingHorizontal: 23,
   },
   WeightButton: {
     backgroundColor: '#FDE598',
     paddingVertical: 35,
-    paddingHorizontal: 23
+    paddingHorizontal: 23,
   },
   MenuButton: {
     backgroundColor: '#F8D675',
     paddingVertical: 35,
-    paddingHorizontal: 23
+    paddingHorizontal: 23,
   },
   MoreButton: {
     backgroundColor: '#E8A54B',
     paddingVertical: 15,
-    paddingHorizontal: 1
+    paddingHorizontal: 1,
   },
   chatContainer: {
     backgroundColor: '#F0F0F0',
@@ -228,7 +225,7 @@ const styles = StyleSheet.create({
   chatBox: {
     minHeight: 140,
   },
-  pdfButton: {  // Ensure this style is correctly defined
+  pdfButton: {
     backgroundColor: '#CB783B',
     padding: 15,
     borderRadius: 10,

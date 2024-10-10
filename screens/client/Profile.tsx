@@ -1,11 +1,3 @@
-/*
- * This component renders a profile screen for the user.
- * It displays a username, a profile image, and a button to select a new profile image.
- * The component also renders a text input for the user to change their username.
- * The component will update the user's profile image and username in the UserContext
- * when the user presses the "Save" button.
- */
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -138,18 +130,14 @@ export default function Profile() {
             {
                 text: 'OK',
                 onPress: async () => {
-                    // הגדר את התמונה ל-default
-                    setProfileImage(defaultProfileImage); // עדכון ישיר לתמונה ברירת המחדל
-                    updateProfileImage(defaultProfileImage); // עדכון בקונטקסט עם התמונה החדשה
-
-                    // מחק את התמונה הנוכחית מה-AsyncStorage
+                    setProfileImage(defaultProfileImage);
+                    updateProfileImage(defaultProfileImage);
                     await AsyncStorage.removeItem(`profileImage_${currentUser ? currentUser.email : 'defaultUserEmail'}`);
                 },
             },
         ]
     );
 };
-  
   
   const saveProfileImage = async (image: ProfileImage) => {
     const userId = currentUser ? currentUser.email : 'defaultUserEmail';
@@ -218,18 +206,11 @@ export default function Profile() {
               value={currentUser?.email || ''}
               keyboardType="email-address"
             />
-            <Text style={styles.inputLabel}>Age</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your age"
-              value={currentUser?.birthDate ? `${new Date().getFullYear() - new Date(currentUser.birthDate).getFullYear()}` : ''}
-              keyboardType="numeric"
-            />
             <Text style={styles.inputLabel}>Current Weight</Text>
             <TextInput
               style={styles.input}
               placeholder="Enter your current weight"
-              value={currentUser?.weight?.toString() || ''}
+              value={currentUser?.currentWeight?.toString() || ''}
               keyboardType="numeric"
             />
             <Text style={styles.inputLabel}>Goal Weight</Text>
@@ -239,25 +220,32 @@ export default function Profile() {
               value={currentUser?.goalWeight?.toString() || ''}
               keyboardType="numeric"
             />
+            <Text style={styles.inputLabel}>Height</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your height (cm)"
+              value={currentUser?.height?.toString() || ''}
+              keyboardType="numeric"
+            />
           </View>
         </View>
 
-            {/* Modal for Full Size Image */}
-            <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalVisible(false)}>
-            <Text style={styles.closeButtonText}>X</Text>
-          </TouchableOpacity>
-          {fullSizeImageUri && (
-            <Image source={{ uri: fullSizeImageUri }} style={styles.fullSizeImage} resizeMode="contain" />
-          )}
-        </View>
-      </Modal>
+        {/* Modal for Full Size Image */}
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+            {fullSizeImageUri && (
+              <Image source={{ uri: fullSizeImageUri }} style={styles.fullSizeImage} resizeMode="contain" />
+            )}
+          </View>
+        </Modal>
       </ScrollView>
     </TouchableWithoutFeedback>
   );
@@ -363,7 +351,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 1000,
     padding: 10,
-    zIndex: 1
+    zIndex: 1,
   },
   closeButtonText: {
     fontSize: 20,

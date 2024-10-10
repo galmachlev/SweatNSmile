@@ -13,8 +13,6 @@ export type User= {
     lastName: string,
     email: string,
     password: string,
-    birthDate: Date,
-    birthDateValidate?: string,
     phoneNumber: string,
     img?: string,
 
@@ -24,7 +22,7 @@ export type User= {
     height?: number,
     currentWeight: number,
     goalWeight?: number,
-    goalDate?: Date,
+    targetDate?: Date,
     dailyCalories?: number,
 
     //***************/
