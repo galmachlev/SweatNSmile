@@ -27,7 +27,6 @@ export default function AddUser() {
           password,
           firstName,
           lastName,
-          birthDate,
           isAdmin,
           currentWeight: parseFloat(currentWeight),
         }),
@@ -91,14 +90,6 @@ export default function AddUser() {
           placeholder="Enter last name"
           value={lastName}
           onChangeText={setLastName}
-        />
-
-        <Text style={styles.label}>Birth Date (YYYY-MM-DD)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter birth date"
-          value={birthDate}
-          onChangeText={setBirthDate}
         />
 
         <Text style={styles.label}>Current Weight</Text>
