@@ -1,17 +1,19 @@
-/*
- * This component displays a circle representing the user's daily water consumption goal.
- * When the user presses the circle, a modal appears with a button to add 240ml of water to their daily consumption.
- * The component also displays a confetti animation when the user reaches their daily goal of 2600ml.
- */
-
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button, Image, Dimensions, Alert } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { useUser } from '../../../context/userContext';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import { Ionicons } from '@expo/vector-icons'; 
 
 const circleImage = require('../../../Images/water.png');
 
 const WaterConsumption = () => {
+  const { currentUser } = useUser();
+  const userId = currentUser?.email ?? 'defaultUserEmail'; 
+  const userGenderValue = currentUser?.gender ?? 'male';
+      
+  const waterGoal = userGenderValue === 'male' ? 2600 : 1800; // Water goal based on gender
   const { width } = Dimensions.get('window');
   const radius = 50;
   const strokeWidth = 10;
@@ -20,25 +22,65 @@ const WaterConsumption = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isGoalReached, setIsGoalReached] = useState(false);
-  const [showFactModal, setShowFactModal] = useState(false); // State for fact modal
+  const [showFactModal, setShowFactModal] = useState(false);
   const animatedValue = useRef(new Animated.Value(0)).current;
-  const progress = animatedValue.interpolate({
-    inputRange: [0, 2600],
-    outputRange: [0, 1],
-  });
+
+  // Sync with AsyncStorage
+  useEffect(() => {
+    const loadWaterIntake = async () => {
+      const storedIntake = await AsyncStorage.getItem('waterIntake');
+      const storedDate = await AsyncStorage.getItem('lastIntakeDate');
+      const today = new Date().toISOString().slice(0, 10);
+
+      if (storedDate !== today) {
+        await AsyncStorage.setItem('waterIntake', '0'); // Reset daily intake
+        await AsyncStorage.setItem('lastIntakeDate', today);
+      } else {
+        setWaterIntake(Number(storedIntake) || 0);
+      }
+    };
+
+    loadWaterIntake();
+  }, []);
+
+// בתוך ה-useEffect המעדכן את animatedValue
+useEffect(() => {
+  const progress = waterIntake / waterGoal; // חישוב ההתקדמות
+  Animated.timing(animatedValue, {
+    toValue: progress, // עדכון הערך המתקדם
+    duration: 500,
+    useNativeDriver: true,
+  }).start();
+
+  if (waterIntake >= waterGoal && !isGoalReached) {
+    setShowConfetti(true);
+    setShowModal(true);
+    setIsGoalReached(true);
+  }
+
+  // עדכון כמות המים ב-AsyncStorage
+  const updateWaterIntake = async () => {
+    await AsyncStorage.setItem('waterIntake', String(waterIntake));
+  };
+  
+  updateWaterIntake();
+}, [waterIntake]);
+
+// ה-strokeDashoffset
+const strokeDashoffset = animatedValue.interpolate({
+  inputRange: [0, 1],
+  outputRange: [circumference, 0],
+});
 
   useEffect(() => {
-    Animated.timing(animatedValue, {
-      toValue: Math.min(waterIntake, 2600), // Cap the animated value at the recommended goal
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
+    const interval = setInterval(() => {
+      const remainingWater = waterGoal - waterIntake;
+      if (remainingWater > 0) {
+        Alert.alert('Reminder', `You have ${remainingWater} ml left to drink today!`);
+      }
+    }, 180000); //שינוי תזמון עד להצגת ההתראה - 3 דק'
 
-    if (waterIntake >= 2600 && !isGoalReached) {
-      setShowConfetti(true);
-      setShowModal(true);
-      setIsGoalReached(true); // Set the goal as reached
-    }
+    return () => clearInterval(interval);
   }, [waterIntake]);
 
   const handleAddGlass = () => {
@@ -49,14 +91,38 @@ const WaterConsumption = () => {
     setShowFactModal(true);
   };
 
-  const strokeDashoffset = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [circumference, 0],
-  });
+
+  // Function to reset intake
+  const resetWaterIntake = () => {
+    Alert.alert(
+      'Reset Water Intake',
+      'Are you sure you want to reset your daily intake progress?',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            setWaterIntake(0); // Reset intake
+            AsyncStorage.setItem('waterIntake', '0'); // Update in AsyncStorage
+            setShowConfetti(false); // Reset confetti state
+            setIsGoalReached(false); // Reset goal reached state
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   return (
     <View style={[styles.container, { width: width * 0.4 }]}>
       <Text style={styles.title}>Daily Water Consumption</Text>
+      <TouchableOpacity style={styles.resetButton} onPress={resetWaterIntake}>
+        <Ionicons name="refresh" size={24} color="#3b5998" />
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.imageContainer} onPress={handleImagePress}>
         <Image source={circleImage} style={styles.image} />
       </TouchableOpacity>
@@ -76,14 +142,17 @@ const WaterConsumption = () => {
           stroke="#3b5998"
           strokeWidth={strokeWidth}
           fill="none"
-          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDasharray={`${circumference} ${circumference}`} // ערך נכון
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
+          rotation={270} // התחלה מהחלק העליון
+          originX={60} // מרכז הסיבוב
+          originY={60} // מרכז הסיבוב
         />
       </Svg>
-      <View style={styles.textContainer}>
+       <View style={styles.textContainer}>
         <Text style={styles.text}>{`${waterIntake} ml`}</Text>
-        <Text style={styles.subText}>Goal: 2600 ml</Text>
+        <Text style={styles.subText}>Goal: {waterGoal} ml</Text>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleAddGlass}>
         <Text style={styles.buttonText}>Add Glass of Water</Text>
@@ -111,7 +180,6 @@ const WaterConsumption = () => {
           </View>
         </View>
       </Modal>
-      {/* Fact Modal */}
       <Modal
         visible={showFactModal}
         animationType="slide"
@@ -120,7 +188,7 @@ const WaterConsumption = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalText}> Did you know? </Text>
+            <Text style={styles.modalText}>Did you know?</Text>
             <Text style={styles.modalText2}>
               The National Institute of Medicine (IOM) recommends consuming 2.6 liters of fluids for men and 1.8 liters for women (from drinking alone, not from food).
             </Text>
@@ -210,24 +278,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   congratulationsText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#3b5998',
+    color: '#28a745',
+    marginBottom: 10,
   },
   modalText: {
-    fontSize: 18,
-    color: '#6c757d',
-    marginVertical: 10,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontSize: 16,
+    marginBottom: 20,
   },
   modalText2: {
     fontSize: 14,
-    color: '#6c757d',
-    lineHeight: 20,
-    marginVertical: 10,
+    marginBottom: 20,
     textAlign: 'center',
+  },
+  resetButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 10, // Ensure the button is on top
   },
 });
 
 export default WaterConsumption;
+
