@@ -10,7 +10,6 @@ import Gallery from './screens/client/Gallery';
 import Profile from './screens/client/Profile';
 import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
-import DailyWeight from './screens/client/DailyWeight';
 import DailyMenu from './screens/client/Menus/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
@@ -24,6 +23,7 @@ import AddUser from './screens/admin/AddUser';
 import UserTable from './screens/admin/UserTable';
 import HomeAdmin from './screens/admin/HomeAdmin';
 import UserWeights from './screens/admin/UserWeights';
+import DailyDashboard from './screens/client/DailyDashboard';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -109,7 +109,7 @@ function TabNavigator() {
 
             if (route.name === 'Home') {
               iconName = 'home';
-            } else if (route.name === 'Weight') {
+            } else if (route.name === 'Dashboard') {
               iconName = 'fitness';
             } else if (route.name === 'Menu') {
               iconName = 'restaurant';
@@ -142,7 +142,7 @@ function TabNavigator() {
         })}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Weight" component={DailyWeight} />
+        <Tab.Screen name="Dashboard" component={DailyDashboard} options={{ headerTitle: 'Daily Progress' }}/>
         <Tab.Screen 
           name="More" 
           component={HomeScreen}
@@ -172,7 +172,7 @@ export default function App() {
           <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
           <Stack.Screen name="Gallery" component={Gallery} />
           <Stack.Screen name="DailyMenu" component={DailyMenu} />
-          <Stack.Screen name="DailyWeight" component={DailyWeight} />
+          <Stack.Screen name="DailyDashboard" component={DailyDashboard} options={{ headerTitle: 'Daily Progress' }} />
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="HealthyRecipesScreen" component={HealthyRecipesScreen}  options={{ headerTitle: '' }}/>
           <Stack.Screen name="HomeStore" component={HomeScreen} />

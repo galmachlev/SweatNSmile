@@ -13,7 +13,7 @@ export type RootStackParamList = {
     Gallery: undefined;
     Profile: undefined;
     AllMenusTable: undefined;
-    DailyWeight: undefined;
+    DailyDashboard: undefined;
     DailyMenu: undefined;
     HomeStore: undefined;
     StoreComingSoonScreen: undefined;

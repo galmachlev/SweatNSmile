@@ -12,7 +12,7 @@ import ProgressBar from './weight/progressBar';
 import WaterConsumption from './weight/WaterConsumption';
 import StepsCounter from './weight/StepsCounter';
 
-const DailyWeight = () => {
+const DailyDashboard = () => {
   const [lastWeight, setLastWeight] = useState(0);
   const [isAddingWeight, setIsAddingWeight] = useState(false);
   const [weight, setWeight] = useState('');
@@ -213,4 +213,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DailyWeight;
+export default DailyDashboard;
