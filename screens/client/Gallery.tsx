@@ -133,11 +133,7 @@ const GalleryScreen: React.FC = () => {
     const userId = currentUser ? currentUser.email : 'defaultUserEmail'; // משתמש באימייל
 
     const formData = new FormData();
-    formData.append('file', {
-      uri: imageUri,
-      name: 'image.jpg',
-      type: 'image/jpeg',
-    });
+    formData.append('file', { uri: imageUri, name: 'image.jpg', type: 'image/jpeg' });
     formData.append('upload_preset', uploadPreset);
     formData.append('folder', `user_images/${userId}`);
     formData.append('resource_type', 'image');
