@@ -39,13 +39,13 @@ const DailyGeminiChat: React.FC = () => {
 
       // Array of customizable prompts for the AI
       const prompts = [
-        "Generate a new nutrition tip in 3 lines or less, and include an appropriate emoji at the end. 🥗",
-        "What’s your motivational health tip for today? Limit your response to 3 lines and add an emoji at the end. 💪",
-        "Share an interesting dieting fact today. Keep it to a maximum of 3 lines and include an emoji at the end. 🍏",
+        "Generate a new nutrition tip",
+        "What’s your motivational health tip for today?",
+        "Share an interesting dieting fact",
       ];
 
       // Randomly select a prompt from the array
-      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+      const prompt = "Limit your response to 3 lines and add an emoji at the end: " + prompts[Math.floor(Math.random() * prompts.length)];
 
       // Request the AI to generate content based on the chosen prompt
       const result = await model.generateContent(prompt);
