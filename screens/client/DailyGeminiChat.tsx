@@ -1,15 +1,21 @@
 /*
- * This component is a chat screen for the user to communicate with the Gemini AI.
- * The user can input text and press the "Send" button to send a message to the AI.
- * The AI will respond with a message and the component will display the entire conversation.
- * The component uses the 'react-native-gifted-chat' library to display the conversation.
- * The component also uses the 'react-native-flash-message' library to display error messages.
+ * DailyGeminiChat Component
+ * 
+ * This component serves as an interactive chat screen for users to engage with the Gemini AI.
+ * Users can trigger a new message generation by tapping the "Refresh" button.
+ * The AI generates a nutrition tip, motivational health advice, or dieting facts, which are displayed 
+ * in a scrollable view. Loading states are managed to enhance user experience.
+ * 
+ * Libraries utilized:
+ * - `@google/generative-ai` for content generation.
+ * - `react-native-flash-message` for displaying potential error notifications.
+ * - `react-native-vector-icons` for icon representation.
  */
 
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import * as GoogleGenerativeAI from "@google/generative-ai";
-import FlashMessage, { showMessage } from "react-native-flash-message";
+import FlashMessage from "react-native-flash-message";
 import { MaterialIcons } from '@expo/vector-icons';
 
 interface Message {
@@ -24,16 +30,29 @@ const DailyGeminiChat: React.FC = () => {
 
   const API_KEY = "AIzaSyAEG-hwBmhVBOIz8t7BQRpGOyPhcr3tWiU";
 
+  // Function to generate a daily fact using Google Generative AI
   const generateDailyFact = async () => {
     try {
       setReloading(true);
       const genAI = new GoogleGenerativeAI.GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = "write the user a Tip for motivation about food or sport or healthy lifestyle around 25 words. include relative emojis at the end.";
+
+      // Array of customizable prompts for the AI
+      const prompts = [
+        "Generate a new nutrition tip in 3 lines or less, and include an appropriate emoji at the end. 🥗",
+        "What’s your motivational health tip for today? Limit your response to 3 lines and add an emoji at the end. 💪",
+        "Share an interesting dieting fact today. Keep it to a maximum of 3 lines and include an emoji at the end. 🍏",
+      ];
+
+      // Randomly select a prompt from the array
+      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+
+      // Request the AI to generate content based on the chosen prompt
       const result = await model.generateContent(prompt);
       const response = result.response;
       const text = response.text();
 
+      // Update messages state with the AI's response
       setMessages([{ text, user: false }]);
       setLoading(false);
       setReloading(false);
@@ -44,6 +63,7 @@ const DailyGeminiChat: React.FC = () => {
     }
   };
 
+  // useEffect to trigger daily fact generation on component mount
   useEffect(() => {
     generateDailyFact();
   }, []);
