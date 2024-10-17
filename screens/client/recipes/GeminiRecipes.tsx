@@ -7,10 +7,24 @@
  */
 
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Keyboard, ActivityIndicator, Image } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  ActivityIndicator,
+  Image,
+  Linking,
+} from "react-native";
 import * as GoogleGenerativeAI from "@google/generative-ai";
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 import { useUser } from "../../../context/userContext";
+import { handleUserInputForQuantityAndIngredient, handleUserInputForRecipe } from "../../client/Menus/edamamApi"; // Import your utility functions
 
 interface Message {
   text: string;
@@ -18,10 +32,13 @@ interface Message {
 }
 
 const RecipeChat: React.FC = () => {
-  const { currentUser } = useUser();  // Use context directly
+  const { currentUser } = useUser(); // Use context directly
   const userName = currentUser?.firstName;
   const [messages, setMessages] = useState<Message[]>([
-    { text: `🌟 Hello ${userName}! 🌟\n\nGot some ingredients in your kitchen and not sure what to make? 🥕🍅\n\nJust list the ingredients you have, and we'll send you a detailed and delicious recipe that perfectly matches what you have on hand!`, user: false }
+    {
+      text: `🌟 Hello ${userName}! 🌟\n\nYou can use me for two things:\n1. If you want to get detailed nutritional information about a food item, just type the quantity and the ingredient in the format 'quantity ingredient' (e.g., '2 bananas'). 🍌\n2. If you're unsure what to cook, just list the ingredients you have (e.g., 'tomato, cheese, pasta') and I'll suggest a delicious recipe! 🍲\n\nWhat would you like to do today?`,
+      user: false,
+    },
   ]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,41 +47,116 @@ const RecipeChat: React.FC = () => {
   // Ref to the ScrollView
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const API_KEY = "AIzaSyAEG-hwBmhVBOIz8t7BQRpGOyPhcr3tWiU";
+  const API_KEY = "AIzaSyAEG-hwBmhVBOIz8t7BQRpGOyPhcr3tWiU"; // Your API key
 
-  const generateRecipe = async () => {
-    if (!inputText.trim()) return; // Avoid sending empty input
+  const genAI = new GoogleGenerativeAI.GoogleGenerativeAI(API_KEY);
 
-    setLoading(true);
+  const getGeminiResponse = async (prompt: string) => {
     try {
-      const prompt = isFirstMessage 
-        ? `Based on the user's current input: ${inputText}, create a detailed and easy-to-follow recipe with detailed calorie intake.`
-        : `You have previously received the following information: ${messages.filter((msg) => !msg.user).map((msg) => msg.text).join(" ")} Now, based on the user's current input: ${inputText}, create a detailed and easy-to-follow recipe.`;
-
-      const genAI = new GoogleGenerativeAI.GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const result = await model.generateContent(prompt);
       const response = result.response;
-      const text = await response.text();
+      const text = await response.text(); // Extract text from response
 
-      // Remove markdown-like formatting such as ## headings and **bold**
-      const cleanText = text
-        .replace(/^\#{1,6}\s+/gm, '') // Remove headings like ## Heading
-        .replace(/\*\*(.*?)\*\*/g, '$1'); // Remove **bold** markdown
-
-      setMessages([...messages, { text: inputText, user: true }, { text: cleanText, user: false }]);
-      setInputText("");
-      setIsFirstMessage(false); // Set flag to false after the first message
+      return text; // Return the text
     } catch (error) {
-      console.error("Error generating recipe:", error);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching Gemini response:", error);
+      return "Sorry, I couldn't fetch a response. Please try again."; // Error message
     }
   };
 
+  const [previousIngredients, setPreviousIngredients] = useState<string[]>([]); // State to store previous ingredients
+  const [ingredientHistory, setIngredientHistory] = useState<string[]>([]); // היסטוריית המרכיבים
+  const [displayedRecipes, setDisplayedRecipes] = useState<string[]>([]);
+
+  const handleChat = async () => {
+    // Avoid sending empty input
+    if (!inputText.trim()) return; 
+    setLoading(true);
+    
+    try {
+      let responseText: string = ""; // Ensure responseText is a string
+  
+      // Define regex patterns
+      const ingredientPattern = /^\d+\s+\w+/; // Matches 'quantity ingredient'
+      const recipePattern = /^[\w\s,]+$/; // Matches a comma-separated list of ingredients
+      const generalGreetingPattern = /^(hello|hi|hey|help|what can you do|how are you)/i; // Matches general greetings
+      const nutritionalRequestPattern = /^(give me|what is|tell me) (the )?calories? (of|for)? (\d+)\s+(\w+)/i; // Matches phrases like "give me the calories of 2 apples"
+  
+      // Check for general greetings or unrelated questions
+      if (generalGreetingPattern.test(inputText)) {
+        responseText = "Hi there! 👋 I'm here to help you with nutritional information or recipe suggestions!";
+      } 
+      // Check if input matches the nutritional request pattern
+      else if (nutritionalRequestPattern.test(inputText)) {
+        const matches = inputText.match(nutritionalRequestPattern);
+        if (matches) {
+          const quantity = matches[4]; // Extract quantity
+          const ingredient = matches[5]; // Extract ingredient
+          const nutritionalInfo = await handleUserInputForQuantityAndIngredient(`${quantity} ${ingredient}`); // Call nutritional info function
+          if (nutritionalInfo) {
+            responseText = `Nutritional Information for ${quantity} ${ingredient}:\n- Calories: ${nutritionalInfo.calories}\n- Protein: ${nutritionalInfo.protein}\n- Fat: ${nutritionalInfo.fat}\n- Carbs: ${nutritionalInfo.carbs}\n- Sodium: ${nutritionalInfo.sodium}`;
+          } else {
+            responseText = "Input not recognized. Please enter in the format 'quantity ingredient' in English.";
+          }
+        }
+      } 
+      // Check if input matches the ingredient pattern
+      else if (ingredientPattern.test(inputText)) {
+        const nutritionalInfo = await handleUserInputForQuantityAndIngredient(inputText);
+        if (nutritionalInfo) {
+          // Add the ingredient to history
+          setIngredientHistory(prev => [...prev, inputText]); // שמירת המרכיב להיסטוריה
+          responseText = `Nutritional Information for ${inputText}:\n- Calories: ${nutritionalInfo.calories}\n- Protein: ${nutritionalInfo.protein}\n- Fat: ${nutritionalInfo.fat}\n- Carbs: ${nutritionalInfo.carbs}\n- Sodium: ${nutritionalInfo.sodium}`;
+        } else {
+          responseText = "Input not recognized. Please enter in the format 'quantity ingredient' in English.";
+        }
+      } 
+      // Check if input matches the recipe pattern
+      else if (recipePattern.test(inputText)) {
+        const recipeSuggestions = await handleUserInputForRecipe(inputText, displayedRecipes);
+        setPreviousIngredients(inputText.split(',').map(ingredient => ingredient.trim()));
+        
+        // הוספת המתכון שהוצג להיסטוריה
+        if (recipeSuggestions.startsWith('🍽️ Recipe:')) {
+          const recipeTitle = recipeSuggestions.split('\n')[0].replace('🍽️ Recipe: ', '');
+          setDisplayedRecipes(prev => [...prev, recipeTitle]); // הוספת המתכון שהוצג
+        }
+        
+        responseText = typeof recipeSuggestions === 'string' ? recipeSuggestions : "Input not recognized. Please enter a list of ingredients.";
+      }
+            // If the input doesn't match any pattern, guide the user
+      else {
+        responseText = `Sorry, I can assist you with two things:\n1. For detailed nutritional information about a food item, type 'quantity ingredient' (e.g., '2 bananas'). 🍌\n2. To get recipe suggestions, list the ingredients you have (e.g., 'tomato, cheese, pasta'). 🍲\n\nWhat would you like to do today?`;
+      }
+  
+      // Update messages
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { text: inputText, user: true },
+        { text: responseText, user: false },
+      ]);
+      setInputText(""); // Clear input after sending
+      setIsFirstMessage(false); // Update first message state
+    } 
+    catch (error) {
+      console.error("Error handling chat:", error);
+    } 
+    finally {
+      setLoading(false); // Reset loading state
+    }
+  };      
+    
+  
+  // הוסף את זה בתחילת הקובץ או בתוך הרכיב שלך
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+
   const startNewConversation = () => {
     setMessages([
-      { text: `🌟 Hello ${userName}! 🌟\n\nGot some ingredients in your kitchen and not sure what to make? 🥕🍅\n\nJust list the ingredients you have, and we'll send you a detailed and delicious recipe that perfectly matches what you have on hand!`, user: false }
+      {
+        text: `🌟 Hello ${userName}! 🌟\n\nYou can use me for two things:\n1. If you want to get detailed nutritional information about a food item, just type the quantity and the ingredient in the format 'quantity ingredient' (e.g., '2 bananas'). 🍌\n2. If you're unsure what to cook, just list the ingredients you have (e.g., 'tomato, cheese, pasta') and I'll suggest a delicious recipe! 🍲\n\nWhat would you like to do today?`,
+        user: false,
+      },
     ]);
     setIsFirstMessage(true);
     setInputText("");
@@ -72,15 +164,15 @@ const RecipeChat: React.FC = () => {
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
-    // Delay the scroll to ensure content is rendered
     const scrollToBottom = () => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
     };
 
-    const timer = setTimeout(scrollToBottom, 100); // Adjust delay if necessary
-
-    return () => clearTimeout(timer); // Cleanup the timer
+    const timer = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timer);
   }, [messages]);
+  
+
 
   return (
     <KeyboardAvoidingView
@@ -104,33 +196,67 @@ const RecipeChat: React.FC = () => {
           <ActivityIndicator size="large" color="#3E6613" />
         ) : (
         <View>
-          {messages.map((message, index) => (
-            <View key={index} style={styles.messageContainer}>
-              {message.user ? (
-                <View style={styles.userMessageContainer}>
-                  <View style={styles.userMessageBubble}>
-                    <Text style={styles.messageText}>{message.text}</Text>
-                    <View style={styles.speechBubbleTailUser} />
-                  </View>
-                  <Image
-                    source={currentUser?.img ? { uri: currentUser.img } : require('../../../Images/profile_img.jpg')}
-                    style={styles.profileImage}
-                  />
-                </View>
-              ) : (
-                <View style={styles.aiMessageContainer}>
-                  <Image
-                    source={{ uri: 'https://images.assetsdelivery.com/compings_v2/vasilyrosca/vasilyrosca1902/vasilyrosca190200036.jpg' }}
-                    style={styles.profileImage}
-                  />
-                  <View style={styles.aiMessageBubble}>
-                    <Text style={styles.messageText}>{message.text}</Text>
-                    <View style={styles.speechBubbleTailAi} />
-                  </View>
-                </View>
-              )}
-            </View>
-          ))}
+{messages.map((message, index) => (
+  <View key={index} style={styles.messageContainer}>
+    {message.user ? (
+      <View style={styles.userMessageContainer}>
+        <View style={styles.userMessageBubble}>
+          <Text style={styles.messageText}>
+            {message.text.split(urlPattern).map((part, partIndex) => {
+              // אם החלק הוא קישור, ניצור Text לחיץ
+              if (urlPattern.test(part)) {
+                return (
+                  <Text
+                    key={partIndex}
+                    style={styles.linkText} // סגנון נפרד לקישור
+                    onPress={() => Linking.openURL(part)}
+                  >
+                    {part}
+                  </Text>
+                );
+              }
+              // אם החלק אינו קישור, פשוט נציגו בטקסט רגיל
+              return part;
+            })}
+          </Text>
+          <View style={styles.speechBubbleTailUser} />
+        </View>
+        <Image
+          source={currentUser?.img ? { uri: currentUser.img } : require('../../../Images/profile_img.jpg')}
+          style={styles.profileImage}
+        />
+      </View>
+    ) : (
+      <View style={styles.aiMessageContainer}>
+        <Image
+          source={{ uri: 'https://images.assetsdelivery.com/compings_v2/vasilyrosca/vasilyrosca1902/vasilyrosca190200036.jpg' }}
+          style={styles.profileImage}
+        />
+        <View style={styles.aiMessageBubble}>
+          <Text style={styles.messageText}>
+            {message.text.split(urlPattern).map((part, partIndex) => {
+              // אם החלק הוא קישור, ניצור Text לחיץ
+              if (urlPattern.test(part)) {
+                return (
+                  <Text
+                    key={partIndex}
+                    style={styles.linkText} // סגנון נפרד לקישור
+                    onPress={() => Linking.openURL(part)}
+                  >
+                    {part}
+                  </Text>
+                );
+              }
+              // אם החלק אינו קישור, פשוט נציגו בטקסט רגיל
+              return part;
+            })}
+          </Text>
+          <View style={styles.speechBubbleTailAi} />
+        </View>
+      </View>
+    )}
+  </View>
+))}
         </View>
         )}
       </ScrollView>
@@ -140,9 +266,9 @@ const RecipeChat: React.FC = () => {
           value={inputText}
           onChangeText={setInputText}
           placeholder="Enter ingredients..."
-          onSubmitEditing={generateRecipe} // Trigger recipe generation on submit
+          onSubmitEditing={handleChat} // Trigger recipe generation on submit
         />
-        <TouchableOpacity style={styles.sendButton} onPress={generateRecipe}>
+        <TouchableOpacity style={styles.sendButton} onPress={handleChat}>
           <MaterialIcons name="send" size={24} color="white" />
         </TouchableOpacity>
       </View>
@@ -206,6 +332,10 @@ const styles = StyleSheet.create({
     maxWidth: '75%',
     position: 'relative',
     marginRight: 10,
+  },
+  linkText: {
+    color: 'blue', // צבע לקישור
+    textDecorationLine: 'underline', // קו תחתון
   },
   speechBubbleTailUser: {
     position: 'absolute',
