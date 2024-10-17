@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { searchFood } from './edamamApi';
+import { useUser } from '../../../context/userContext'; 
 
 interface Macros {
   protein: number;
@@ -29,15 +29,33 @@ interface MealSectionProps {
 }
 
 const DailyMenu: React.FC = () => {
-  const [dailyCalories, setDailyCalories] = useState<number>(1800);
+  const { currentUser, calculateDailyCalories } = useUser(); // Access user data and the calculate function
+  const [dailyCalories, setDailyCalories] = useState<number>(1800); // Default value to be updated
   const [macros, setMacros] = useState<Macros>({ protein: 180, carbs: 175, fat: 30 });
   const [meals, setMeals] = useState<Meals>({ Breakfast: [], Lunch: [], Dinner: [], Extras: [] });
-  
+
   const [showSearch, setShowSearch] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+
+  // Calculate daily calories when the component mounts
+  useEffect(() => {
+    if (currentUser) {
+      const result = calculateDailyCalories(
+        currentUser.gender || '', // Use an empty string as a fallback
+        String(currentUser.height || ''), // Fallback to empty string if undefined
+        String(currentUser.currentWeight || ''),
+        String(currentUser.goalWeight || ''),
+        currentUser.activityLevel || '' // Fallback if activityLevel is undefined
+      );
+
+      if (result) {
+        setDailyCalories(result.RecommendedDailyCalories); // Update the daily calories
+      }
+    }
+  }, [currentUser]);
 
   const MealSection: React.FC<MealSectionProps> = ({ title, data, borderColor, onRefresh }) => (
     <View style={[styles.mealSection, { borderLeftColor: borderColor }]}>
@@ -75,103 +93,8 @@ const DailyMenu: React.FC = () => {
     }
   };
 
-  const getRandomItem = (items: any[]) => items[Math.floor(Math.random() * items.length)];
-  
-    
-type MealType = 'breakfast' | 'lunch' | 'dinner';
-
-const foodCategories: Record<MealType, { protein: string[]; carbs: string[]; fats: string[] }> = {
-  breakfast: {
-    protein: ["egg", "yogurt", "cheese", "smoked salmon", "tuna"],
-    carbs: ["oats", "whole grain bread", "banana", "berries", "granola"],
-    fats: ["avocado", "almond butter", "peanut butter", "chia seeds", "honey"],
-  },
-  lunch: {
-    protein: ["chicken", "beef", "tofu", "veal", "chickpeas", "fish"],
-    carbs: ["rice", "quinoa", "pasta", "sweet potato", "whole grain wraps"],
-    fats: ["olive oil", "nuts", "cheese", "hummus", "sunflower seeds"],
-  },
-  dinner: {
-    protein: ["fish", "chicken", "tofu", "lean beef", "lentils", "egg"],
-    carbs: ["brown rice", "sweet potato", "pasta", "rice"],
-    fats: ["butter", "olive oil", "avocado", "pesto", "pumpkin seeds"],
-  },
-};
-
-// Fetch food items based on ingredients
-const fetchFoodItems = async (ingredients: string): Promise<any[]> => {
-  // Here, you'd implement your fetch logic for the Edamam API
-  return await fetchFoodItems(ingredients); // Replace with your actual fetch call
-};
-
-// Generate random meal data
-const generateRandomMealData = async (mealType: MealType): Promise<any> => {
-  const categories = foodCategories[mealType];
-  const proteinItems = await fetchFoodItems(categories.protein.join(','));
-  const carbItems = await fetchFoodItems(categories.carbs.join(','));
-  const fatItems = await fetchFoodItems(categories.fats.join(','));
-
-  const randomMealItem = (items: any[]): any => {
-    const randomItem = getRandomItem(items);
-    return {
-      name: randomItem.label,
-      calories: randomItem.nutrients.ENERC_KCAL,
-    };
-  };
-
-  return {
-    [mealType.charAt(0).toUpperCase() + mealType.slice(1)]: [
-      randomMealItem(proteinItems),
-      randomMealItem(carbItems),
-      randomMealItem(fatItems),
-    ],
-  };
-};
-
-// Generate daily menu based on target calories
-const generateDailyMenu = async (targetCalories: number) => {
-  const caloriesPerMeal = (targetCalories-200) / 3;
-  const meals: Record<MealType, any[]> = {
-    breakfast: [],
-    lunch: [],
-    dinner: []
-  };
-
-  for (const mealType of ['breakfast', 'lunch', 'dinner'] as MealType[]) {
-    let totalCalories = 0;
-    meals[mealType] = []; // Initialize the meal type array
-
-    while (totalCalories < caloriesPerMeal) {
-      const mealData = await generateRandomMealData(mealType);
-      const mealCalories = mealData[mealType].reduce((acc, item) => acc + item.calories, 0);
-
-      if (totalCalories + mealCalories <= caloriesPerMeal) {
-        meals[mealType].push(...mealData[mealType]); // Use spread operator to add items
-        totalCalories += mealCalories;
-      }
-    }
-  }
-
-  return meals;
-};
-
-// Fetch meal data and set state
-const fetchMealData = async (targetCalories: number) => {
-  try {
-    const mealData = await generateDailyMenu(targetCalories);
-    setMeals(mealData);
-  } catch (error) {
-    console.error('Error fetching meal data:', error);
-  }
-};
-
-// Fetch meal data on component mount
-useEffect(() => {
-  fetchMealData(dailyCalories);
-}, [dailyCalories]);
-
   const handleSearchIconPress = () => setShowSearch(true);
-  
+
   const handleOutsidePress = () => {
     setShowSearch(false);
     setSearchQuery('');
@@ -184,7 +107,7 @@ useEffect(() => {
       setError('');
       try {
         const data = await searchFood(searchQuery);
-        setSearchResults(data.hints || []); 
+        setSearchResults(data.hints || []);
       } catch (err) {
         setError('Error fetching data. Please try again.');
       } finally {
@@ -209,7 +132,7 @@ useEffect(() => {
     setSearchResults([]);
   };
 
-  const refreshAllMeals = () => fetchMealData(dailyCalories); // Ensure to pass the current dailyCalories
+  const refreshAllMeals = () => fetchMealData(dailyCalories);
 
   const refreshMealData = (title: string) => fetchMealData(dailyCalories);
 
@@ -221,7 +144,7 @@ useEffect(() => {
   }));
 
   const filteredMealSections = mealSections.filter(section => !(section.title === 'Extras' && section.data.length === 0));
-  
+
   filteredMealSections.push({
     title: '',
     data: [],
@@ -251,14 +174,14 @@ useEffect(() => {
             <Text style={styles.macroValue}>{macros.protein}</Text>
           </View>
         </View>
-        
+
         <View style={styles.macroItem}>
           <Text style={styles.macroLabel}>Carbohydrates (g)</Text>
           <View style={styles.macroValueContainer}>
             <Text style={styles.macroValue}>{macros.carbs}</Text>
           </View>
         </View>
-        
+
         <View style={styles.macroItem}>
           <Text style={styles.macroLabel}>Fat (g)</Text>
           <View style={styles.macroValueContainer}>
@@ -267,39 +190,39 @@ useEffect(() => {
         </View>
       </View>
 
-     {/* Meal Sections */}
-    <FlatList
-      data={filteredMealSections}
-      keyExtractor={(item, index) => index.toString()}
-      renderItem={({ item }) => {
-        if (item.type === 'meal') {
-          return (
-            <MealSection 
-              title={item.title} 
-              data={item.data} 
-              borderColor={item.borderColor} 
-              onRefresh={refreshMealData} 
-            />
-          );
-        } else if (item.type === 'feedback') {
-          return (
-            <View style={styles.feedbackSection}>
-              <Text style={styles.feedbackText}>
-                Didn't like the menu?
-              </Text>
-              <TouchableOpacity onPress={refreshAllMeals} style={styles.refreshAllButton}>
+      {/* Meal Sections */}
+      <FlatList
+        data={filteredMealSections}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => {
+          if (item.type === 'meal') {
+            return (
+              <MealSection
+                title={item.title}
+                data={item.data}
+                borderColor={item.borderColor}
+                onRefresh={refreshMealData}
+              />
+            );
+          } else if (item.type === 'feedback') {
+            return (
+              <View style={styles.feedbackSection}>
+                <Text style={styles.feedbackText}>
+                  Didn't like the menu?
+                </Text>
+                <TouchableOpacity onPress={refreshAllMeals} style={styles.refreshAllButton}>
                   <FontAwesome name="refresh" size={20} color="#FFF" />
                   <Text style={styles.refreshAllText}>Create different</Text>
                 </TouchableOpacity>
-            </View>
-          );
-        }
-        return null;
-      }}
-    />      
+              </View>
+            );
+          }
+          return null;
+        }}
+      />
 
-     {/* Search Icon */}
-     <TouchableOpacity onPress={handleSearchIconPress} style={styles.floatingButton}>
+      {/* Search Icon */}
+      <TouchableOpacity onPress={handleSearchIconPress} style={styles.floatingButton}>
         <FontAwesome name="plus" size={24} color="#FFF" />
       </TouchableOpacity>
 
@@ -313,7 +236,7 @@ useEffect(() => {
                   placeholder="Search for food to add"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
-                  onSubmitEditing={handleSearch} 
+                  onSubmitEditing={handleSearch}
                   autoFocus
                 />
                 {loading ? (
@@ -324,8 +247,8 @@ useEffect(() => {
                   <FlatList
                     data={searchResults}
                     renderItem={({ item }) => (
-                      <TouchableOpacity 
-                        style={styles.resultItem} 
+                      <TouchableOpacity
+                        style={styles.resultItem}
                         onPress={() => handleAddToSnacks(item)}
                       >
                         <Text style={styles.resultText}>{item.food.label}</Text>
@@ -343,7 +266,7 @@ useEffect(() => {
                         </Text>
                       </TouchableOpacity>
                     )}
-                    keyExtractor={(item) => item.food.foodId.toString()} 
+                    keyExtractor={(item) => item.food.foodId.toString()}
                     ListEmptyComponent={() => <Text>No results found</Text>}
                   />
                 )}
@@ -378,7 +301,7 @@ const styles = StyleSheet.create({
   middleCircle: {
     width: 125,
     height: 125,
-    borderRadius: 100, 
+    borderRadius: 100,
     borderWidth: 10,
     borderColor: '#FFCE76',
     justifyContent: 'center',
@@ -419,7 +342,6 @@ const styles = StyleSheet.create({
     width: '80%',
     justifyContent: 'space-between',
     marginLeft: '8%',
-
   },
   macroItem: {
     alignItems: 'center',
@@ -431,7 +353,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   macroValueContainer: {
-    backgroundColor: '#696B6D', // The gray color from your image
+    backgroundColor: '#696B6D',
     borderRadius: 20,
     paddingVertical: 5,
     paddingHorizontal: 15,
@@ -439,7 +361,7 @@ const styles = StyleSheet.create({
   macroValue: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#FFF', // White color for the text inside the rounded background
+    color: '#FFF',
   },
   mealSection: {
     backgroundColor: '#FFF',
@@ -454,7 +376,7 @@ const styles = StyleSheet.create({
     borderLeftColor: '#E8A54B',
     borderLeftWidth: 25,
     borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0
+    borderBottomLeftRadius: 0,
   },
   header: {
     flexDirection: 'row',
@@ -528,32 +450,32 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     width: '80%',
-    maxHeight: '80%'
+    maxHeight: '80%',
   },
   searchInput: {
     borderBottomWidth: 1,
     borderColor: '#CCC',
     marginBottom: 10,
-    padding: 5
+    padding: 5,
   },
   searchButton: {
     backgroundColor: '#E8A54B',
     borderRadius: 20,
     padding: 10,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   searchButtonText: {
     color: '#FFF',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   errorText: {
     color: 'red',
-    marginTop: 10
+    marginTop: 10,
   },
   resultItem: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#DDD'
+    borderBottomColor: '#DDD',
   },
   resultText: {
     fontSize: 16,
@@ -570,9 +492,8 @@ const styles = StyleSheet.create({
     right: 20,
     backgroundColor: '#E8A54B',
     borderRadius: 30,
-    padding: 10
+    padding: 10,
   },
-
 });
 
 export default DailyMenu;

@@ -32,6 +32,7 @@ export type User= {
     //***************/
     
     isActive?: boolean,
+    gallery?: string[];
 
     measurements?: {
         date: Date; 
