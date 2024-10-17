@@ -8,7 +8,7 @@
  */
 
 export type User= {
-    user_id: string, // ?
+    user_id: string,
     firstName: string,
     lastName: string,
     email: string,
@@ -20,6 +20,7 @@ export type User= {
 
     gender?: string,
     height?: number,
+    startWeight?: number,
     currentWeight: number,
     goalWeight?: number,
     targetDate?: Date,

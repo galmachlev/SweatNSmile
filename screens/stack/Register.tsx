@@ -19,14 +19,6 @@ export type RootStackParamList = {
     HomeStore: undefined;
     Login: undefined ;
 };
-const cities = [
-    "Tel Aviv", "Jerusalem", "Haifa", "Rishon LeZion", "Petah Tikva",
-    "Ashdod", "Netanya", "Beer Sheva", "Bnei Brak", "Holon"
-];
-const streets = [
-    "Rothschild", "Ben Yehuda", "Allenby", "Dizengoff", "Herzl",
-    "King George", "Beit Habad", "Yaffo", "Bialik", "Haim Ozer"
-];
 
 type CustomCheckboxProps = {
     checked: boolean;
@@ -64,6 +56,7 @@ const Register = () => {
                 email: formik.values.email,
                 password: formik.values.password,
                 phoneNumber: formik.values.phoneNumber,
+                startWeight: formik.values.startWeight ? parseFloat(formik.values.startWeight.toString()) : 0,
                 currentWeight: formik.values.currentWeight ? parseFloat(formik.values.currentWeight.toString()) : 0, // Ensure currentWeight is a number
                 goalWeight: formik.values.goalWeight ? parseFloat(formik.values.goalWeight.toString()) : undefined, // Add goalWeight if provided
                 gender: formik.values.gender ?? '', // Add gender
@@ -116,26 +109,59 @@ const Register = () => {
     }, [currentIndex, navigation]);
 
     const validate = (values: Partial<User>) => {
-        const errors: Partial<User> = {};
-
-        if (!/^[A-Za-z\s]{2,50}$/.test(values.firstName ?? '')) {
+        const errors: Partial<Record<keyof User, string>> = {};
+    
+        // Validate first name
+        if (values.firstName && !/^[A-Za-z\s]{2,50}$/.test(values.firstName)) {
             errors.firstName = 'Invalid first name';
+        } else if (!values.firstName) {
+            errors.firstName = 'First name is required';
         }
-
-        if (!/^[A-Za-z\s]{2,50}$/.test(values.lastName ?? '')) {
+    
+        // Validate last name
+        if (values.lastName && !/^[A-Za-z\s]{2,50}$/.test(values.lastName)) {
             errors.lastName = 'Invalid last name';
+        } else if (!values.lastName) {
+            errors.lastName = 'Last name is required';
         }
-
-        if (!/^(05\d)-\d{7}$/g.test(values.phoneNumber ?? '')) {
+    
+        // Validate phone number
+        if (values.phoneNumber && !/^(05\d)-\d{7}$/.test(values.phoneNumber)) {
             errors.phoneNumber = 'Invalid phone number';
+        } else if (!values.phoneNumber) {
+            errors.phoneNumber = 'Phone number is required';
         }
-
-        if (!/^[a-zA-Z0-9!@#$%^&*]+$/.test(values.password ?? '')) {
-            errors.password = 'Invalid password';
+    
+        // Validate password
+        if (values.password && !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*]{6,}$/.test(values.password)) {
+            errors.password = 'Invalid password (min 6 chars, letters and numbers required)';
+        } else if (!values.password) {
+            errors.password = 'Password is required';
         }
-
+    
+        // Validate height
+        if (values.height !== undefined && (isNaN(values.height) || values.height <= 0)) {
+            errors.height = 'Height must be a positive number';
+        }
+    
+        // Validate current weight
+        if (values.currentWeight === undefined || isNaN(values.currentWeight) || values.currentWeight <= 0) {
+            errors.currentWeight = 'Current weight must be a positive number';
+        }
+    
+        // Validate goal weight (optional)
+        if (values.goalWeight !== undefined && (isNaN(values.goalWeight) || values.goalWeight <= 0)) {
+            errors.goalWeight = 'Goal weight must be a positive number';
+        }
+    
+        // Validate target date
+        if (values.targetDate && !(values.targetDate instanceof Date)) {
+            errors.targetDate = 'Invalid date format, must be a Date object';
+        }
+    
         return errors;
     };
+    
 
     const formik = useFormik<Partial<User>>({
         initialValues: {
@@ -145,9 +171,18 @@ const Register = () => {
             password: '',
             phoneNumber: '',
             img: '',
+            // Include other initial values as needed
+            gender: undefined,  // or '' if you want to set a default
+            height: undefined,
+            startWeight: undefined,
+            currentWeight: undefined, // Assuming this is required
+            goalWeight: undefined,
+            targetDate: undefined,
+            dailyCalories: undefined,
         },
         validate,
         onSubmit: (values) => {
+            console.log(values); // You can log the values for debugging
             if (swiperRef.current) {
                 swiperRef.current.scrollBy(1); // Move swiper to the next screen
             }

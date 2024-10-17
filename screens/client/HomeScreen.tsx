@@ -13,10 +13,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   console.log('currentUser ==> ', currentUser);
 
-  // Fetch startingWeight and targetWeight from currentUser
-  const startingWeight = currentUser?.currentWeight || 0;
-  const targetWeight = currentUser?.goalWeight || 0;
-
   const userName = currentUser?.firstName;
   const startDate = new Date('2024-02-07'); // Example start date
   const currentDate = new Date(); // Current date
@@ -26,15 +22,27 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const totalDays = Math.ceil((estimatedDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
   const passedDays = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
 
-  // Calculate progress percentage
-  let progress = (passedDays / totalDays) * 100;
+  // Fetch startingWeight and targetWeight from currentUser
+  const startingWeight = currentUser?.currentWeight || 0;
+  const targetWeight = currentUser?.goalWeight || 0;
 
-  // Limit progress to 100% if current date is beyond or exactly estimatedDate
-  if (currentDate >= estimatedDate) {
-    progress = 100;
+  // Calculate progress in percentage based on starting and target weight
+  const totalWeightLoss = startingWeight - targetWeight;
+  const currentWeight = currentUser?.currentWeight || 0; // Replace this with the actual current weight if available
+  const weightLost = startingWeight - currentWeight;
+
+  // Calculate progress percentage
+  let progress = (weightLost / totalWeightLoss) * 100;
+
+  // Limit progress to 100% if current weight is at or below target weight
+  if (currentWeight <= targetWeight) {
+      progress = 100;
   } else {
-    progress = Math.min(progress, 100); // Ensure progress does not exceed 100%
+      progress = Math.max(progress, 0); // Ensure progress does not go below 0%
   }
+
+  // Ensure progress does not exceed 100%
+  progress = Math.min(progress, 100);
 
   const handleNavigation = (componentName: string) => {
     navigation.navigate(componentName);
@@ -80,9 +88,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Image source={require('../../Images/GalleryIcon.png')} style={styles.iconImage} />
             <Text>Gallery</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('DailyWeight')}>
+          <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('DailyDashboard')}>
             <Image source={require('../../Images/WeightIcon.png')} style={styles.iconImage} />
-            <Text>Weight</Text>
+            <Text>Track</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('DailyMenu')}>
             <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
