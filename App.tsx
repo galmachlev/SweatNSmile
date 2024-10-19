@@ -24,6 +24,7 @@ import UserTable from './screens/admin/UserTable';
 import HomeAdmin from './screens/admin/HomeAdmin';
 import UserWeights from './screens/admin/UserWeights';
 import DailyDashboard from './screens/client/DailyDashboard';
+import DailyMenu2 from './screens/client/Menus/DailyMenuTest';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();

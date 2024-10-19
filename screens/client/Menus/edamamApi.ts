@@ -5,34 +5,33 @@ const NUTRITION_APP_ID = '1819ba46';
 const NUTRITION_APP_KEY = '4d37c48e6bb660485646255234d6009d';
 const RECIPE_APP_ID = 'e5c2dbb7';
 const RECIPE_APP_KEY = '77c9bd3f46f7f035b6ade101987451a6';
-const FOOD_DATABASE_APP_ID = '08030483';
-const FOOD_DATABASE_APP_KEY = '67cd309030d603a15e8df88a2c28e9dc';
+const FOOD_DATABASE_APP_ID = 'f08678bb';
+const FOOD_DATABASE_APP_KEY = 'e5ffa7af8b03dfb301649b18a7ea2d57';
 
 // API URLs
 const EDAMAM_NUTRITION_API_URL = 'https://api.edamam.com/api/food-database/v2/parser';
 const EDAMAM_RECIPE_API_URL = 'https://api.edamam.com/search';
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// פונקציה לחיפוש מזון ולקבל מידע תזונתי
+
 export const searchFood = async (ingredient: string) => {
   try {
     const response = await axios.get(EDAMAM_NUTRITION_API_URL, {
       params: {
-        app_id: NUTRITION_APP_ID,
-        app_key: NUTRITION_APP_KEY,
+        app_id: FOOD_DATABASE_APP_ID,
+        app_key: FOOD_DATABASE_APP_KEY,
         ingr: ingredient,
       },
     });
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching data from Edamam Nutrition API:', error.response ? error.response.data : error.message);
-    } else {
-      console.error('Unexpected error:', error);
-    }
-    throw error; // להחזיר שגיאה כדי שניתן יהיה לטפל בה מאוחר יותר
+    console.error('Error fetching data from Edamam API:', error);
+    throw error;
   }
 };
+
+
 
 
 // פונקציה לחיפוש מתכון לפי רשימת מרכיבים
