@@ -21,15 +21,15 @@ type RootStackParamList = {
 type UserContextType = {
     login: (email: string, password: string) => Promise<void>;
     currentUser: User | null;
-    users: User[]; // Add users array to store the fetched users
-    fetchUsers: () => Promise<void>; // Add function to fetch users
-    deleteUser: (email: string) => Promise<void>; // Add function to delete user
-    profileImage: string | null; // Add the profile image property
-    updateProfileImage: (imageUri: string) => void; // Add function to update profile image
+    users: User[];
+    fetchUsers: () => Promise<void>;
+    deleteUser: (email: string) => Promise<void>;
+    profileImage: string | null;
+    updateProfileImage: (imageUri: string) => void;
     calculateDailyCalories: (
         gender: string, height: string, currentWeight: string,
         goalWeight: string, activityLevel: string
-    ) => Result | null; // Update the daily calorie calculation function
+    ) => Result | null;
 };
 
 // Define the Result type
@@ -61,7 +61,7 @@ type UserProviderProps = {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [users, setUsers] = useState<User[]>([]); // Add state for storing users
+    const [users, setUsers] = useState<User[]>([]);
 
     // Login function
     const login = async (email: string, password: string) => {
@@ -70,27 +70,23 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             return;
         }
 
-        // Basic email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             Alert.alert('Error', 'Invalid email address.');
             return;
         }
 
-        // Password validation
         if (password.length < 6) {
             Alert.alert('Error', 'Password must be at least 6 characters long');
             return;
         }
 
         try {
-            // Check if the login is for the admin
             if (email === 'admin@gmail.com' && password === 'admin1234321!') {
                 navigation.navigate('HomeAdmin');
                 return;
             }
 
-            // Proceed with normal user login
             let res = await fetch('https://database-s-smile.onrender.com/api/users/login', {
                 method: 'POST',
                 headers: {
@@ -102,7 +98,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             if (res.ok) {
                 let data = await res.json();
                 setCurrentUser(data.user);
-                Alert.alert('Success', 'Login successful.');
+                //Alert.alert('Success', 'Login successful.');
                 navigation.navigate('HomeScreen');
             } else {
                 Alert.alert('Error', 'Invalid email or password.');
@@ -113,13 +109,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
     };
 
+    
     // Fetch users from the API
     const fetchUsers = async () => {
         try {
             let res = await fetch('https://database-s-smile.onrender.com/api/users/');
             if (res.ok) {
                 let data = await res.json();
-                setUsers(data); // Store users in the state
+                setUsers(data);
             } else {
                 console.error('Failed to fetch users');
             }
@@ -147,8 +144,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             });
 
             if (res.ok) {
-                // Fetch the updated list of users after successful deletion
-                await fetchUsers(); // Re-fetch users from the backend to get the updated data
+                await fetchUsers();
                 Alert.alert('Success', 'User deleted successfully.');
             } else {
                 const errorResponse = await res.json();
@@ -163,39 +159,35 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // Calculate BMR (assuming a default age of 30)
     const calculateBMR = (gender: string, height: number, weight: number): number => {
         if (gender.toLowerCase() === 'male') {
-            return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * 30); // Assuming age 30
+            return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * 30);
         } else if (gender.toLowerCase() === 'female') {
-            return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * 30); // Assuming age 30
+            return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * 30);
         } else {
             return 0;
         }
     };
 
-    // Calculate TDEE (Total Daily Energy Expenditure)
     const calculateTDEE = (bmr: number, activityLevel: string): number => {
         const activityMultipliers: Record<string, number> = {
-            'notVeryActive': 1.2,         // Equivalent to sedentary
-            'lightlyActive': 1.375,       // Equivalent to light
-            'moderatelyActive': 1.55,     // Equivalent to moderate
-            'active': 1.725,              // Equivalent to active
-            'veryActive': 1.9             // Equivalent to very active
+            'notVeryActive': 1.2,
+            'lightlyActive': 1.375,
+            'moderatelyActive': 1.55,
+            'active': 1.725,
+            'veryActive': 1.9,
         };
 
-        // Default to 'notVeryActive' if activityLevel is not recognized
         return bmr * (activityMultipliers[activityLevel] || 1.2);
     };
 
-    // Calculate daily calorie deficit without goal date
     const calculateDailyCalorieDeficit = (currentWeight: number, goalWeight: number): number => {
-        const totalWeightLossNeeded = currentWeight - goalWeight; // in kg
-        const weeklyWeightLoss = 0.5; // Assume the user wants to lose 0.5 kg per week
-        const caloriesPerKg = 7700; // 1 kg of fat = 7700 calories
-        const weeklyCalorieDeficit = weeklyWeightLoss * caloriesPerKg; // Calorie deficit per week
-        const dailyCalorieDeficit = weeklyCalorieDeficit / 7; // Convert weekly deficit to daily
+        const totalWeightLossNeeded = currentWeight - goalWeight;
+        const weeklyWeightLoss = 0.5;
+        const caloriesPerKg = 7700;
+        const weeklyCalorieDeficit = weeklyWeightLoss * caloriesPerKg;
+        const dailyCalorieDeficit = weeklyCalorieDeficit / 7;
         return dailyCalorieDeficit;
     };
 
-    // Function to calculate daily calories
     const calculateDailyCalories = (
         gender: string,
         height: string,
@@ -218,8 +210,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     return (
         <UserContext.Provider value={{
-            login, currentUser, users, fetchUsers, deleteUser,
-            profileImage, updateProfileImage, calculateDailyCalories
+            login,
+            currentUser,
+            users,
+            fetchUsers,
+            deleteUser,
+            profileImage,
+            updateProfileImage,
+            calculateDailyCalories
         }}>
             {children}
         </UserContext.Provider>

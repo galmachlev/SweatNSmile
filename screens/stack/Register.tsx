@@ -49,21 +49,34 @@ const Register = () => {
 
     const SendToDb = async () => {
         try {
-            // Collect the necessary fields from formik.values
             const user = {
                 firstName: formik.values.firstName,
                 lastName: formik.values.lastName,
                 email: formik.values.email,
                 password: formik.values.password,
                 phoneNumber: formik.values.phoneNumber,
-                startWeight: formik.values.startWeight ? parseFloat(formik.values.startWeight.toString()) : 0,
-                currentWeight: formik.values.currentWeight ? parseFloat(formik.values.currentWeight.toString()) : 0, // Ensure currentWeight is a number
-                goalWeight: formik.values.goalWeight ? parseFloat(formik.values.goalWeight.toString()) : undefined, // Add goalWeight if provided
-                gender: formik.values.gender ?? '', // Add gender
-                height: formik.values.height ? parseFloat(formik.values.height.toString()) : undefined, // Add height if provided
-                targetDate: formik.values.targetDate ? formik.values.targetDate.toISOString().split('T')[0] : undefined, // Add targetDate in ISO format
-                activityLevel: formik.values.activityLevel ?? '', // Add activityLevel
-                isAdmin: false, // Assuming user is not an admin
+                // Ensure startWeight is always provided
+                startWeight: formik.values.startWeight
+                    ? parseFloat(formik.values.startWeight.toString())
+                    : parseFloat(formik.values.currentWeight?.toString() || '0'),
+                // Use currentWeight as fallback for startWeight, if necessary
+                currentWeight: formik.values.currentWeight
+                    ? parseFloat(formik.values.currentWeight.toString())
+                    : formik.values.startWeight
+                    ? parseFloat(formik.values.startWeight.toString())
+                    : 0,
+                goalWeight: formik.values.goalWeight
+                    ? parseFloat(formik.values.goalWeight.toString())
+                    : undefined,
+                gender: formik.values.gender ?? '',
+                height: formik.values.height
+                    ? parseFloat(formik.values.height.toString())
+                    : undefined,
+                targetDate: formik.values.targetDate
+                    ? formik.values.targetDate.toISOString().split('T')[0]
+                    : undefined,
+                activityLevel: formik.values.activityLevel ?? '',
+                isAdmin: false,
             };
     
             // Send a POST request to the backend
@@ -72,27 +85,23 @@ const Register = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(user), // Send the user object
+                body: JSON.stringify(user),
             });
     
-            // Log the raw response for debugging
             const contentType = res.headers.get('content-type');
             console.log('Response Content-Type:', contentType);
     
             if (contentType && contentType.includes('application/json')) {
                 let data = await res.json();
-    
-                // Check if the request was successful
                 if (res.status === 201) {
                     console.log('User added:', data);
-                    navigation.navigate('Login' as never); // Navigate to the login screen
+                    navigation.navigate('Login' as never);
                 } else {
                     console.error('Error adding user:', data);
                     alert(`Error: ${data.error || 'Failed to add user'}`);
                 }
             } else {
-                // Handle non-JSON response (likely an error page or a server issue)
-                const text = await res.text(); // Get the raw text response
+                const text = await res.text();
                 console.error('Non-JSON response received:', text);
                 alert('An error occurred. Please check the server.');
             }
@@ -101,6 +110,8 @@ const Register = () => {
             alert('An error occurred while adding the user.');
         }
     };
+    
+    
     
     
 
@@ -144,6 +155,10 @@ const Register = () => {
             errors.height = 'Height must be a positive number';
         }
     
+        if (values.startWeight === undefined || isNaN(values.startWeight) || values.startWeight <= 0) {
+            errors.startWeight = 'Start weight is required and must be a positive number';
+        }
+    
         // Validate current weight
         if (values.currentWeight === undefined || isNaN(values.currentWeight) || values.currentWeight <= 0) {
             errors.currentWeight = 'Current weight must be a positive number';
@@ -171,23 +186,23 @@ const Register = () => {
             password: '',
             phoneNumber: '',
             img: '',
-            // Include other initial values as needed
-            gender: undefined,  // or '' if you want to set a default
+            gender: undefined,
             height: undefined,
             startWeight: undefined,
-            currentWeight: undefined, // Assuming this is required
+            currentWeight: undefined, // Set initial value as needed
             goalWeight: undefined,
             targetDate: undefined,
             dailyCalories: undefined,
         },
         validate,
         onSubmit: (values) => {
-            console.log(values); // You can log the values for debugging
+            console.log(values); 
             if (swiperRef.current) {
-                swiperRef.current.scrollBy(1); // Move swiper to the next screen
+                swiperRef.current.scrollBy(1); 
             }
         },
     });
+    
 
     return (
         <View style={styles.container}>

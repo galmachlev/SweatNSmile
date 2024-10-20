@@ -15,10 +15,9 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Avatar, Icon, Button } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
-import { useUser } from '../../context/userContext'; // Import the useUser hook
-import axios from 'axios'; // Import axios
-import { Camera } from 'expo-camera';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import { useUser } from '../../context/userContext';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ProfileImage {
   uri: string | null;
@@ -85,8 +84,7 @@ export default function Profile() {
   const handleImageResult = async (result: ImagePicker.ImagePickerResult) => {
     if (!result.canceled && result.assets.length > 0) {
       const imageUri = result.assets[0].uri;
-      updateProfileImage(imageUri); 
-      console.log('Current profile image:', profileImage);
+      updateProfileImage(imageUri);
       const cloudinaryUrl = await uploadImageToCloudinary(imageUri);
       if (cloudinaryUrl) {
         const newProfileImage = { uri: cloudinaryUrl };
@@ -123,21 +121,21 @@ export default function Profile() {
 
   const deleteImage = () => {
     Alert.alert(
-        'Confirm Delete',
-        'Are you sure you want to delete this image?',
-        [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'OK',
-                onPress: async () => {
-                    setProfileImage(defaultProfileImage);
-                    updateProfileImage(defaultProfileImage);
-                    await AsyncStorage.removeItem(`profileImage_${currentUser ? currentUser.email : 'defaultUserEmail'}`);
-                },
-            },
-        ]
+      'Confirm Delete',
+      'Are you sure you want to delete this image?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'OK',
+          onPress: async () => {
+            setProfileImage(defaultProfileImage);
+            updateProfileImage(defaultProfileImage);
+            await AsyncStorage.removeItem(`profileImage_${currentUser ? currentUser.email : 'defaultUserEmail'}`);
+          },
+        },
+      ]
     );
-};
+  };
   
   const saveProfileImage = async (image: ProfileImage) => {
     const userId = currentUser ? currentUser.email : 'defaultUserEmail';
@@ -169,14 +167,14 @@ export default function Profile() {
             <Button title="Logout" type="clear" titleStyle={styles.logoutButton} onPress={handleLogout} />
           </View>
           <View style={styles.profileSection}>
-          <Avatar
-            rounded
-            size="xlarge"
-            source={profileImage} // This should be an object with uri
-            containerStyle={styles.avatar}
-          >
-            <Avatar.Accessory size={35} onPress={pickImage} />
-          </Avatar>
+            <Avatar
+              rounded
+              size="xlarge"
+              source={profileImage}
+              containerStyle={styles.avatar}
+            >
+              <Avatar.Accessory size={35} onPress={pickImage} />
+            </Avatar>
           </View>
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
@@ -206,6 +204,13 @@ export default function Profile() {
               value={currentUser?.email || ''}
               keyboardType="email-address"
             />
+            <Text style={styles.inputLabel}>Start Weight</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your start weight"
+              value={currentUser?.startWeight?.toString() || ''}
+              keyboardType="numeric"
+            />
             <Text style={styles.inputLabel}>Current Weight</Text>
             <TextInput
               style={styles.input}
@@ -226,6 +231,12 @@ export default function Profile() {
               placeholder="Enter your height (cm)"
               value={currentUser?.height?.toString() || ''}
               keyboardType="numeric"
+            />
+            <Text style={styles.inputLabel}>Activity Level</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your activity level"
+              value={currentUser?.activityLevel || ''}
             />
           </View>
         </View>
