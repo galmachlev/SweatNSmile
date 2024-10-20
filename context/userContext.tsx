@@ -26,6 +26,7 @@ type UserContextType = {
     deleteUser: (email: string) => Promise<void>;
     profileImage: string | null;
     updateProfileImage: (imageUri: string) => void;
+    updateUserDetails: (email: string, updates: Partial<User>) => Promise<void>; // Add this line
     calculateDailyCalories: (
         gender: string, height: string, currentWeight: string,
         goalWeight: string, activityLevel: string
@@ -98,7 +99,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             if (res.ok) {
                 let data = await res.json();
                 setCurrentUser(data.user);
-                //Alert.alert('Success', 'Login successful.');
                 navigation.navigate('HomeScreen');
             } else {
                 Alert.alert('Error', 'Invalid email or password.');
@@ -109,7 +109,37 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
     };
 
-    
+    // Function to update user details
+    const updateUserDetails = async (email: string, updates: Partial<User>) => {
+        try {
+            const res = await fetch('https://database-s-smile.onrender.com/api/users/edit', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, updates }),
+            });
+
+            if (res.ok) {
+                const updatedUser = await res.json();
+                setCurrentUser((prevUser) => {
+                    // Update the local user state if the current user matches the edited one
+                    if (prevUser && prevUser.email === email) {
+                        return { ...prevUser, ...updates };
+                    }
+                    return prevUser;
+                });
+                Alert.alert('Success', 'Profile updated successfully.');
+            } else {
+                const errorResponse = await res.json();
+                throw new Error(errorResponse.message || 'Failed to update user');
+            }
+        } catch (error) {
+            console.error('Error updating user:', error);
+            Alert.alert('Error', 'An error occurred while updating the user. Please try again.');
+        }
+    };
+
     // Fetch users from the API
     const fetchUsers = async () => {
         try {
@@ -217,6 +247,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             deleteUser,
             profileImage,
             updateProfileImage,
+            updateUserDetails, // Include the new function here
             calculateDailyCalories
         }}>
             {children}

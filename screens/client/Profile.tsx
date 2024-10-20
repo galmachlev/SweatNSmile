@@ -18,19 +18,55 @@ import * as ImagePicker from 'expo-image-picker';
 import { useUser } from '../../context/userContext';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNPickerSelect from 'react-native-picker-select';
 
 interface ProfileImage {
   uri: string | null;
   cloudinaryUrl?: string;
 }
 
+const genderOptions = [
+  { label: 'Male', value: 'male' },
+  { label: 'Female', value: 'female' },
+  { label: 'Other', value: 'other' },
+];
+
+const activityLevelOptions = [
+  { label: 'Not Very Active', value: 'notVeryActive' },
+  { label: 'Lightly Active', value: 'lightlyActive' },
+  { label: 'Active', value: 'active' },
+  { label: 'Very Active', value: 'veryActive' },
+];
+
 export default function Profile() {
-  const { currentUser } = useUser();
+  const { currentUser, updateUserDetails } = useUser();
   const { updateProfileImage } = useUser();
   const defaultProfileImage = require('../../Images/profile_img.jpg');
   const [profileImage, setProfileImage] = useState({ uri: defaultProfileImage });
   const [fullSizeImageUri, setFullSizeImageUri] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  // State variables for each field's edit mode
+  const [isEditingField, setIsEditingField] = useState({
+    fullName: false,
+    gender: false,
+    activityLevel: false,
+    startWeight: false,
+    currentWeight: false,
+    goalWeight: false,
+    height: false,
+  });
+
+  // State variables for field values
+  const [firstName, setFirstName] = useState(currentUser?.firstName || '');
+  const [lastName, setLastName] = useState(currentUser?.lastName || '');
+  const [gender, setGender] = useState(currentUser?.gender || '');
+  const [activityLevel, setActivityLevel] = useState(currentUser?.activityLevel || '');
+  const [startWeight, setStartWeight] = useState(currentUser?.startWeight?.toString() || '');
+  const [currentWeight, setCurrentWeight] = useState(currentUser?.currentWeight?.toString() || '');
+  const [goalWeight, setGoalWeight] = useState(currentUser?.goalWeight?.toString() || '');
+  const [height, setHeight] = useState(currentUser?.height?.toString() || '');
+
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -136,7 +172,7 @@ export default function Profile() {
       ]
     );
   };
-  
+
   const saveProfileImage = async (image: ProfileImage) => {
     const userId = currentUser ? currentUser.email : 'defaultUserEmail';
     try {
@@ -158,12 +194,42 @@ export default function Profile() {
     );
   };
 
+  // Function to handle field edit toggle
+  const handleFieldEdit = (fieldName: string) => {
+    setIsEditingField((prev) => ({
+      ...prev,
+      [fieldName]: !prev[fieldName],
+    }));
+  };
+
+  // Function to save all changes
+  const handleSaveChanges = () => {
+    if (currentUser) {
+      const updates: Partial<User> = {
+        firstName,
+        lastName,
+        gender,
+        activityLevel,
+        startWeight: parseFloat(startWeight),
+        currentWeight: parseFloat(currentWeight),
+        goalWeight: parseFloat(goalWeight),
+        height: parseFloat(height),
+      };
+
+      updateUserDetails(currentUser.email, updates);
+      Alert.alert('Success', 'Profile updated successfully.');
+    }
+  };
+
+  // Check if any field is being edited
+  const isAnyFieldEditing = Object.values(isEditingField).some((editing) => editing);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.headerText}>Profile settings</Text>
+            <Text style={styles.headerText}>Profile Settings</Text>
             <Button title="Logout" type="clear" titleStyle={styles.logoutButton} onPress={handleLogout} />
           </View>
           <View style={styles.profileSection}>
@@ -176,69 +242,168 @@ export default function Profile() {
               <Avatar.Accessory size={35} onPress={pickImage} />
             </Avatar>
           </View>
-          <View style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <Icon name="language" type="font-awesome" color="#517fa4" />
-              <Text style={styles.infoText}>Language: {currentUser?.language || 'English'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Icon name="balance-scale" type="font-awesome" color="#517fa4" />
-              <Text style={styles.infoText}>Weight unit: {currentUser?.weightUnit || 'KG'}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Icon name="lock" type="font-awesome" color="#517fa4" />
-              <Text style={styles.infoText}>Change password</Text>
-            </View>
-          </View>
+
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Full Name</Text>
+            {/* Full Name */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('fullName')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                isEditingField.fullName && styles.inputEditing,
+              ]}
               placeholder="Enter your full name"
-              value={`${currentUser?.firstName || ''} ${currentUser?.lastName || ''}`}
+              value={`${firstName} ${lastName}`}
+              editable={isEditingField.fullName}
+              onChangeText={(text) => {
+                const [first, ...last] = text.split(' ');
+                setFirstName(first);
+                setLastName(last.join(' '));
+              }}
             />
-            <Text style={styles.inputLabel}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              value={currentUser?.email || ''}
-              keyboardType="email-address"
+
+            {/* Gender */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Gender</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('gender')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
+            <RNPickerSelect
+              onValueChange={(value) => setGender(value)}
+              items={genderOptions}
+              value={gender}
+              placeholder={{ label: 'Select your gender', value: null }}
+              style={{
+                ...pickerSelectStyles,
+                inputIOS: [
+                  pickerSelectStyles.inputIOS,
+                  isEditingField.gender && pickerSelectStyles.inputEditing,
+                ],
+                inputAndroid: [
+                  pickerSelectStyles.inputAndroid,
+                  isEditingField.gender && pickerSelectStyles.inputEditing,
+                ],
+              }}
+              disabled={!isEditingField.gender}
             />
-            <Text style={styles.inputLabel}>Start Weight</Text>
+
+            {/* Activity Level */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Activity Level</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('activityLevel')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
+            <RNPickerSelect
+              onValueChange={(value) => setActivityLevel(value)}
+              items={activityLevelOptions}
+              value={activityLevel}
+              placeholder={{ label: 'Select your activity level', value: null }}
+              style={{
+                ...pickerSelectStyles,
+                inputIOS: [
+                  pickerSelectStyles.inputIOS,
+                  isEditingField.activityLevel && pickerSelectStyles.inputEditing,
+                ],
+                inputAndroid: [
+                  pickerSelectStyles.inputAndroid,
+                  isEditingField.activityLevel && pickerSelectStyles.inputEditing,
+                ],
+              }}
+              disabled={!isEditingField.activityLevel}
+            />
+
+            {/* Start Weight */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Start Weight</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('startWeight')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                isEditingField.startWeight && styles.inputEditing,
+              ]}
               placeholder="Enter your start weight"
-              value={currentUser?.startWeight?.toString() || ''}
+              value={startWeight}
               keyboardType="numeric"
+              editable={isEditingField.startWeight}
+              onChangeText={setStartWeight}
             />
-            <Text style={styles.inputLabel}>Current Weight</Text>
+
+            {/* Current Weight */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Current Weight</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('currentWeight')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                isEditingField.currentWeight && styles.inputEditing,
+              ]}
               placeholder="Enter your current weight"
-              value={currentUser?.currentWeight?.toString() || ''}
+              value={currentWeight}
               keyboardType="numeric"
+              editable={isEditingField.currentWeight}
+              onChangeText={setCurrentWeight}
             />
-            <Text style={styles.inputLabel}>Goal Weight</Text>
+
+            {/* Goal Weight */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Goal Weight</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('goalWeight')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                isEditingField.goalWeight && styles.inputEditing,
+              ]}
               placeholder="Enter your goal weight"
-              value={currentUser?.goalWeight?.toString() || ''}
+              value={goalWeight}
               keyboardType="numeric"
+              editable={isEditingField.goalWeight}
+              onChangeText={setGoalWeight}
             />
-            <Text style={styles.inputLabel}>Height</Text>
+
+            {/* Height */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Height</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('height')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                isEditingField.height && styles.inputEditing,
+              ]}
               placeholder="Enter your height (cm)"
-              value={currentUser?.height?.toString() || ''}
+              value={height}
               keyboardType="numeric"
-            />
-            <Text style={styles.inputLabel}>Activity Level</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your activity level"
-              value={currentUser?.activityLevel || ''}
+              editable={isEditingField.height}
+              onChangeText={setHeight}
             />
           </View>
+
+          {/* Save Changes Button */}
+          {isAnyFieldEditing && (
+            <Button
+              title="Save Changes"
+              onPress={handleSaveChanges}
+              buttonStyle={styles.saveButton}
+              containerStyle={styles.saveButtonContainer}
+            />
+          )}
         </View>
 
         {/* Modal for Full Size Image */}
@@ -292,28 +457,10 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#ffd700',
   },
-  infoCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    padding: 15,
-    marginVertical: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  infoRow: {
+  fieldRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
-  },
-  infoText: {
-    marginLeft: 10,
-    fontSize: 16,
   },
   inputContainer: {
     marginTop: 20,
@@ -338,6 +485,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  inputEditing: {
+    backgroundColor: '#e0f7fa', // Light blue background to indicate editing
+  },
+  saveButton: {
+    backgroundColor: '#4caf50',
+  },
+  saveButtonContainer: {
+    marginTop: 10,
   },
   modalContainer: {
     flex: 1,
@@ -367,5 +523,35 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 10,
+    color: 'black',
+    paddingRight: 30,
+    backgroundColor: '#ffffff',
+    marginBottom: 15,
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: 'gray',
+    borderRadius: 10,
+    color: 'black',
+    paddingRight: 30,
+    backgroundColor: '#ffffff',
+    marginBottom: 15,
+  },
+  inputEditing: {
+    backgroundColor: '#e0f7fa',
   },
 });

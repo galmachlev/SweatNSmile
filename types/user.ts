@@ -28,7 +28,7 @@ export type User= {
 
     //***************/
  
-    activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very active',
+    activityLevel?: 'notVeryActive'| 'lightlyActive'| 'active'| 'veryActive';
 
     //***************/
     
