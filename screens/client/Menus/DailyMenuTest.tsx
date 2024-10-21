@@ -1,226 +1,294 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
-import axios from 'axios';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import * as GoogleGenerativeAI from '@google/generative-ai';
+import { FontAwesome } from '@expo/vector-icons';
+import {foodData} from './FoodData';
 
-// Application IDs and Keys for Edamam API
-const FOOD_DATABASE_APP_ID = '08030483';
-const FOOD_DATABASE_APP_KEY = '67cd309030d603a15e8df88a2c28e9dc';
-
-// API URLs
-const EDAMAM_NUTRITION_API_URL = 'https://api.edamam.com/api/food-database/v2/parser';
-
-// Function to search for food ingredients using the Edamam API
-export const searchFood = async (ingredient: string) => {
-  try {
-    const response = await axios.get(EDAMAM_NUTRITION_API_URL, {
-      params: {
-        app_id: FOOD_DATABASE_APP_ID,
-        app_key: FOOD_DATABASE_APP_KEY,
-        ingr: ingredient,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching data from Edamam API:', error);
-    throw error;
-  }
+type Macro = {
+  protein: number;
+  carbs: number;
+  fat: number;
 };
 
-// Constants for nutrient distribution percentages
-const PROTEIN_PERCENTAGE = 40;
-const CARBS_PERCENTAGE = 40;
-const FAT_PERCENTAGE = 20;
-
-// Function to calculate the nutrient breakdown based on total meal calories
-const calculateNutrientBreakdown = (mealCalories: number) => {
-  const proteinCalories = (mealCalories * PROTEIN_PERCENTAGE) / 100;
-  const carbsCalories = (mealCalories * CARBS_PERCENTAGE) / 100;
-  const fatCalories = (mealCalories * FAT_PERCENTAGE) / 100;
-
-  const gramsProtein = Math.floor(proteinCalories / 4); // 1g protein = 4 calories
-  const gramsCarbs = Math.floor(carbsCalories / 4);     // 1g carb = 4 calories
-  const gramsFat = Math.floor(fatCalories / 9);         // 1g fat = 9 calories
-
-  return {
-    gramsProtein,
-    gramsCarbs,
-    gramsFat,
-  };
+interface Ingredient {
+  name: string;
+  amount: string;
+  details: string; // format: 'p:XX, f:XX, c:XX, calories:X'
 }
 
-// רשימת המוצרים שלך
-const meals: { [key: string]: string[] } = { // Explicitly define the type
-  Breakfast: ['Eggs', 'Oatmeal', 'Avocado', 'Greek Yogurt', 'Banana'],
-  Lunch: ['Chicken Breast', 'Brown Rice', 'Olive Oil', 'Quinoa', 'Tuna'],
-  Dinner: ['Pasta', 'Steak', 'Vegetables', 'Seafood', 'Quinoa'],
-};
-
-// פונקציה עבור הבקשות ל-API עם עיכוב
-async function fetchFoodItem(item: string): Promise<any> { // Explicitly define the parameter type
-  try {
-    const response = await axios.get(`YOUR_API_URL`, { params: { item } });
-    return response.data;
-  } catch (error: any) { // Define the error type
-    if (error.response && error.response.status === 429) {
-      console.error('Too many requests. Waiting before retrying...');
-      await new Promise(resolve => setTimeout(resolve, 2000)); // המתן 2 שניות
-      return fetchFoodItem(item); // נסה שוב
-    }
-    console.error('Error fetching food item:', error);
-    throw error; // מעלה את השגיאה כדי שהקוד העליון יוכל לטפל בה
-  }
+interface Meal {
+  totalCalories: number;
+  meal: string;
+  ingredients: Ingredient[];
 }
 
-// פונקציה כדי לגשת למוצרים ולשלוח בקשות ל-API
-async function fetchMeals() {
-  for (const [mealType, items] of Object.entries(meals) as [string, string[]][]) { // Ensure the correct type
-    for (const item of items) {
-      try {
-        const foodData = await fetchFoodItem(item); // שימוש בפונקציה עם העיכוב
-        console.log(`Fetched data for ${item}:`, foodData);
-      } catch (error: any) { // Define the error type
-        console.error(`Error fetching data for ${item}:`, error);
-      }
-    }
-  }
-}
-
-// קריאה לפונקציה
-fetchMeals();
-
-// Update the createMeal function to choose ingredients based on meal type
-const createMeal = async (mealCalories: number, mealType: keyof typeof meals) => { // Use keyof for mealType
-  const ingredientCount = 3; // Number of ingredients to include
-  const selectedIngredients: any[] = [];
-  let totalCalories = 0;
-
-  const ingredients = meals[mealType]; // Access the ingredients using the defined type
-
-  // Loop to select ingredients
-  while (selectedIngredients.length < ingredientCount && totalCalories < mealCalories) {
-    const randomIngredient = ingredients[Math.floor(Math.random() * ingredients.length)];
-
-    try {
-      const data = await searchFood(randomIngredient);
-      const foodItem = data.hints[0]; // Assuming you want to take the first result
-
-      if (foodItem) {
-        const calories = Number(foodItem.food.nutrients.ENERC_KCAL);
-        if (totalCalories + calories <= mealCalories) {
-          selectedIngredients.push(foodItem);
-          totalCalories += calories;
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching food item:', error);
-    }
-  }
-
-  return {
-    ingredients: selectedIngredients,
-    totalCalories,
-    nutrientBreakdown: calculateNutrientBreakdown(totalCalories),
-  };
-};
-
-const DailyMenu2: React.FC = () => {
-  const [meals, setMeals] = useState<any[]>([]); // Ensure meals is initialized as an empty array
+const DailyMenu: React.FC = () => {
+  const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+  const [macros, setMacros] = useState<Macro>({ protein: 0, carbs: 0, fat: 0 });
+  const [previousMeals, setPreviousMeals] = useState<Meal[]>([]);
 
-  const handleGenerateMeals = async () => {
+  const PROTEIN_PERCENTAGE = 0.4;
+  const CARBS_PERCENTAGE = 0.4;
+  const FAT_PERCENTAGE = 0.2;
+  const TOTAL_CALORIES = 2200;
+  const FREE_CALORIES = 200;
+  const CALORIES_FOR_MEALS = TOTAL_CALORIES - FREE_CALORIES;
+
+  const mealsCalories = {
+    breakfast: CALORIES_FOR_MEALS * 0.3,
+    lunch: CALORIES_FOR_MEALS * 0.4,
+    dinner: CALORIES_FOR_MEALS * 0.3,
+  };
+
+  const calculateNutrientBreakdown = (mealCalories: number) => {
+    const proteinCalories = mealCalories * PROTEIN_PERCENTAGE;
+    const carbsCalories = mealCalories * CARBS_PERCENTAGE;
+    const fatCalories = mealCalories * FAT_PERCENTAGE;
+
+    return {
+      gramsProtein: Math.floor(proteinCalories / 4),
+      gramsCarbs: Math.floor(carbsCalories / 4),
+      gramsFat: Math.floor(fatCalories / 9),
+    };
+  };
+
+  const API_KEY = "AIzaSyAEG-hwBmhVBOIz8t7BQRpGOyPhcr3tWiU"; // Use environment variable for the API key
+  const genAI = new GoogleGenerativeAI.GoogleGenerativeAI(API_KEY);
+
+  const parseIngredients = (lines: string[]): Ingredient[] => {
+    return lines.reduce<Ingredient[]>((acc, line) => {
+      const match = line.match(/^\s*\{ name:\s*'(.*?)', amount:\s*'(.*?)', details:\s*'(.*?)' \}\s*$/);
+      if (match) {
+        const [, name, amount, details] = match;
+        acc.push({ name, amount, details });
+      }
+      return acc;
+    }, []);
+  };
+
+  const generateMealWithGemini = async (
+    mealType: string,
+    mealCalories: number,
+  ): Promise<Ingredient[]> => {
+    const { gramsProtein, gramsCarbs, gramsFat } = calculateNutrientBreakdown(mealCalories);
+
+    const prompt = `
+    Generate a healthy ${mealType} with exactly ${mealCalories} calories. 
+    It should include ingredients that provide approximately ${gramsProtein}g of protein, ${gramsCarbs}g of carbohydrates, and ${gramsFat}g of fat. 
+    Select ingredients based on the type of meal (e.g., breakfast, lunch, or dinner) and ensure the ingredients complement each other in flavor, using data from ${JSON.stringify(foodData)}. 
+    Adjust the amount of each ingredient to ensure the total sum of all ingredients equals the exact calorie amount (${mealCalories} calories). 
+    Each ingredient must detail its nutritional content, including protein (P), fat (F), carbohydrates (C), and total calories.
+  
+    Format the output for each ingredient as follows:
+    List each ingredient on a new line, detailing the breakdown of protein (P), fats (F), carbohydrates (C), and calories:
+    { name: 'Ingredient Name', amount: 'Amount', details: 'p:XX, f:XX, c:XX, calories:X' }. 
+    Do not include any additional text or formatting.
+  `;
+            
+    console.log(mealCalories);
+  
+    const response = await getGeminiResponse(prompt);
+    console.log("Response from Gemini:", response);
+  
+    if (!response) {
+      console.error(`No response received for ${mealType}`);
+      return [];
+    }
+  
+    const formattedIngredients = response
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+  
+    const ingredientsArray: Ingredient[] = parseIngredients(formattedIngredients);
+  
+    // Filter ingredients to ensure they exist in the provided food data
+    const filteredIngredients = ingredientsArray.filter(ingredient =>
+      foodData.some(category =>
+        category.items.some(item => item.name === ingredient.name)
+      )
+    );
+  
+    return filteredIngredients;
+  };
+  
+  const fetchMeals = async () => {
     setLoading(true);
-    setError('');
-
-    const breakfastCalories = 600; // 600 calories for breakfast
-    const lunchCalories = 800;     // 800 calories for lunch
-    const dinnerCalories = 800;    // 800 calories for dinner
-
+    setError(null);
+  
     try {
-      const breakfast = await createMeal(breakfastCalories, 'Breakfast');
-      const lunch = await createMeal(lunchCalories, 'Lunch');
-      const dinner = await createMeal(dinnerCalories, 'Dinner');
+      const generatedMeals: Meal[] = await Promise.all(
+        Object.entries(mealsCalories).map(async ([mealType, calories]) => {
+          const ingredients = await generateMealWithGemini(mealType, calories);
+          return {
+            meal: mealType.charAt(0).toUpperCase() + mealType.slice(1),
+            totalCalories: calories,
+            ingredients,
+          };
+        })
+      );
 
-      setMeals([
-        { type: 'Breakfast', meal: breakfast.ingredients, totalCalories: breakfast.totalCalories },
-        { type: 'Lunch', meal: lunch.ingredients, totalCalories: lunch.totalCalories },
-        { type: 'Dinner', meal: dinner.ingredients, totalCalories: dinner.totalCalories },
-      ]);
-    } catch (err: any) { // Define the error type
-      setError('Failed to generate meals. Please try again.');
+      setPreviousMeals(prevMeals => [...prevMeals, ...generatedMeals]);
+      setMeals(generatedMeals.filter(meal => meal.ingredients.length > 0));
+      updateMacros(generatedMeals);
+    } catch (err) {
+      setError('Failed to generate meals. Please try again later.');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  const getGeminiResponse = async (prompt: string) => {
+    try {
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const result = await model.generateContent(prompt);
+      console.log("Raw response from Gemini:", result);
+      return result.response.text(); 
+    } catch (error) {
+      console.error("Error fetching Gemini response:", error);
+      setError("Sorry, I couldn't fetch a response. Please try again.");
+      return ""; 
+    }
+  };
+
+  const updateMacros = (meals: Meal[]) => {
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFat = 0;
+  
+    meals.forEach(meal => {
+      meal.ingredients.forEach(ingredient => {
+        const details = ingredient.details.split(', ');
+        details.forEach(detail => {
+          const [key, value] = detail.split(':');
+          const parsedValue = parseInt(value);
+          if (key.trim() === 'p') {
+            totalProtein += parsedValue;
+          } else if (key.trim() === 'c') {
+            totalCarbs += parsedValue;
+          } else if (key.trim() === 'f') {
+            totalFat += parsedValue;
+          }
+        });
+      });
+    });
+  
+    setMacros({ protein: totalProtein, carbs: totalCarbs, fat: totalFat });
+  };
+  
+  const handleRefresh = () => {
+    setPreviousMeals([]);
+    fetchMeals();
+  };
+
+  useEffect(() => {
+    fetchMeals();
+  }, []);
+
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <Button title="Generate Meals" onPress={handleGenerateMeals} />
-        
-        {loading && <ActivityIndicator size="large" color="#0000ff" />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
-        
-        {meals.map((meal, index) => (
-          <View key={index} style={styles.mealContainer}>
-            <Text style={styles.mealType}>{meal.type}:</Text>
-            {meal.meal.map((ingredient: any, i: number) => (
-              <View key={i}>
-                <Text style={styles.mealDescription}>
-                  {ingredient.food.label} - {ingredient.food.nutrients.ENERC_KCAL} kcal
-                </Text>
-                {i < meal.meal.length - 1 && <View style={styles.divider} />}
-              </View>
-            ))}
-            <Text style={styles.totalCalories}>Total Calories: {meal.totalCalories}</Text>
-          </View>
-        ))}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Daily Menu</Text>
+        <TouchableOpacity style={styles.refreshButton} onPress={handleRefresh}>
+          <FontAwesome name="refresh" size={24} color="white" />
+        </TouchableOpacity>
       </View>
-    </ScrollView>
+
+      <View style={styles.macros}>
+        <Text style={styles.macroLabel}>Macros Breakdown:</Text>
+        <Text>Protein: {macros.protein}g</Text>
+        <Text>Carbs: {macros.carbs}g</Text>
+        <Text>Fat: {macros.fat}g</Text>
+      </View>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : error ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : (
+        <FlatList
+          data={meals}
+          keyExtractor={(item, index) => `${item.meal}-${index}`}
+          renderItem={({ item }) => (
+            <View style={styles.mealContainer}>
+              <Text style={styles.mealTitle}>{item.meal}</Text>
+              <Text>Total Calories: {item.totalCalories}</Text>
+              <FlatList
+                data={item.ingredients}
+                keyExtractor={(item, index) => item.name + index}
+                renderItem={({ item }) => (
+                  <View style={styles.ingredientContainer}>
+                    <Text>{item.name} ({item.amount})</Text>
+                    <Text style={styles.ingredientDetails}>{item.details}</Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+        />
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#f9f9f9',
     flex: 1,
+    padding: 16,
+    backgroundColor: '#ffffff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  refreshButton: {
+    padding: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
+  },
+  macros: {
+    marginVertical: 16,
+  },
+  macroLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   mealContainer: {
     marginVertical: 10,
-    padding: 15,
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 5,
   },
-  mealType: {
-    fontSize: 22,
+  mealTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
   },
-  mealDescription: {
-    fontSize: 16,
-    color: '#666',
+  ingredientContainer: {
+    marginVertical: 4,
   },
-  totalCalories: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#ccc',
-    marginVertical: 5,
+  ingredientDetails: {
+    fontStyle: 'italic',
+    color: '#555',
   },
   errorText: {
     color: 'red',
-    marginVertical: 10,
+    textAlign: 'center',
   },
 });
 
-export default DailyMenu2;
+export default DailyMenu;

@@ -153,7 +153,7 @@ function TabNavigator() {
             ) 
           }} 
         />
-        <Tab.Screen name="Menu" component={DailyMenu}  options={{ headerTitle: 'Daily menu' }} />
+        <Tab.Screen name="Menu" component={DailyMenu2}  options={{ headerTitle: 'Daily menu' }} />
         <Tab.Screen name="Profile" component={Profile} />
       </Tab.Navigator>
       <MoreMenu visible={moreMenuVisible} onClose={() => setMoreMenuVisible(false)} />
