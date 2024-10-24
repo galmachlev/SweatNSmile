@@ -130,7 +130,7 @@ const HealthGraph = () => {
       )}
       <Modal
         visible={showModal}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setShowModal(false)}
       >

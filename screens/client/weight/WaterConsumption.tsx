@@ -168,7 +168,7 @@ const strokeDashoffset = animatedValue.interpolate({
       )}
       <Modal
         visible={showModal}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setShowModal(false)}
       >

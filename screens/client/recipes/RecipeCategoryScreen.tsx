@@ -204,7 +204,7 @@ const RecipeCategoryScreen: React.FC<{ route: any }> = ({ route }) => {
             <Modal
                 visible={!!selectedRecipe}
                 transparent={true}
-                animationType="slide"
+                animationType="fade"
                 onRequestClose={() => setSelectedRecipe(null)}
             >
                 <View style={styles.modalBackground}>

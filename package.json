@@ -46,6 +46,7 @@
     "react-native": "^0.74.3",
     "react-native-chart-kit": "^6.12.0",
     "react-native-confetti-cannon": "^1.5.2",
+    "react-native-dropdown-select-list": "^2.0.5",
     "react-native-elements": "^3.4.3",
     "react-native-flash-message": "^0.4.2",
     "react-native-gesture-handler": "~2.16.1",

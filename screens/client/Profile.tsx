@@ -25,12 +25,14 @@ interface ProfileImage {
   cloudinaryUrl?: string;
 }
 
+// Picker gender select options
 const genderOptions = [
   { label: 'Male', value: 'male' },
   { label: 'Female', value: 'female' },
   { label: 'Other', value: 'other' },
 ];
 
+// Picker activity level select options
 const activityLevelOptions = [
   { label: 'Not Very Active', value: 'notVeryActive' },
   { label: 'Lightly Active', value: 'lightlyActive' },
@@ -69,6 +71,7 @@ export default function Profile() {
 
   const navigation = useNavigation();
 
+  // Function to load profile image
   useEffect(() => {
     const loadProfileImage = async () => {
       const userId = currentUser ? currentUser.email : 'defaultUserEmail';
@@ -82,6 +85,7 @@ export default function Profile() {
     loadProfileImage();
   }, [currentUser]);
 
+  // Function to handle image result
   const pickImage = async () => {
     Alert.alert(
       'Choose Image Source',
@@ -97,6 +101,7 @@ export default function Profile() {
     );
   };
 
+  // Function to take photo
   const takePhoto = async () => {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -107,6 +112,7 @@ export default function Profile() {
     handleImageResult(result);
   };
 
+  // Function to pick image from gallery
   const pickFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -117,6 +123,7 @@ export default function Profile() {
     handleImageResult(result);
   };
 
+  // Function to handle image result
   const handleImageResult = async (result: ImagePicker.ImagePickerResult) => {
     if (!result.canceled && result.assets.length > 0) {
       const imageUri = result.assets[0].uri;
@@ -130,6 +137,7 @@ export default function Profile() {
     }
   };
 
+  // Function to upload image to Cloudinary
   const uploadImageToCloudinary = async (imageUri: string) => {
     const cloudName = 'duiifdn9s';
     const uploadPreset = 'GALMACH';
@@ -150,11 +158,13 @@ export default function Profile() {
     }
   };
 
+  // Function to view full size image
   const viewFullSize = (uri: string | null) => {
     setFullSizeImageUri(uri);
     setModalVisible(true);
   };
 
+  // Function to delete profile image
   const deleteImage = () => {
     Alert.alert(
       'Confirm Delete',
@@ -173,6 +183,7 @@ export default function Profile() {
     );
   };
 
+  // Function to save profile image
   const saveProfileImage = async (image: ProfileImage) => {
     const userId = currentUser ? currentUser.email : 'defaultUserEmail';
     try {
@@ -182,6 +193,7 @@ export default function Profile() {
     }
   };
 
+  // Function to handle logout
   const handleLogout = () => {
     Alert.alert(
       'Logout',
@@ -410,7 +422,7 @@ export default function Profile() {
         <Modal
           visible={modalVisible}
           transparent={true}
-          animationType="slide"
+          animationType="fade"
           onRequestClose={() => setModalVisible(false)}
         >
           <View style={styles.modalContainer}>
@@ -487,13 +499,17 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   inputEditing: {
-    backgroundColor: '#e0f7fa', // Light blue background to indicate editing
+    backgroundColor: '#FDE598', // Light blue background to indicate editing
   },
   saveButton: {
-    backgroundColor: '#4caf50',
+    backgroundColor: '#3E6613',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
   },
   saveButtonContainer: {
     marginTop: 10,
+    marginBottom: 20,
   },
   modalContainer: {
     flex: 1,
@@ -552,6 +568,6 @@ const pickerSelectStyles = StyleSheet.create({
     marginBottom: 15,
   },
   inputEditing: {
-    backgroundColor: '#e0f7fa',
+    backgroundColor: '#FDE598',
   },
 });
