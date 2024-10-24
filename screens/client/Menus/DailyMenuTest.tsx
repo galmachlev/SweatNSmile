@@ -6,7 +6,13 @@ import { searchFood } from './edamamApi';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { Meal, mealData } from './FoodData';
 import { FoodItem, FoodCategory, FoodData } from '../Menus/FoodData'; // Import from the new file
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
+interface DetailsVisibility {
+  [mealType: string]: {
+    [category: string]: boolean;
+  };
+}
 type SelectedItemsType = Record<string, Record<string, FoodItem | null>>;
 
 // Main DailyMenu Component
@@ -23,8 +29,30 @@ const DailyMenu: React.FC = () => {
   const [subcategories, setSubcategories] = useState<Record<string, FoodCategory[]>>({});
   const [selectedItems, setSelectedItems] = useState<Record<string, Record<string, FoodItem | null>>>({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} });
   const [showModal, setShowModal] = useState(false);
-   
+  const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({});
 
+  // Initialize visibility state for subcategories (items description will be hidden by default)
+  useEffect(() => {
+    const initialVisibility = Object.fromEntries(
+      ['Breakfast', 'Lunch', 'Dinner', 'Extras'].map(mealType => [
+        mealType,
+        Object.fromEntries(subcategories[mealType]?.map(subcategory => [subcategory.category, false]) || [])
+      ])
+    );
+    setDetailsVisibility(initialVisibility);
+  }, [subcategories]);
+  
+  // Toggle visibility for specific subcategory
+  const toggleDetails = (mealType: string, category: string) => {
+    setDetailsVisibility(prev => ({
+      ...prev,
+      [mealType]: {
+        ...prev[mealType],
+        [category]: !prev[mealType]?.[category],
+      },
+    }));
+  };
+  
   // Function to get the border color based on the meal type
   const getBorderColor = (mealType: string): string => {
     const colors: Record<string, string> = {
@@ -105,8 +133,8 @@ const DailyMenu: React.FC = () => {
     if (!item) return null;
   
     return (
-      <Text>
-        (Calories: {item.calories} | P: {item.protein}g, C: {item.carbs}g, F: {item.fat}g )
+      <Text style={styles.selectedItemDetails}>
+        Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs}
       </Text>
     );
   };
@@ -339,20 +367,29 @@ const DailyMenu: React.FC = () => {
           <View key={mealType} style={[styles.mealSection, { borderColor: getBorderColor(mealType) }]}>
             <Text style={styles.mealTitle}>{mealType}</Text>
             {subcategories[mealType]?.length ? (
-              subcategories[mealType].map((subcategory) => (
-                <View key={subcategory.category} style={styles.subcategory}>
-                  <Text style={styles.subcategoryTitle}>{subcategory.category}</Text>
-                  <SelectList
-                    data={subcategory.items.map(item => ({ value: item.name, key: item.name }))}
-                    setSelected={(selected: string | null) =>
-                      handleSelect(selected, mealType, subcategory.category, subcategory.items)
-                    }
-                    placeholder="Select Food"
-                    selected={selectedItems[mealType]?.name || null} // Use the name if an item is selected
-                  />
-                  {renderSelectedItemDetails(mealType, subcategory.category)}
-                </View>
-              ))
+              subcategories[mealType].map((subcategory) => {
+                const isVisible = detailsVisibility[mealType]?.[subcategory.category];
+
+                return (
+                  <View key={subcategory.category} style={styles.subcategory}>
+                    <Text style={styles.subcategoryTitle}>{subcategory.category}</Text>
+                    <View style={styles.selectContainer}>
+                      <SelectList 
+                        data={subcategory.items.map(item => ({ value: item.name, key: item.name }))}
+                        setSelected={(selected: string | null) =>
+                          handleSelect(selected, mealType, subcategory.category, subcategory.items)
+                        }
+                        placeholder="Select Food"
+                        selected={selectedItems[mealType]?.name || null} // Use the name if an item is selected
+                      />
+                      <TouchableOpacity onPress={() => toggleDetails(mealType, subcategory.category)} style={styles.infoButton}>
+                        <Icon name="info" size={20} color="#696B6D" />
+                      </TouchableOpacity>
+                    </View>
+                    {isVisible && renderSelectedItemDetails(mealType, subcategory.category)}
+                  </View>
+                );
+              })
             ) : (
               <Text>No food added yet.</Text>
             )}
@@ -634,9 +671,9 @@ const styles = StyleSheet.create({
   foodItemName: {
     fontSize: 16,
   },
-
   subcategory: {
     marginBottom: 10,
+    width: '90%',
   },
   subcategoryTitle: {
     fontSize: 14,
@@ -699,7 +736,7 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     padding: 15,
-    backgroundColor: '#FF4C4C', // צבע הרקע של הכפתור
+    backgroundColor: '#D3D3D3', // צבע הרקע של הכפתור
     flexDirection: 'row', // מאפשר הצגת האייקון והטקסט באותה שורה
     alignItems: 'center', // ממרכז את התוכן
     justifyContent: 'center', // מרכז את האייקון
@@ -760,7 +797,22 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
   },
-
+  selectContainer: {
+    position: 'relative', // הגדרת מיקום עבור הילד
+    width: '100%', // קבע את הרוחב ל-100% של הסקשן
+  },
+  infoButton: {
+    position: 'absolute', // הפוך את הכפתור למיקום מוחלט
+    right: -30, // מיקום הכפתור בקצה הימני של הקונטיינר
+    top: '50%', // מרכז את הכפתור אנכית
+    transform: [{ translateY: -10 }], // תיקון מרכז האנכי של הכפתור
+  },
+  selectedItemDetails: {
+    fontSize: 12,
+    color: '#696B6D',
+    marginTop: 2,
+    paddingLeft: 20,
+  },
 });
 
 export default DailyMenu;

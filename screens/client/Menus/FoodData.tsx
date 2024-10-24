@@ -11,7 +11,7 @@ export interface FoodItem {
         foodId: string;
         label: string;
         nutrients: FoodNutrients;
-      };
+    };
 }
   
 export interface FoodCategory {
