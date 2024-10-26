@@ -7,6 +7,7 @@ import { SelectList } from 'react-native-dropdown-select-list';
 import { Meal, mealData } from './FoodData';
 import { FoodItem, FoodCategory, FoodData } from '../Menus/FoodData'; // Import from the new file
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { foodData } from './FoodData2';
 
 interface DetailsVisibility {
   [mealType: string]: {
@@ -30,6 +31,108 @@ const DailyMenu: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Record<string, Record<string, FoodItem | null>>>({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} });
   const [showModal, setShowModal] = useState(false);
   const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({});
+
+  // אחוזים לחלוקת קלוריות יומית
+  const mealDistribution = {
+    Breakfast: 0.25,
+    Lunch: 0.4,
+    Dinner: 0.25,
+    Extras: 0.1
+  };
+
+  // אחוזים לחלוקת מאקרונוטריאנטים
+  const nutrientDistribution = {
+    Protein: 0.35,
+    Fat: 0.15,
+    Carb: 0.35,
+    Vegetable: 0.075, // 7.5% כאשר יש גם פרי וגם ירק
+    Fruit: 0.075,
+  };
+
+  // Function to calculate the distribution of calories and macronutrients
+  function calculateMealNutrientDistribution(dailyCalories: number) {
+    // Initialize the distribution object
+    const mealCalories: { [key: string]: number } = {};
+    const nutrientCalories: { [key: string]: number } = {};
+
+    // Calculate calories for each meal
+    for (const meal in mealDistribution) {
+      mealCalories[meal] = parseFloat((dailyCalories * mealDistribution[meal]).toFixed(2));
+    }
+
+    // Calculate macronutrients based on total calories
+    const totalMealCalories = Object.values(mealCalories).reduce((a, b) => a + b, 0);
+    for (const nutrient in nutrientDistribution) {
+      nutrientCalories[nutrient] = parseFloat((totalMealCalories * nutrientDistribution[nutrient]).toFixed(2));
+    }
+
+    return {
+      mealCalories,
+      nutrientCalories,
+    };
+  }
+
+// Function to adjust food item values based on target calories
+function adjustFoodItem(item: FoodItem, targetCalories: number): FoodItem {
+  // Calculate the scaling factor based on original calories
+  const scalingFactor = targetCalories / item.calories;
+
+  // Adjust each nutrient based on the scaling factor
+  const adjustedProtein = item.protein * scalingFactor;
+  const adjustedFat = item.fat * scalingFactor;
+  const adjustedCarbs = item.carbs * scalingFactor;
+  const adjustedQuantity = item.quantity * scalingFactor;
+
+  // Return the adjusted item with new values
+  return {
+    ...item,
+    calories: targetCalories, // Set the calories to the target value
+    protein: parseFloat(adjustedProtein.toFixed(2)),
+    fat: parseFloat(adjustedFat.toFixed(2)),
+    carbs: parseFloat(adjustedCarbs.toFixed(2)),
+    quantity: parseFloat(adjustedQuantity.toFixed(2)),
+  };
+}
+
+  // Function to generate daily menu
+  const generateDailyMenu = () => {
+    const meals = ['Breakfast', 'Lunch', 'Dinner', 'Extras'];
+    const updatedSelectedItems: SelectedItemsType = { Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} };
+
+    // Calculate the distribution based on the daily calories
+    const distribution = calculateMealNutrientDistribution(dailyCalories);
+
+    meals.forEach(mealType => {
+      const mealCalories = distribution.mealCalories[mealType];
+
+      // Create an item for each category according to the macronutrient distribution
+      Object.keys(nutrientDistribution).forEach(nutrient => {
+        const nutrientCalories = mealCalories * nutrientDistribution[nutrient as keyof typeof nutrientDistribution];
+        const item = getRandomItemForCategory(mealType, nutrient, nutrientCalories);
+
+        if (item) {
+          updatedSelectedItems[mealType][nutrient] = adjustFoodItem(item, nutrientCalories);
+        }
+      });
+    });
+
+    setSelectedItems(updatedSelectedItems); // Update selected items state
+    updateMacros(updatedSelectedItems); // Update macro values based on selected items
+  };
+
+// Function to select a random item based on category and target calories
+const getRandomItemForCategory = (mealType: string, category: string, targetCalories: number): FoodItem | null => {
+  const categoryItems = mealData
+    .find(meal => meal.mealName === mealType)?.categories
+    .find(cat => cat.category === category)?.items || [];
+
+  if (categoryItems.length === 0) return null; // Return null if no items in category
+
+  const randomItem = categoryItems[Math.floor(Math.random() * categoryItems.length)];
+  
+  // Adjust the item based on target calories, but without changing the calories here
+  return { ...randomItem };
+};
 
   // Initialize visibility state for subcategories (items description will be hidden by default)
   useEffect(() => {
@@ -99,33 +202,34 @@ const DailyMenu: React.FC = () => {
     }};
   
   // Update macros based on selected items
-  const updateMacros = (selectedItems: SelectedItemsType) => {
-    if (!selectedItems) return; // Check if selectedItems exist
-    let totalProtein = 0;
-    let totalFat = 0;
-    let totalCarbs = 0;
-    let totalCalories = 0;
-  
-    Object.keys(selectedItems).forEach(mealType => {
-      const categories = selectedItems[mealType] || {};
-      Object.keys(categories).forEach(category => {
-        const selectedItem = categories[category];
-        if (selectedItem) {
-          totalProtein += selectedItem.protein || 0;
-          totalFat += selectedItem.fat || 0;
-          totalCarbs += selectedItem.carbs || 0;
-          totalCalories += selectedItem.calories || 0;
-        }
-      });
+// Function to update macro values based on selected items
+const updateMacros = (selectedItems: SelectedItemsType) => {
+  if (!selectedItems) return; // Check if selectedItems exist
+  let totalProtein = 0;
+  let totalFat = 0;
+  let totalCarbs = 0;
+  let totalCalories = 0;
+
+  Object.keys(selectedItems).forEach(mealType => {
+    const categories = selectedItems[mealType] || {};
+    Object.keys(categories).forEach(category => {
+      const selectedItem = categories[category];
+      if (selectedItem) {
+        totalProtein += selectedItem.protein || 0;
+        totalFat += selectedItem.fat || 0;
+        totalCarbs += selectedItem.carbs || 0;
+        totalCalories += selectedItem.calories || 0;
+      }
     });
-  
-    setMacros({
-      protein: parseFloat(totalProtein.toFixed(1)),
-      fat: parseFloat(totalFat.toFixed(1)),
-      carbs: parseFloat(totalCarbs.toFixed(1)),
-      calories: parseFloat(totalCalories.toFixed(1)),
-    });
-  };
+  });
+
+  setMacros({
+    protein: parseFloat(totalProtein.toFixed(1)),
+    fat: parseFloat(totalFat.toFixed(1)),
+    carbs: parseFloat(totalCarbs.toFixed(1)),
+    calories: parseFloat(totalCalories.toFixed(1)),
+  });
+};
     
   // Show selected item details below each selected food item
   const renderSelectedItemDetails = (mealType: string, category: string) => {
@@ -134,7 +238,7 @@ const DailyMenu: React.FC = () => {
   
     return (
       <Text style={styles.selectedItemDetails}>
-        Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs}
+        Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs} | Quantity: {item.quantity}
       </Text>
     );
   };
@@ -179,10 +283,19 @@ const DailyMenu: React.FC = () => {
     }
   };
 
+
   // Load food items on component mount
   useEffect(() => {
     loadFoodItems();
   }, []);
+
+
+  useEffect(() => {
+    if (dailyCalories > 0) {
+        generateDailyMenu();
+    }
+  }, [dailyCalories]);
+
   
   // Handle search query change
   const handleSearch = async () => {
@@ -291,6 +404,7 @@ const DailyMenu: React.FC = () => {
       calories: 0,
     });
     setShowModal(false);
+    generateDailyMenu();
   };
   
   return (
@@ -302,7 +416,7 @@ const DailyMenu: React.FC = () => {
         style={styles.resetButton}
       >
         <Text style={styles.resetButtonText}>
-          Clear Menu
+          Generate new menu
         </Text>
         <MaterialIcons name="refresh" size={24} color="#FFF" />
       </TouchableOpacity>
@@ -374,14 +488,12 @@ const DailyMenu: React.FC = () => {
                   <View key={subcategory.category} style={styles.subcategory}>
                     <Text style={styles.subcategoryTitle}>{subcategory.category}</Text>
                     <View style={styles.selectContainer}>
-                      <SelectList 
-                        data={subcategory.items.map(item => ({ value: item.name, key: item.name }))}
-                        setSelected={(selected: string | null) =>
-                          handleSelect(selected, mealType, subcategory.category, subcategory.items)
-                        }
-                        placeholder="Select Food"
-                        selected={selectedItems[mealType]?.name || null} // Use the name if an item is selected
-                      />
+                    <SelectList 
+                        data={subcategory.items.map(item => ({ value: item.name, key: item.id }))}
+                        setSelected={() => {}} // לא נדרש כאן, כי זה כבר מתמלא אוטומטית
+                        placeholder={selectedItems[mealType][subcategory.category]?.name || "Select Food"}
+                        selected={selectedItems[mealType][subcategory.category]?.name || null}
+                    />
                       <TouchableOpacity onPress={() => toggleDetails(mealType, subcategory.category)} style={styles.infoButton}>
                         <Icon name="info" size={20} color="#696B6D" />
                       </TouchableOpacity>

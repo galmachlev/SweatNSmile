@@ -4,7 +4,7 @@ export interface FoodItem {
     protein: number;
     fat: number;
     carbs: number;
-    quantity: number; // הכמות בגרמים
+    quantity: number;
 }
 
 export interface FoodCategory {
