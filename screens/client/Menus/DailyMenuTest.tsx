@@ -7,13 +7,13 @@ import { SelectList } from 'react-native-dropdown-select-list';
 import { Meal, mealData } from './FoodData';
 import { FoodItem, FoodCategory, FoodData } from '../Menus/FoodData'; // Import from the new file
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { foodData } from './FoodData2';
 
 interface DetailsVisibility {
   [mealType: string]: {
     [category: string]: boolean;
   };
 }
+
 type SelectedItemsType = Record<string, Record<string, FoodItem | null>>;
 
 // Main DailyMenu Component
@@ -42,7 +42,7 @@ const DailyMenu: React.FC = () => {
       };
       return colors[mealType] || '#FBF783';
   };
-      
+  
   // Calculate daily calories when current user or related data changes
   useEffect(() => {
       if (currentUser) {
@@ -286,7 +286,6 @@ const DailyMenu: React.FC = () => {
   useEffect(() => {
     loadFoodItems();
   }, []);
-
 
   useEffect(() => {
     if (dailyCalories > 0) {
