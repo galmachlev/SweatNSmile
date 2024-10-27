@@ -35,9 +35,4 @@ export type User= {
     isActive?: boolean,
     gallery?: string[];
 
-    measurements?: {
-        date: Date; 
-        weight: number; //DailyWeight
-        bodyImage?: string; //DailyPicture
-    }[];
 };
