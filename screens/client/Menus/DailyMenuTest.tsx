@@ -31,6 +31,7 @@ const DailyMenu: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Record<string, Record<string, FoodItem | null>>>({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} });
   const [showModal, setShowModal] = useState(false);
   const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({});
+  const [mealCalories, setMealCalories] = useState<{ [key: string]: number }>({});
 
   // Function to get the border color based on the meal type
   const getBorderColor = (mealType: string): string => {
@@ -79,26 +80,31 @@ const DailyMenu: React.FC = () => {
 
   // Calculate the distribution of calories and macronutrients
   function calculateMealNutrientDistribution(dailyCalories: number) {
-    // Initialize the distribution object
     const mealCalories: { [key: string]: number } = {};
     const nutrientCalories: { [key: string]: number } = {};
 
-    // Calculate calories for each meal
+    // חישוב קלוריות עבור כל ארוחה
     for (const meal in mealDistribution) {
-      mealCalories[meal] = parseFloat((dailyCalories * mealDistribution[meal]).toFixed(2));
+        mealCalories[meal] = parseFloat((dailyCalories * mealDistribution[meal]).toFixed(2));
     }
 
-    // Calculate macronutrients based on total calories
+    // חישוב מאקרונוטריינטים בהתבסס על קלוריות כוללות
     const totalMealCalories = Object.values(mealCalories).reduce((a, b) => a + b, 0);
     for (const nutrient in nutrientDistribution) {
-      nutrientCalories[nutrient] = parseFloat((totalMealCalories * nutrientDistribution[nutrient]).toFixed(2));
+        nutrientCalories[nutrient] = parseFloat((totalMealCalories * nutrientDistribution[nutrient]).toFixed(2));
     }
 
     return {
-      mealCalories,
-      nutrientCalories,
+        mealCalories,
+        nutrientCalories,
     };
   }
+
+  // שימוש ב-useEffect כדי לעדכן את mealCalories כאשר dailyCalories משתנה
+  useEffect(() => {
+    const { mealCalories: calculatedMealCalories } = calculateMealNutrientDistribution(dailyCalories);
+    setMealCalories(calculatedMealCalories);
+  }, [dailyCalories]);
 
   // Adjust food item values based on target calories
   function adjustFoodItem(item: FoodItem, targetCalories: number): FoodItem {
@@ -114,7 +120,7 @@ const DailyMenu: React.FC = () => {
     // Return the adjusted item with new values
     return {
       ...item,
-      calories: parseFloat(targetCalories.toFixed(0)), // Set the calories to the target value
+      calories: parseFloat(targetCalories.toFixed(0)),
       protein: parseFloat(adjustedProtein.toFixed(1)),
       fat: parseFloat(adjustedFat.toFixed(1)),
       carbs: parseFloat(adjustedCarbs.toFixed(1)),
@@ -196,7 +202,7 @@ const DailyMenu: React.FC = () => {
             [category]: item,
           },
         };
-        updateMacros(newSelectedItems); // עדכון המקרו לאחר הבחירה
+        updateMacros(newSelectedItems); 
         return newSelectedItems;
       });
     }};
@@ -401,6 +407,36 @@ const DailyMenu: React.FC = () => {
     });
     setShowModal(false);
     generateDailyMenu();
+    setDetailsVisibility({
+      Breakfast: {
+        Carb: false,
+        Fat: false,
+        Fruit: false,
+        Protein: false,
+        Vegetable: false,
+      },
+      Lunch: {
+        Carb: false,
+        Fat: false,
+        Fruit: false,
+        Protein: false,
+        Vegetable: false,
+      },
+      Dinner: {
+        Carb: false,
+        Fat: false,
+        Fruit: false,
+        Protein: false,
+        Vegetable: false,
+      },
+      Extras: {
+        Carb: false,
+        Fat: false,
+        Fruit: false,
+        Protein: false,
+        Vegetable: false,
+      },
+    });
   };
   
   return (
@@ -475,7 +511,9 @@ const DailyMenu: React.FC = () => {
         {/* Meal Sections */}
         {(['Breakfast', 'Lunch', 'Dinner', 'Extras'] as Array<string>).map((mealType) => (
           <View key={mealType} style={[styles.mealSection, { borderColor: getBorderColor(mealType) }]}>
-            <Text style={styles.mealTitle}>{mealType}</Text>
+            <Text style={styles.mealTitle}>
+            {mealType} - <Text style={styles.caloriesText}>{Math.round(mealCalories[mealType] || 0)} kcal</Text>
+            </Text>
             {subcategories[mealType]?.length ? (
               subcategories[mealType].map((subcategory) => {
                 const isVisible = detailsVisibility[mealType]?.[subcategory.category];
@@ -676,6 +714,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#696B6D',
     marginBottom: 10,
+  },
+  caloriesText: {
+      fontSize: 14, 
   },
   mealItem: {
     flexDirection: 'row',
