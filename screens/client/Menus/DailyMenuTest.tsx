@@ -32,7 +32,35 @@ const DailyMenu: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({});
 
-  // אחוזים לחלוקת קלוריות יומית
+  // Function to get the border color based on the meal type
+  const getBorderColor = (mealType: string): string => {
+      const colors: Record<string, string> = {
+        Breakfast: '#FFCE76',
+        Lunch: '#F8D675',
+        Dinner: '#FDE598',
+        Extras: '#E8A54B',
+      };
+      return colors[mealType] || '#FBF783';
+  };
+      
+  // Calculate daily calories when current user or related data changes
+  useEffect(() => {
+      if (currentUser) {
+        const result = calculateDailyCalories(
+          currentUser.gender || '',
+          String(currentUser.height || ''),
+          String(currentUser.currentWeight || ''),
+          String(currentUser.goalWeight || ''),
+          currentUser.activityLevel || ''
+        );
+  
+        if (result) {
+          setDailyCalories(result.RecommendedDailyCalories);
+        }
+      }
+  }, [currentUser, calculateDailyCalories]);
+  
+  // Calories percentage per meal
   const mealDistribution = {
     Breakfast: 0.25,
     Lunch: 0.4,
@@ -40,7 +68,7 @@ const DailyMenu: React.FC = () => {
     Extras: 0.1
   };
 
-  // אחוזים לחלוקת מאקרונוטריאנטים
+  // Calories percentage per macronutrient
   const nutrientDistribution = {
     Protein: 0.35,
     Fat: 0.15,
@@ -49,7 +77,7 @@ const DailyMenu: React.FC = () => {
     Fruit: 0.075,
   };
 
-  // Function to calculate the distribution of calories and macronutrients
+  // Calculate the distribution of calories and macronutrients
   function calculateMealNutrientDistribution(dailyCalories: number) {
     // Initialize the distribution object
     const mealCalories: { [key: string]: number } = {};
@@ -72,29 +100,29 @@ const DailyMenu: React.FC = () => {
     };
   }
 
-// Function to adjust food item values based on target calories
-function adjustFoodItem(item: FoodItem, targetCalories: number): FoodItem {
-  // Calculate the scaling factor based on original calories
-  const scalingFactor = targetCalories / item.calories;
+  // Adjust food item values based on target calories
+  function adjustFoodItem(item: FoodItem, targetCalories: number): FoodItem {
+    // Calculate the scaling factor based on original calories
+    const scalingFactor = targetCalories / item.calories;
 
-  // Adjust each nutrient based on the scaling factor
-  const adjustedProtein = item.protein * scalingFactor;
-  const adjustedFat = item.fat * scalingFactor;
-  const adjustedCarbs = item.carbs * scalingFactor;
-  const adjustedQuantity = item.quantity * scalingFactor;
+    // Adjust each nutrient based on the scaling factor
+    const adjustedProtein = item.protein * scalingFactor;
+    const adjustedFat = item.fat * scalingFactor;
+    const adjustedCarbs = item.carbs * scalingFactor;
+    const adjustedQuantity = item.quantity * scalingFactor;
 
-  // Return the adjusted item with new values
-  return {
-    ...item,
-    calories: targetCalories, // Set the calories to the target value
-    protein: parseFloat(adjustedProtein.toFixed(2)),
-    fat: parseFloat(adjustedFat.toFixed(2)),
-    carbs: parseFloat(adjustedCarbs.toFixed(2)),
-    quantity: parseFloat(adjustedQuantity.toFixed(2)),
-  };
-}
+    // Return the adjusted item with new values
+    return {
+      ...item,
+      calories: parseFloat(targetCalories.toFixed(0)), // Set the calories to the target value
+      protein: parseFloat(adjustedProtein.toFixed(1)),
+      fat: parseFloat(adjustedFat.toFixed(1)),
+      carbs: parseFloat(adjustedCarbs.toFixed(1)),
+      quantity: parseFloat(adjustedQuantity.toFixed(1)),
+    };
+  }
 
-  // Function to generate daily menu
+  // Generate daily menu
   const generateDailyMenu = () => {
     const meals = ['Breakfast', 'Lunch', 'Dinner', 'Extras'];
     const updatedSelectedItems: SelectedItemsType = { Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} };
@@ -120,19 +148,19 @@ function adjustFoodItem(item: FoodItem, targetCalories: number): FoodItem {
     updateMacros(updatedSelectedItems); // Update macro values based on selected items
   };
 
-// Function to select a random item based on category and target calories
-const getRandomItemForCategory = (mealType: string, category: string, targetCalories: number): FoodItem | null => {
-  const categoryItems = mealData
-    .find(meal => meal.mealName === mealType)?.categories
-    .find(cat => cat.category === category)?.items || [];
+  // Select a random item based on category and target calories
+  const getRandomItemForCategory = (mealType: string, category: string, targetCalories: number): FoodItem | null => {
+    const categoryItems = mealData
+      .find(meal => meal.mealName === mealType)?.categories
+      .find(cat => cat.category === category)?.items || [];
 
-  if (categoryItems.length === 0) return null; // Return null if no items in category
+    if (categoryItems.length === 0) return null; // Return null if no items in category
 
-  const randomItem = categoryItems[Math.floor(Math.random() * categoryItems.length)];
-  
-  // Adjust the item based on target calories, but without changing the calories here
-  return { ...randomItem };
-};
+    const randomItem = categoryItems[Math.floor(Math.random() * categoryItems.length)];
+    
+    // Adjust the item based on target calories, but without changing the calories here
+    return { ...randomItem };
+  };
 
   // Initialize visibility state for subcategories (items description will be hidden by default)
   useEffect(() => {
@@ -156,34 +184,6 @@ const getRandomItemForCategory = (mealType: string, category: string, targetCalo
     }));
   };
   
-  // Function to get the border color based on the meal type
-  const getBorderColor = (mealType: string): string => {
-    const colors: Record<string, string> = {
-      Breakfast: '#FFCE76',
-      Lunch: '#F8D675',
-      Dinner: '#FDE598',
-      Extras: '#E8A54B',
-    };
-    return colors[mealType] || '#FBF783';
-  };
-    
-  // Calculate daily calories when current user or related data changes
-  useEffect(() => {
-    if (currentUser) {
-      const result = calculateDailyCalories(
-        currentUser.gender || '',
-        String(currentUser.height || ''),
-        String(currentUser.currentWeight || ''),
-        String(currentUser.goalWeight || ''),
-        currentUser.activityLevel || ''
-      );
-
-      if (result) {
-        setDailyCalories(result.RecommendedDailyCalories);
-      }
-    }
-  }, [currentUser, calculateDailyCalories]);
-
   // Handle item selection
   const handleSelect = (selected: string | null, mealType: string, category: string, items: FoodItem[]) => {
     if (selected) {
@@ -202,34 +202,33 @@ const getRandomItemForCategory = (mealType: string, category: string, targetCalo
     }};
   
   // Update macros based on selected items
-// Function to update macro values based on selected items
-const updateMacros = (selectedItems: SelectedItemsType) => {
-  if (!selectedItems) return; // Check if selectedItems exist
-  let totalProtein = 0;
-  let totalFat = 0;
-  let totalCarbs = 0;
-  let totalCalories = 0;
+  const updateMacros = (selectedItems: SelectedItemsType) => {
+    if (!selectedItems) return; // Check if selectedItems exist
+    let totalProtein = 0;
+    let totalFat = 0;
+    let totalCarbs = 0;
+    let totalCalories = 0;
 
-  Object.keys(selectedItems).forEach(mealType => {
-    const categories = selectedItems[mealType] || {};
-    Object.keys(categories).forEach(category => {
-      const selectedItem = categories[category];
-      if (selectedItem) {
-        totalProtein += selectedItem.protein || 0;
-        totalFat += selectedItem.fat || 0;
-        totalCarbs += selectedItem.carbs || 0;
-        totalCalories += selectedItem.calories || 0;
-      }
+    Object.keys(selectedItems).forEach(mealType => {
+      const categories = selectedItems[mealType] || {};
+      Object.keys(categories).forEach(category => {
+        const selectedItem = categories[category];
+        if (selectedItem) {
+          totalProtein += selectedItem.protein || 0;
+          totalFat += selectedItem.fat || 0;
+          totalCarbs += selectedItem.carbs || 0;
+          totalCalories += selectedItem.calories || 0;
+        }
+      });
     });
-  });
 
-  setMacros({
-    protein: parseFloat(totalProtein.toFixed(1)),
-    fat: parseFloat(totalFat.toFixed(1)),
-    carbs: parseFloat(totalCarbs.toFixed(1)),
-    calories: parseFloat(totalCalories.toFixed(1)),
-  });
-};
+    setMacros({
+      protein: parseFloat(totalProtein.toFixed(1)),
+      fat: parseFloat(totalFat.toFixed(1)),
+      carbs: parseFloat(totalCarbs.toFixed(1)),
+      calories: parseFloat(totalCalories.toFixed(1)),
+    });
+  };
     
   // Show selected item details below each selected food item
   const renderSelectedItemDetails = (mealType: string, category: string) => {
@@ -238,7 +237,7 @@ const updateMacros = (selectedItems: SelectedItemsType) => {
   
     return (
       <Text style={styles.selectedItemDetails}>
-        Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs} | Quantity: {item.quantity}
+        Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs} | Quantity(g): {item.quantity}
       </Text>
     );
   };
@@ -283,7 +282,6 @@ const updateMacros = (selectedItems: SelectedItemsType) => {
     }
   };
 
-
   // Load food items on component mount
   useEffect(() => {
     loadFoodItems();
@@ -295,8 +293,7 @@ const updateMacros = (selectedItems: SelectedItemsType) => {
         generateDailyMenu();
     }
   }, [dailyCalories]);
-
-  
+ 
   // Handle search query change
   const handleSearch = async () => {
       if (searchQuery.trim()) {
