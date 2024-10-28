@@ -1,85 +1,48 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
-import DailyGeminiChat from './DailyGeminiChat'; // Adjust the path as per your project structure
+import DailyGeminiChat from './DailyGeminiChat';
 import { useUser } from '../../context/UserContext';
-import { createStackNavigator } from '@react-navigation/stack';
-import { RootStackParamList } from '../stack/Register';
-
-const Stack = createStackNavigator<RootStackParamList>();
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const { currentUser } = useUser();  // Use context directly
-  const { profileImage } = useUser();
+  const { currentUser, profileImage } = useUser();
 
-  console.log('currentUser ==> ', currentUser);
-
-  const userName = currentUser?.firstName;
-  const startDate = new Date('2024-02-07'); // Example start date
-  const currentDate = new Date(); // Current date
-  const estimatedDate = new Date('2024-09-08'); // Example target date
-
-  // Calculate progress in percentage based on start and current date
-  const totalDays = Math.ceil((estimatedDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
-  const passedDays = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
-
-  // Fetch startingWeight and targetWeight from currentUser
-  const startingWeight = currentUser?.currentWeight || 0;
+  const userName = currentUser?.firstName || 'User';
+  const startingWeight = currentUser?.startWeight || 0;
+  const currentWeight = currentUser?.currentWeight || 0;
   const targetWeight = currentUser?.goalWeight || 0;
 
-  // Calculate progress in percentage based on starting and target weight
-  const totalWeightLoss = startingWeight - targetWeight;
-  const currentWeight = currentUser?.currentWeight || 0; // Replace this with the actual current weight if available
+  // Calculate weight progress percentage
+  const totalWeightToLose = startingWeight - targetWeight;
   const weightLost = startingWeight - currentWeight;
-
-  // Calculate progress percentage
-  let progress = (weightLost / totalWeightLoss) * 100;
-
-  // Limit progress to 100% if current weight is at or below target weight
-  if (currentWeight <= targetWeight) {
-      progress = 100;
-  } else {
-      progress = Math.max(progress, 0); // Ensure progress does not go below 0%
-  }
-
-  // Ensure progress does not exceed 100%
-  progress = Math.min(progress, 100);
+  const progress = Math.min(Math.max((weightLost / totalWeightToLose) * 100, 0), 100);
 
   const handleNavigation = (componentName: string) => {
     navigation.navigate(componentName);
   };
 
   const openPDF = () => {
-    const pdfUrl = 'https://www.spinplus.co.il/wp-content/uploads/2019/03/%D7%AA%D7%9B%D7%A0%D7%99%D7%AA-%D7%90%D7%99%D7%9E%D7%95%D7%9F-%D7%9E%D7%AA%D7%97%D7%99%D7%9C%D7%99%D7%9D.pdf'; // Replace with the actual PDF URL
+    const pdfUrl = 'https://www.spinplus.co.il/wp-content/uploads/2019/03/%D7%AA%D7%9B%D7%A0%D7%99%D7%AA-%D7%90%D7%99%D7%9E%D7%95%D7%9F-%D7%9E%D7%AA%D7%97%D7%99%D7%9C%D7%99%D7%9D.pdf';
     Linking.openURL(pdfUrl);
   };
-
-  useEffect(() => {
-    console.log("Profile image updated in HomeScreen:", profileImage);
-  }, [profileImage]); // Image will auto-update when it changes
 
   return (
     <ScrollView style={styles.page}>
       <View style={styles.container}>
         <View style={styles.header}>
-          {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.profileImage} />
-          ) : (
-            <Image source={require('../../Images/profile_img.jpg')} style={styles.profileImage} /> // Placeholder image
-          )}
+          <Image source={{ uri: profileImage || require('../../Images/profile_img.jpg') }} style={styles.profileImage} />
           <Text style={styles.greeting}>Hello, {userName}</Text>
         </View>
 
         <View style={styles.progressBarContainer}>
-          {/* Show the starting weight and target weight */}
-          <Text style={styles.progressBarTextLeft}>Starting Weight: {startingWeight} kg</Text>
-          <View style={[styles.progressBarFill, { width: `${progress}%` }]}></View>
-          <Text style={styles.progressBarTextRight}>Target Weight: {targetWeight} kg</Text>
+          <Text style={styles.progressBarTextLeft}>Start: {startingWeight} kg</Text>
+          <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+          <Text style={styles.progressBarTextRight}>Goal: {targetWeight} kg</Text>
         </View>
 
         <View style={styles.details}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
-            <Text style={styles.textbelow}>Target Date: {estimatedDate.toLocaleDateString()}</Text>
+            <Text style={styles.textbelow}>Target Date: 2024-09-08</Text>
           </View>
         </View>
 
@@ -123,12 +86,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    paddingBottom: 90,
   },
   header: {
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 20,
   },
   profileImage: {
@@ -143,32 +104,25 @@ const styles = StyleSheet.create({
     marginTop: 25,
     marginBottom: 30,
   },
-  details: {
-    marginTop: 20,
-  },
-  textbelow: {
-    fontSize: 13,
-    paddingHorizontal: 8,
-    marginTop: -15,
-    marginBottom: 30,
-  },
   progressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#9AB28B',
     height: 45,
     borderRadius: 10,
     marginTop: 20,
     overflow: 'hidden',
-    flexDirection: 'row',
     position: 'relative',
   },
   progressBarFill: {
     backgroundColor: '#3E6613',
+    height: '100%',
   },
   progressBarTextLeft: {
     fontSize: 14,
     color: '#FFFFFF',
     position: 'absolute',
-    left: 20,
+    left: 10,
     top: 13,
     zIndex: 1,
   },
@@ -177,9 +131,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
     position: 'absolute',
-    right: 20,
+    right: 10,
     top: 13,
     zIndex: 1,
+  },
+  details: {
+    marginTop: 20,
+  },
+  textbelow: {
+    fontSize: 13,
+    paddingHorizontal: 8,
+    marginTop: -15,
+    marginBottom: 30,
   },
   buttonsContainer: {
     flexDirection: 'row',

@@ -1,62 +1,103 @@
-/*
- * This component renders a line chart that displays the user's weight
- * measurements over time. It receives a callback function as a prop that
- * is called when the component mounts, and passes the last weight measurement
- * to it.
- *
- * The chart is rendered using the 'react-native-chart-kit' library.
- * The data for the chart is hardcoded for now, but it will be replaced with
- * actual data from the user's weight measurements in the future.
- */
-
-import React, { useEffect } from 'react';
-import { LineChart } from 'react-native-chart-kit';
-import { Dimensions, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
 
 interface ProgressBarProps {
-  onLastValueChange: (value: number) => void;
+  startWeight: number;
+  currentWeight: number;
+  goalWeight: number;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ onLastValueChange }) => {
-  const data = [82.1, 81.8, 81.5, 81.2, 80.9, 80.5, 80.7, 80.6];
+const screenWidth = Dimensions.get('window').width;
 
-  useEffect(() => {
-    // Notify parent component about the last value
-    onLastValueChange(data[data.length - 1]);
-  }, [onLastValueChange]);
+const ProgressBar: React.FC<ProgressBarProps> = ({ startWeight, currentWeight, goalWeight }) => {
+  const validStartWeight = startWeight || 1;
+  const validCurrentWeight = currentWeight || validStartWeight;
+  const validGoalWeight = goalWeight || validStartWeight;
+
+  const totalWeightToLose = validStartWeight - validGoalWeight;
+  const weightLost = validStartWeight - validCurrentWeight;
+
+  const progressPercentage = Math.min(Math.max((weightLost / totalWeightToLose) * 100, 0), 100);
+  const remainingPercentage = 100 - progressPercentage;
+
+  const data = [
+    {
+      name: `Achieved`,
+      population: progressPercentage,
+      color: '#4CAF50',
+      legendFontColor: '#4CAF50',
+      legendFontSize: 15,
+    },
+    {
+      name: `Remaining`,
+      population: remainingPercentage,
+      color: '#d9d9d9',
+      legendFontColor: '#666666',
+      legendFontSize: 15,
+    },
+  ];
 
   return (
-    <LineChart
-      data={{
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [
-          {
-            data: data,
-          },
-        ],
-      }}
-      width={Dimensions.get('window').width - 40} // from react-native
-      height={220}
-      yAxisSuffix=" kg"
-      chartConfig={{
-        backgroundColor: '#FFFFFF',
-        backgroundGradientFrom: '#FFFFFF',
-        backgroundGradientTo: '#FFFFFF',
-        decimalPlaces: 1,
-        color: (opacity = 1) => `#C6CAD0`,
-        labelColor: (opacity = 1) => `#808387`,
-      }}
-      bezier
-      style={styles.chart}
-    />
+    <View style={styles.widgetContainer}>
+      <Text style={styles.title}>Progress to Goal Weight</Text>
+      <View style={styles.chartContainer}>
+        <PieChart
+          data={data}
+          width={screenWidth - 80}
+          height={220}
+          chartConfig={{
+            backgroundColor: '#ffffff',
+            backgroundGradientFrom: '#ffffff',
+            backgroundGradientTo: '#ffffff',
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            strokeWidth: 5,
+            barPercentage: 0.5,
+          }}
+          accessor="population"
+          backgroundColor="transparent"
+          paddingLeft="15"
+        />
+        <Text style={styles.progressText}>{Math.round(progressPercentage)}% towards your goal</Text>
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  chart: {
-    marginVertical: 8,
-    borderRadius: 16,
-    paddingVertical: 20,
+  widgetContainer: {
+    alignItems: 'center',
+    paddingVertical: 30,
+  },
+  chartContainer: {
+    backgroundColor: '#f0f4f8',
+    padding: 25,
+    borderRadius: 30,
+    borderColor: '#d1d1d1',
+    borderWidth: 2,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 5, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 8,
+    alignItems: 'center', // Center align the percentage text
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  progressText: {
+    fontSize: 18,
+    color: '#4CAF50',
+    fontWeight: '700',
+    marginTop: 15, // Adjust space between chart and text
+    textAlign: 'center',
   },
 });
 
