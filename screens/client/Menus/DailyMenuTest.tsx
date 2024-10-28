@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity,TextInput,ActivityIndicator,ScrollView,TouchableWithoutFeedback, Modal,} from 'react-native';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
-import { useUser } from '../../../context/userContext';
+import { useUser } from '../../../context/UserContext';
 import { searchFood } from './edamamApi';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { Meal, mealData } from './FoodData';
@@ -481,7 +481,7 @@ const DailyMenu: React.FC = () => {
                 <View style={styles.inner1Circle}>
                   <Text style={styles.caloriesNum}>{macros.calories}/</Text>
                   <Text style={styles.caloriesNum}>{dailyCalories}</Text>
-                  <Text style={styles.caloriesLabel}>kcal</Text>
+                  <Text style={styles.caloriesLabel}>calories</Text>
                 </View>
               </View>
             </View>

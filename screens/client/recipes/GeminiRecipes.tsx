@@ -23,7 +23,7 @@ import {
 } from "react-native";
 import * as GoogleGenerativeAI from "@google/generative-ai";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useUser } from "../../../context/userContext";
+import { useUser } from "../../../context/UserContext";
 import { handleUserInputForQuantityAndIngredient, handleUserInputForRecipe } from "../../client/Menus/edamamApi"; // Import your utility functions
 
 interface Message {

@@ -13,7 +13,7 @@ import HomeScreen from './screens/client/HomeScreen';
 import DailyMenu from './screens/client/Menus/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
-import { UserProvider } from './context/userContext';
+import { UserProvider } from './context/UserContext';
 import StoreComingSoonScreen from './screens/client/StoreComingSoon';
 import HealthyRecipesScreen from './screens/client/recipes/HealthyRecipesScreen';
 import GeminiRecipes from './screens/client/recipes/GeminiRecipes';
@@ -25,6 +25,7 @@ import HomeAdmin from './screens/admin/HomeAdmin';
 import UserWeights from './screens/admin/UserWeights';
 import DailyDashboard from './screens/client/DailyDashboard';
 import DailyMenu2 from './screens/client/Menus/DailyMenuTest';
+import AdminEditUser from './screens/admin/AdminEditUser';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -184,6 +185,7 @@ export default function App() {
           <Stack.Screen name="AddUser" component={AddUser} options={{ headerTitle: 'AddUser' }}/>
           <Stack.Screen name="UserTable" component={UserTable} options={{ headerTitle: 'UserTable' }}/>
           <Stack.Screen name="UserWeights" component={UserWeights} options={{ headerTitle: 'UserWeights' }}/>
+          <Stack.Screen name="AdminEditUser" component={AdminEditUser} options={{ headerTitle: 'AdminEditUser' }}/>
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>

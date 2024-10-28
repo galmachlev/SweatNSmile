@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Alert, Dimen
 import * as ImagePicker from 'expo-image-picker';
 import { Camera } from 'expo-camera';
 import axios from 'axios';
-import { useUser } from '../../context/userContext';
+import { useUser } from '../../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface GalleryImage {

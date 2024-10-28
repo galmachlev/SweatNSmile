@@ -1,10 +1,12 @@
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useUser } from '../../context/userContext';
+import { useNavigation } from '@react-navigation/native';
+import { useUser } from '../../context/UserContext';
 
 export default function UserTable() {
   const { users, fetchUsers, deleteUser } = useUser();
   const [loading, setLoading] = useState<boolean>(true);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -21,18 +23,15 @@ export default function UserTable() {
       'Delete User',
       `Are you sure you want to delete ${firstName} ${lastName}?`,
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Yes',
-          onPress: () => deleteUser(email),
-          style: 'destructive',
-        },
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Yes', onPress: () => deleteUser(email), style: 'destructive' },
       ],
       { cancelable: true }
     );
+  };
+
+  const handleEditPress = (user: any) => {
+    navigation.navigate('AdminEditUser', { user }); // Pass user details to AdminEditUser
   };
 
   const renderUser = ({ item }: { item: any }) => (
@@ -40,12 +39,14 @@ export default function UserTable() {
       <Text style={styles.userText}>{item.firstName}</Text>
       <Text style={styles.userText}>{item.lastName}</Text>
       <Text style={styles.userText}>{item.email}</Text>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={() => handleDeletePress(item.firstName, item.lastName, item.email)}
-      >
-        <Text style={styles.deleteButtonText}>Delete</Text>
-      </TouchableOpacity>
+      <View style={styles.actionButtons}>
+        <TouchableOpacity style={styles.editButton} onPress={() => handleEditPress(item)}>
+          <Text style={styles.buttonText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeletePress(item.firstName, item.lastName, item.email)}>
+          <Text style={styles.buttonText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -62,11 +63,7 @@ export default function UserTable() {
         <Text style={styles.headerText}>Email</Text>
         <Text style={styles.headerText}>Actions</Text>
       </View>
-      <FlatList
-        data={users}
-        renderItem={renderUser}
-        keyExtractor={(item) => item.email} // Using email as the unique key
-      />
+      <FlatList data={users} renderItem={renderUser} keyExtractor={(item) => item.email} />
     </View>
   );
 }
@@ -92,7 +89,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold', 
     color: '#3E6613',
     flex: 1,
     textAlign: 'center',
@@ -111,13 +108,24 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+    marginRight: 8,
+  },
   deleteButton: {
     backgroundColor: '#FF6347',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 5,
   },
-  deleteButtonText: {
+  buttonText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',

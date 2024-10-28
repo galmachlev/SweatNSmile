@@ -25,4 +25,5 @@ export type RootStackParamList = {
     AddUser: undefined;
     UserTable: undefined;
     UserWeights: undefined;
+    AdminEditUser: undefined;
 };
