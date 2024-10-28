@@ -14,7 +14,7 @@ const EDAMAM_RECIPE_API_URL = 'https://api.edamam.com/search';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-
+// Fetch data from Edamam API - Daily Menu Search and AddToExtras
 export const searchFood = async (ingredient: string) => {
   try {
     const response = await axios.get(EDAMAM_NUTRITION_API_URL, {
@@ -30,9 +30,6 @@ export const searchFood = async (ingredient: string) => {
     throw error;
   }
 };
-
-
-
 
 // פונקציה לחיפוש מתכון לפי רשימת מרכיבים
 export const fetchRecipeFromAPI = async (ingredients: string[], displayedRecipes: string[]): Promise<string> => {
@@ -82,9 +79,6 @@ export const handleUserInputForRecipe = async (input: string, displayedRecipes: 
   return recipe;
 };
 
-// דוגמה לשימוש בפונקציה
-//handleUserInputForRecipe("chicken, tomato, garlic").then(console.log);
-
 // פונקציה שתבצע את זיהוי המרכיב וכמותו
 export const handleUserInputForQuantityAndIngredient = async (input: string) => {
   const regex = /^(\d+)\s+(.+)$/;
@@ -122,7 +116,6 @@ export const fetchNutritionalInfo = async (ingredient: string) => {
     return null; // מחזיר null במקרה של שגיאה
   }
 };
-
 
 // פונקציה לקבלת מידע תזונתי עבור מרכיב עם כמות
 export const getNutritionalInfoForIngredient = async (ingredient: string) => {
