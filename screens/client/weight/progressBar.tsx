@@ -25,8 +25,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ startWeight, currentWeight, g
     {
       name: `Achieved`,
       population: progressPercentage,
-      color: '#3E6613',
-      legendFontColor: '#3E6613',
+      color: '#5AA72A',
+      legendFontColor: '#5AA72A',
       legendFontSize: 14,
     },
     {
@@ -58,7 +58,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ startWeight, currentWeight, g
           backgroundColor="transparent"
           paddingLeft="15"
         />
-        <Text style={styles.progressText}>{Math.round(progressPercentage)}% towards your goal</Text>
+        <Text style={styles.progressText}>{Math.round(remainingPercentage)}% towards your goal</Text>
       </View>
     </View>
   );
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     backgroundColor: '#f9f9f9',
     padding: 13,
-    borderRadius: 30,
+    borderRadius: 15,
     marginTop: 10,
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 2 },

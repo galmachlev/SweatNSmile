@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#f9f9f9',
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.2,
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8A54B',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 10,
   },
   buttonText: {
     color: '#fff',

@@ -108,10 +108,10 @@ const DailyDashboard = () => {
               <Text style={styles.dateText}>{currentDate}</Text>
             </View>
 
-            <TouchableOpacity style={styles.updateButton} onPress={handleAddWeightPress}>
+            <TouchableOpacity style={[styles.updateButton, isAddingWeight && isWeightChanged ? { backgroundColor: '#d9534f', paddingHorizontal: 20 } : null]} onPress={handleAddWeightPress}>
             <Text style={styles.updateButtonText}>
               {isAddingWeight
-                ? (isWeightChanged ? 'Save\n Changes' : 'Update\n Weight')
+                ? (isWeightChanged ? 'Save\nChanges' : 'Update\n Weight')
                 : 'Update\n Weight'}
             </Text>
             </TouchableOpacity>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   infoContainer: {
     padding: 15,
     backgroundColor: '#f7f7f7',
-    borderRadius: 12,
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#3E6613',
+    color: '#5AA72A',
   },
   dateText: {
     fontSize: 14,
@@ -195,9 +195,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   updateButton: {
-    backgroundColor: '#3E6613',
+    backgroundColor: '#5EAD2C',
     paddingVertical: 20,
-    paddingHorizontal: 27,
+    paddingHorizontal: 25,
     borderRadius: 15,
     elevation: 5,
     shadowColor: '#000',
@@ -205,22 +205,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
+  saveChangesButton: {
+    backgroundColor: '#d9534f', // צבע רקע שונה בעת השינוי
+  },
   updateButtonText: {
     color: 'white',
     fontSize: 15,
     fontWeight: '600',
+    textAlign: 'center',
   },
   weightInputContainer: {
     backgroundColor: 'white',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
     marginBottom: 10,
-    width: '85%',
+    width: '95%',
+    alignItems: 'center',
   },
   inputLabel: { fontSize: 16, marginBottom: 10 },
   input: {

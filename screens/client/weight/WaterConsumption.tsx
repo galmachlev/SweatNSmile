@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#f9f9f9',
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3b5998',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 10,
   },
   buttonText: {
     color: '#fff',
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     width: 300,
     padding: 20,
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 15,
     alignItems: 'center',
   },
   congratulationsText: {
