@@ -14,7 +14,7 @@ export type User= {
     email: string,
     password: string,
     phoneNumber: string,
-    img?: string,
+    profileImageUrl?: string,
 
     //***************/
 

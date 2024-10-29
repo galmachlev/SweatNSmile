@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView,Image, Alert } from 'react-native';
 import Swiper from 'react-native-swiper';
 import { useFormik } from 'formik';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 import { User } from '../../types/user';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
+import * as ImagePicker from 'expo-image-picker';
+
 
 export type RootStackParamList = {
     OnBoarding: undefined;
@@ -39,6 +41,8 @@ const Register = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const swiperRef = React.useRef<Swiper>(null);
     const navigation = useNavigation();
+    const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+
 
     const screenTitles = [
         'Basic Details',
@@ -76,6 +80,7 @@ const Register = () => {
                     ? formik.values.targetDate.toISOString().split('T')[0]
                     : undefined,
                 activityLevel: formik.values.activityLevel ?? '',
+                profileImageUrl: profileImageUri, // Attach the image URI here
                 isAdmin: false,
             };
     
@@ -112,7 +117,24 @@ const Register = () => {
     };
     
     
+    const pickImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission required', 'Camera roll permissions are needed to select a profile image.');
+            return;
+        }
     
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+    
+        if (!result.canceled && result.assets.length > 0) {
+            setProfileImageUri(result.assets[0].uri);
+        }
+    };
     
 
     useEffect(() => {
@@ -185,7 +207,7 @@ const Register = () => {
             email: '',
             password: '',
             phoneNumber: '',
-            img: '',
+            profileImageUrl: '',
             gender: undefined,
             height: undefined,
             startWeight: undefined,
@@ -267,6 +289,14 @@ const Register = () => {
                             placeholder="********"
                             secureTextEntry
                         />
+                        <Text style={styles.label}>Profile Image</Text>
+                        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+                            {profileImageUri ? (
+                                <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
+                            ) : (
+                                <Text style={styles.imagePickerText}>Upload Profile Image</Text>
+                            )}
+                        </TouchableOpacity>
                         {/* next button */}
                         <TouchableOpacity style={styles.nextButton} onPress={() => swiperRef.current?.scrollBy(1)}>
                             <Text style={styles.nextButtonText}>Next</Text>
@@ -275,6 +305,7 @@ const Register = () => {
                         <TouchableOpacity style={styles.loginLinkContainer} onPress={() => navigation.navigate('Login' as never)}>
                             <Text style={styles.loginLinkText1}>Already have an account?   <Text style={styles.loginLinkText2}>Login</Text></Text>
                         </TouchableOpacity>
+
 
                     </View>
                 </ScrollView>
@@ -713,7 +744,22 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#808080',
         marginLeft: 10,
-      },    
+      },  
+      imagePicker: {
+        alignItems: 'center',
+        marginBottom: 15,
+        padding: 10,
+        borderRadius: 7,
+        backgroundColor: '#ddd',
+    },
+    imagePickerText: {
+        color: '#555',
+    },
+    profileImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+    },  
 });
 
 export default Register;

@@ -10,6 +10,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const startingWeight = currentUser?.startWeight || 0;
   const currentWeight = currentUser?.currentWeight || 0;
   const targetWeight = currentUser?.goalWeight || 0;
+  const profile_img = currentUser?.profileImageUrl;
+
 
   // Calculate weight progress percentage
   const totalWeightToLose = startingWeight - targetWeight;
@@ -29,8 +31,8 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     <ScrollView style={styles.page}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Image source={{ uri: profileImage || require('../../Images/profile_img.jpg') }} style={styles.profileImage} />
-          <Text style={styles.greeting}>Hello, {userName}</Text>
+        <Image source={profile_img ? { uri: profile_img } : require('../../Images/profile_img.jpg')} style={styles.profileImage} />
+        <Text style={styles.greeting}>Hello, {userName}</Text>
         </View>
 
         <View style={styles.progressBarContainer}>
