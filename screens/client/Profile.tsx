@@ -44,7 +44,9 @@ export default function Profile() {
   const { currentUser, updateUserDetails } = useUser();
   const { updateProfileImage } = useUser();
   const defaultProfileImage = require('../../Images/profile_img.jpg');
-  const [profileImage, setProfileImage] = useState({ uri: defaultProfileImage });
+  const [profileImage, setProfileImage] = useState({
+    uri: currentUser?.profileImageUrl || defaultProfileImage,
+  });
   const [fullSizeImageUri, setFullSizeImageUri] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -68,6 +70,9 @@ export default function Profile() {
   const [currentWeight, setCurrentWeight] = useState(currentUser?.currentWeight?.toString() || '');
   const [goalWeight, setGoalWeight] = useState(currentUser?.goalWeight?.toString() || '');
   const [height, setHeight] = useState(currentUser?.height?.toString() || '');
+  const [isProfileImageChanged, setIsProfileImageChanged] = useState(false);
+
+  
 
   const navigation = useNavigation();
 
@@ -93,15 +98,12 @@ export default function Profile() {
       [
         { text: 'Take a new photo', onPress: takePhoto },
         { text: 'Upload from Gallery', onPress: pickFromGallery },
-        { text: 'View Full Size', onPress: () => viewFullSize(profileImage.uri) },
-        { text: 'Delete Image', onPress: deleteImage },
         { text: 'Cancel', style: 'cancel' },
       ],
       { cancelable: true }
     );
   };
-
-  // Function to take photo
+  
   const takePhoto = async () => {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -111,8 +113,7 @@ export default function Profile() {
     });
     handleImageResult(result);
   };
-
-  // Function to pick image from gallery
+  
   const pickFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -122,32 +123,29 @@ export default function Profile() {
     });
     handleImageResult(result);
   };
-
-  // Function to handle image result
+  
   const handleImageResult = async (result: ImagePicker.ImagePickerResult) => {
     if (!result.canceled && result.assets.length > 0) {
       const imageUri = result.assets[0].uri;
-      updateProfileImage(imageUri);
       const cloudinaryUrl = await uploadImageToCloudinary(imageUri);
       if (cloudinaryUrl) {
         const newProfileImage = { uri: cloudinaryUrl };
         setProfileImage(newProfileImage);
         saveProfileImage(newProfileImage);
+        updateProfileImage(cloudinaryUrl); // Update profile image in user context
+        setIsProfileImageChanged(true); // Mark profile image as changed
       }
     }
   };
-
-  // Function to upload image to Cloudinary
+  
   const uploadImageToCloudinary = async (imageUri: string) => {
     const cloudName = 'duiifdn9s';
     const uploadPreset = 'GALMACH';
-    const userId = currentUser ? currentUser.email : 'defaultUserEmail';
-
+  
     const formData = new FormData();
     formData.append('file', { uri: imageUri, name: 'image.jpg', type: 'image/jpeg' });
     formData.append('upload_preset', uploadPreset);
-    formData.append('folder', `user_images/${userId}`);
-
+  
     try {
       const response = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData);
       return response.data.secure_url;
@@ -157,14 +155,16 @@ export default function Profile() {
       return null;
     }
   };
-
-  // Function to view full size image
-  const viewFullSize = (uri: string | null) => {
-    setFullSizeImageUri(uri);
-    setModalVisible(true);
+  
+  const saveProfileImage = async (image: ProfileImage) => {
+    const userId = currentUser ? currentUser.email : 'defaultUserEmail';
+    try {
+      await AsyncStorage.setItem(`profileImage_${userId}`, JSON.stringify(image));
+    } catch (error) {
+      console.error('Error saving profile image', error);
+    }
   };
-
-  // Function to delete profile image
+  
   const deleteImage = () => {
     Alert.alert(
       'Confirm Delete',
@@ -182,16 +182,7 @@ export default function Profile() {
       ]
     );
   };
-
-  // Function to save profile image
-  const saveProfileImage = async (image: ProfileImage) => {
-    const userId = currentUser ? currentUser.email : 'defaultUserEmail';
-    try {
-      await AsyncStorage.setItem(`profileImage_${userId}`, JSON.stringify(image));
-    } catch (error) {
-      console.error('Error saving profile image', error);
-    }
-  };
+  
 
   // Function to handle logout
   const handleLogout = () => {
@@ -226,15 +217,17 @@ export default function Profile() {
         currentWeight: parseFloat(currentWeight),
         goalWeight: parseFloat(goalWeight),
         height: parseFloat(height),
+        profileImageUrl: isProfileImageChanged ? profileImage.uri : currentUser.profileImageUrl,
       };
-
+  
       updateUserDetails(currentUser.email, updates);
+      setIsProfileImageChanged(false); // Reset the profile image change flag
       Alert.alert('Success', 'Profile updated successfully.');
     }
-  };
+  };  
 
   // Check if any field is being edited
-  const isAnyFieldEditing = Object.values(isEditingField).some((editing) => editing);
+  const isAnyFieldEditing = Object.values(isEditingField).some((editing) => editing) || isProfileImageChanged;
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
