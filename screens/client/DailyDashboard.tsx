@@ -109,9 +109,11 @@ const DailyDashboard = () => {
             </View>
 
             <TouchableOpacity style={styles.updateButton} onPress={handleAddWeightPress}>
-              <Text style={styles.updateButtonText}>
-                {isAddingWeight ? (isWeightChanged ? 'Save Changes' : 'Update Weight') : 'Update Weight'}
-              </Text>
+            <Text style={styles.updateButtonText}>
+              {isAddingWeight
+                ? (isWeightChanged ? 'Save\n Changes' : 'Update\n Weight')
+                : 'Update\n Weight'}
+            </Text>
             </TouchableOpacity>
           </View>
 
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     paddingHorizontal: 10,
-    marginVertical: 20,
+    marginVertical: 5,
   },
   infoContainer: {
     padding: 15,
@@ -182,9 +184,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   infoValue: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#3E6613',
   },
   dateText: {
     fontSize: 14,
@@ -194,16 +196,14 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     backgroundColor: '#3E6613',
-    paddingVertical: 30,
-    paddingHorizontal: 78,
+    paddingVertical: 20,
+    paddingHorizontal: 27,
     borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
     elevation: 5,
-    borderWidth: 1,         // Add this line
-    borderColor: '#f7f7f7', 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   updateButtonText: {
     color: 'white',

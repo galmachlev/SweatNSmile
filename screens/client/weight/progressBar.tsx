@@ -25,25 +25,25 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ startWeight, currentWeight, g
     {
       name: `Achieved`,
       population: progressPercentage,
-      color: '#4CAF50',
-      legendFontColor: '#4CAF50',
-      legendFontSize: 15,
+      color: '#3E6613',
+      legendFontColor: '#3E6613',
+      legendFontSize: 14,
     },
     {
       name: `Remaining`,
       population: remainingPercentage,
       color: '#d9d9d9',
       legendFontColor: '#666666',
-      legendFontSize: 15,
+      legendFontSize: 14,
     },
   ];
 
   return (
     <View style={styles.widgetContainer}>
-      <Text style={styles.title}>Progress to Goal Weight</Text>
       <View style={styles.chartContainer}>
+      <Text style={styles.title}>Progress to Goal Weight</Text>
         <PieChart
-          data={data}
+          data ={data}
           width={screenWidth - 80}
           height={220}
           chartConfig={{
@@ -70,33 +70,31 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
   },
   chartContainer: {
-    backgroundColor: '#f0f4f8',
-    padding: 25,
+    backgroundColor: '#f9f9f9',
+    padding: 13,
     borderRadius: 30,
-    borderColor: '#d1d1d1',
-    borderWidth: 2,
     marginTop: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 5, height: 10 },
+    shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 15,
     elevation: 8,
-    alignItems: 'center', // Center align the percentage text
+    alignItems: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 15,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
+    color: '#4d4d4d',
+    padding: 15,
     textAlign: 'center',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: 1.1,
+    
   },
   progressText: {
-    fontSize: 18,
-    color: '#4CAF50',
+    fontSize: 14,
+    color: '#4d4d4d',
     fontWeight: '700',
-    marginTop: 15, // Adjust space between chart and text
+    marginTop: 10, // Adjust space between chart and text
     textAlign: 'center',
   },
 });
