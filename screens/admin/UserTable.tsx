@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../../context/UserContext';
@@ -36,6 +36,7 @@ export default function UserTable() {
 
   const renderUser = ({ item }: { item: any }) => (
     <View style={styles.userRow}>
+      <Image source={{ uri: item.profileImageUrl }} style={styles.profileImage} />
       <Text style={styles.userText}>{item.firstName}</Text>
       <Text style={styles.userText}>{item.lastName}</Text>
       <Text style={styles.userText}>{item.email}</Text>
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f4f7',
   },
   header: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     color: '#3E6613',
     marginBottom: 20,
@@ -83,13 +84,13 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     paddingVertical: 10,
     backgroundColor: '#9AB28B',
   },
   headerText: {
     fontSize: 16,
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
     color: '#3E6613',
     flex: 1,
     textAlign: 'center',
@@ -99,8 +100,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: 1.2,
     borderBottomColor: '#3E6613',
+  },
+  profileImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 13,
+    marginRight: 8,
   },
   userText: {
     fontSize: 14,
