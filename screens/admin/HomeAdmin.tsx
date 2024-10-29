@@ -1,18 +1,17 @@
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../types/navigationTypes'; 
+import { RootStackParamList } from '../../types/navigationTypes';
+import { DonutChart } from './DonutChart'; // Import DonutChart as named export
 
 type AdminPageNavigationProp = StackNavigationProp<RootStackParamList, 'HomeAdmin'>;
 
 export default function AdminPage() {
-  // Use the typed navigation prop
   const navigation = useNavigation<AdminPageNavigationProp>();
   const [userCount, setUserCount] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Function to fetch user count from backend
   const fetchUserCount = async () => {
     try {
       const response = await fetch('https://database-s-smile.onrender.com/api/users/countUsers');
@@ -38,14 +37,13 @@ export default function AdminPage() {
   };
 
   const handleViewUserWeights = () => {
-    navigation.navigate('UserWeights'); // This should navigate to the component that shows the user weights (graph or avg)
+    navigation.navigate('UserWeights');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Admin Dashboard</Text>
 
-      {/* User Count Box */}
       <View style={styles.boxContainer}>
         {loading ? (
           <ActivityIndicator size="large" color="#3E6613" />
@@ -57,7 +55,9 @@ export default function AdminPage() {
         )}
       </View>
 
-      {/* Buttons */}
+      {/* Display the DonutChart for user activity levels */}
+      <DonutChart />
+
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleAddUser}>
           <Text style={styles.buttonText}>Add User</Text>
@@ -70,7 +70,6 @@ export default function AdminPage() {
         </TouchableOpacity>
       </View>
 
-      {/* New Button for Viewing User Weights */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleViewUserWeights}>
           <Text style={styles.buttonText}>View User Weights</Text>

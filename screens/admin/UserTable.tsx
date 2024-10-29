@@ -31,7 +31,7 @@ export default function UserTable() {
   };
 
   const handleEditPress = (user: any) => {
-    navigation.navigate('AdminEditUser', { user }); // Pass user details to AdminEditUser
+    navigation.navigate('AdminEditUser', { user });
   };
 
   const renderUser = ({ item }: { item: any }) => (
