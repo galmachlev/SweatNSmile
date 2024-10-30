@@ -61,9 +61,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
             <Text>Menu</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('More')}>
+          <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('WeeklyChallenge')}>
             <Image source={require('../../Images/MoreIcon.png')} style={styles.iconImage} />
-            <Text>More</Text>
+            <Text>Weekly Challenge</Text>
           </TouchableOpacity>
         </View>
 

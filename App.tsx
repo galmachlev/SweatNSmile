@@ -26,6 +26,9 @@ import UserWeights from './screens/admin/UserWeights';
 import DailyDashboard from './screens/client/DailyDashboard';
 import DailyMenu2 from './screens/client/Menus/DailyMenuTest';
 import AdminEditUser from './screens/admin/AdminEditUser';
+import WeeklyChallenge from './screens/client/Challenges/WeeklyChallenge';
+
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator<RootStackParamList>();
@@ -33,7 +36,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const menuItems = [
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
   { name: 'Store', icon: 'cart', routeName: 'StoreComingSoonScreen' },
-  { name: 'Recpies', icon: 'nutrition', routeName: 'HealthyRecipesScreen' },
+  { name: 'Recipes', icon: 'nutrition', routeName: 'HealthyRecipesScreen' },
 ];
 
 type MoreMenuProps = {
@@ -56,7 +59,7 @@ function MoreMenu({ visible, onClose }: MoreMenuProps) {
   const navigateToScreen = (routeName: keyof RootStackParamList) => {
     onClose();
     navigation.navigate(routeName);
-  };
+};
 
   const translateY = animation.interpolate({
     inputRange: [0, 1],
@@ -186,6 +189,7 @@ export default function App() {
           <Stack.Screen name="UserTable" component={UserTable} options={{ headerTitle: 'UserTable' }}/>
           <Stack.Screen name="UserWeights" component={UserWeights} options={{ headerTitle: 'UserWeights' }}/>
           <Stack.Screen name="AdminEditUser" component={AdminEditUser} options={{ headerTitle: 'AdminEditUser' }}/>
+          <Stack.Screen name="WeeklyChallenge" component={WeeklyChallenge} options={{ headerTitle: 'WeeklyChallenge' }}/>
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
