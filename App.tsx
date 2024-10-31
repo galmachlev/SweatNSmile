@@ -28,6 +28,7 @@ import DailyMenu2 from './screens/client/Menus/DailyMenuTest';
 import AdminEditUser from './screens/admin/AdminEditUser';
 import WeeklyChallenge from './screens/client/Challenges/WeeklyChallenge';
 import ChallengeDetails from './screens/client/Challenges/ChallengeDetails';
+import { PaperProvider } from 'react-native-paper';
 
 LogBox.ignoreLogs([
   'VirtualizedLists should never be nested inside plain ScrollViews', // Ignore VirtualizedLists warning
@@ -172,6 +173,7 @@ function TabNavigator() {
 
 export default function App() {
   return (
+  <PaperProvider>
     <NavigationContainer>
       <UserProvider>
         <Stack.Navigator initialRouteName="OnBoarding">
@@ -200,6 +202,7 @@ export default function App() {
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
+  </PaperProvider>
   );
 }
 
