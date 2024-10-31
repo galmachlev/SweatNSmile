@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Dimensions } from 'react-native';
 import { useUser } from '../../../context/UserContext';
 import * as Progress from 'react-native-progress';
+import { useNavigation } from '@react-navigation/native';
 
 type ChallengeOption = {
   goalType: 'workouts' | 'sleep' | 'activeDays' | 'trySomethingNew';
   label: string;
   description: string;
+  image: any;
 };
 
 const challengeOptions: ChallengeOption[] = [
-  { goalType: 'workouts', label: 'Workouts per week', description: 'Complete X workouts per week.' },
-  { goalType: 'sleep', label: 'Sleep Hours', description: 'Sleep X hours each night.' },
-  { goalType: 'activeDays', label: 'Active Days', description: 'Be active every day this week.' },
-  { goalType: 'trySomethingNew', label: 'Try Something New', description: 'Try a new activity this week.' },
+  { goalType: 'workouts', label: 'Workouts per week', description: 'Complete X workouts per week.', image: require('../../../Images/lunch.jpeg') },
+  { goalType: 'sleep', label: 'Sleep Hours', description: 'Sleep X hours each night.', image: require('../../../Images/lunch.jpeg') },
+  { goalType: 'activeDays', label: 'Active Days', description: 'Be active every day this week.', image: require('../../../Images/lunch.jpeg') },
+  { goalType: 'trySomethingNew', label: 'Try Something New', description: 'Try a new activity this week.', image: require('../../../Images/lunch.jpeg') },
 ];
 
-export default function WeeklyChallenge() {
+const WeeklyChallenge = () => {
   const { currentUser, updateUserDetails } = useUser();
   const [isChoosingNewChallenge, setIsChoosingNewChallenge] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const today = new Date();
+    // Check if there's an expired challenge or no active weekly goals
     if (currentUser?.weeklyGoals?.[0]?.endDate && new Date(currentUser.weeklyGoals[0].endDate) < today) {
       updateUserDetails(currentUser.email, { weeklyGoals: [] });
       setIsChoosingNewChallenge(true);
@@ -45,49 +49,35 @@ export default function WeeklyChallenge() {
 
     updateUserDetails(currentUser.email, { weeklyGoals: [newWeeklyGoal] });
     setIsChoosingNewChallenge(false);
-  };
-
-  const addWorkout = () => {
-    const updatedWeeklyGoals = currentUser?.weeklyGoals?.map((goal) => {
-      if (goal.goalType === 'workouts') {
-        const newProgress = goal.progressValue + 1;
-        const isCompleted = newProgress >= goal.targetValue;
-        return { ...goal, progressValue: newProgress, isCompleted };
-      }
-      return goal;
-    });
-
-    updateUserDetails(currentUser.email, { weeklyGoals: updatedWeeklyGoals });
-  };
-
-  const changeChallenge = () => {
-    Alert.alert(
-      'Change Challenge',
-      'Are you sure you want to change your current weekly challenge?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Yes', onPress: () => setIsChoosingNewChallenge(true) },
-      ],
-      { cancelable: true }
-    );
+    navigation.navigate('ChallengeDetails', { goalType });
   };
 
   const renderChallengeOptions = () => (
     <View>
       <Text style={styles.header}>Choose Your Weekly Challenge</Text>
-      {challengeOptions.map((option) => (
-        <TouchableOpacity
-          key={option.goalType}
-          style={styles.challengeOption}
-          onPress={() => {
-            const targetValue = option.goalType === 'workouts' ? 3 : 7; // Example values
-            selectChallenge(option.goalType, targetValue);
-          }}
-        >
-          <Text style={styles.optionLabel}>{option.label}</Text>
-          <Text style={styles.optionDescription}>{option.description}</Text>
-        </TouchableOpacity>
-      ))}
+      <Text style={styles.description}>
+        Pick a challenge to motivate yourself this week. Whether it's fitness, sleep, or something new, stay active and reach your goals!
+      </Text>
+
+      <View style={styles.challengeGrid}>
+        {challengeOptions.map((option) => (
+          <TouchableOpacity
+            key={option.goalType}
+            style={styles.challengeCardWrapper}
+            onPress={() => {
+              const targetValue = option.goalType === 'workouts' ? 3 : 7;
+              selectChallenge(option.goalType, targetValue);
+            }}
+            activeOpacity={0.9}
+          >
+            <View style={styles.challengeCard}>
+              <Image source={option.image} style={styles.challengeImage} />
+              <Text style={styles.challengeLabel}>{option.label}</Text>
+              <Text style={styles.challengeDescription}>{option.description}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 
@@ -97,49 +87,20 @@ export default function WeeklyChallenge() {
 
     const progress = activeChallenge.progressValue / activeChallenge.targetValue;
 
-    const getChallengeStyles = () => {
-      switch (activeChallenge.goalType) {
-        case 'workouts':
-          return {
-            container: styles.workoutContainer,
-            header: 'Complete Your Workouts',
-            description: `Complete ${activeChallenge.targetValue} workouts this week.`,
-          };
-        case 'sleep':
-          return {
-            container: styles.sleepContainer,
-            header: 'Track Your Sleep',
-            description: `Sleep ${activeChallenge.targetValue} hours each night.`,
-          };
-        case 'activeDays':
-          return {
-            container: styles.activeDaysContainer,
-            header: 'Be Active Daily',
-            description: `Stay active every day this week.`,
-          };
-        case 'tryNew':
-          return {
-            container: styles.tryNewContainer,
-            header: 'Try Something New',
-            description: `Try a new activity this week.`,
-          };
-        default:
-          return {};
-      }
-    };
-
-    const { container, header, description } = getChallengeStyles();
-
     return (
-      <View style={[styles.baseContainer, container]}>
-        <Text style={styles.header}>{header}</Text>
-        <Text style={styles.challengeText}>{description}</Text>
+      <View style={styles.activeChallengeContainer}>
+        <Text style={styles.header}>This Week's Challenge</Text>
+        <Text style={styles.challengeText}>
+          {activeChallenge.goalType === 'workouts' && `Complete ${activeChallenge.targetValue} workouts this week.`}
+          {activeChallenge.goalType === 'sleep' && `Sleep ${activeChallenge.targetValue} hours each night.`}
+          {activeChallenge.goalType === 'activeDays' && `Stay active every day this week.`}
+          {activeChallenge.goalType === 'tryNew' && `Try a new activity this week.`}
+        </Text>
 
         <Text style={styles.progressText}>
           Progress: {activeChallenge.progressValue} / {activeChallenge.targetValue}
         </Text>
 
-        {/* Progress Bar */}
         <Progress.Bar
           progress={progress}
           width={null}
@@ -150,18 +111,11 @@ export default function WeeklyChallenge() {
           style={styles.progressBar}
         />
 
-        {activeChallenge.goalType === 'workouts' && !activeChallenge.isCompleted && (
-          <TouchableOpacity style={styles.logWorkoutButton} onPress={addWorkout}>
-            <Text style={styles.buttonText}>Log Workout</Text>
-          </TouchableOpacity>
-        )}
-
         {activeChallenge.isCompleted && <Text style={styles.completedText}>Challenge Completed!</Text>}
 
-        {/* "Change Challenge" Button */}
         <View style={styles.changeChallengeContainer}>
           <Text style={styles.changeChallengeText}>Don't want this challenge anymore?</Text>
-          <TouchableOpacity onPress={changeChallenge}>
+          <TouchableOpacity onPress={() => setIsChoosingNewChallenge(true)}>
             <Text style={styles.changeChallengeButton}>Change Weekly Challenge</Text>
           </TouchableOpacity>
         </View>
@@ -170,56 +124,82 @@ export default function WeeklyChallenge() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       {isChoosingNewChallenge ? renderChallengeOptions() : renderActiveChallenge()}
-    </View>
+    </ScrollView>
   );
-}
+};
+
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
     backgroundColor: '#F5F5F5',
+    alignItems: 'center',
   },
   header: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#3E6613',
-    marginBottom: 15,
-  },
-  challengeOption: {
-    padding: 15,
-    backgroundColor: '#9AB28B',
-    borderRadius: 10,
     marginBottom: 10,
+    textAlign: 'center',
   },
-  optionLabel: {
-    fontSize: 18,
+  description: {
+    fontSize: 16,
+    color: '#6B8E23',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  challengeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+  },
+  challengeCardWrapper: {
+    width: screenWidth * 0.42,
+    marginVertical: 10,
+    borderRadius: 15,
+    overflow: 'hidden',
+  },
+  challengeCard: {
+    width: '100%',
+    height: screenWidth * 0.5,
+    padding: 10,
+    justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 7,
+    backgroundColor: '#9AB28B',
+  },
+  challengeImage: {
+    width: '100%',
+    height: '50%',
+    borderRadius: 10,
+  },
+  challengeLabel: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#3E6613',
+    color: '#FFF',
+    textAlign: 'center',
+    marginTop: 5,
   },
-  optionDescription: {
-    fontSize: 14,
-    color: '#3E6613',
+  challengeDescription: {
+    fontSize: 12,
+    color: '#F0F0F0',
+    textAlign: 'center',
+    marginTop: 5,
   },
-  baseContainer: {
+  activeChallengeContainer: {
     padding: 20,
+    backgroundColor: '#9AB28B',
     borderRadius: 10,
     alignItems: 'center',
     flex: 1,
-  },
-  workoutContainer: {
-    backgroundColor: '#D1C4E9',
-  },
-  sleepContainer: {
-    backgroundColor: '#B3E5FC',
-  },
-  activeDaysContainer: {
-    backgroundColor: '#C8E6C9',
-  },
-  tryNewContainer: {
-    backgroundColor: '#FFCDD2',
   },
   challengeText: {
     fontSize: 18,
@@ -234,18 +214,6 @@ const styles = StyleSheet.create({
   progressBar: {
     marginTop: 10,
     width: '80%',
-  },
-  logWorkoutButton: {
-    backgroundColor: '#4CAF50',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   completedText: {
     fontSize: 18,
@@ -267,3 +235,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+export default WeeklyChallenge;

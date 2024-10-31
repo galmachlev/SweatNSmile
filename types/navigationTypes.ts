@@ -27,4 +27,6 @@ export type RootStackParamList = {
     UserWeights: undefined;
     AdminEditUser: undefined;
     WeeklyChallenge: undefined;
+    ChallengeDetails: undefined;
+
 };

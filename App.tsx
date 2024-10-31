@@ -27,6 +27,9 @@ import DailyDashboard from './screens/client/DailyDashboard';
 import DailyMenu2 from './screens/client/Menus/DailyMenuTest';
 import AdminEditUser from './screens/admin/AdminEditUser';
 import WeeklyChallenge from './screens/client/Challenges/WeeklyChallenge';
+import ChallengeDetails from './screens/client/Challenges/ChallengeDetails';
+
+
 
 
 
@@ -190,6 +193,8 @@ export default function App() {
           <Stack.Screen name="UserWeights" component={UserWeights} options={{ headerTitle: 'UserWeights' }}/>
           <Stack.Screen name="AdminEditUser" component={AdminEditUser} options={{ headerTitle: 'AdminEditUser' }}/>
           <Stack.Screen name="WeeklyChallenge" component={WeeklyChallenge} options={{ headerTitle: 'WeeklyChallenge' }}/>
+          <Stack.Screen name="ChallengeDetails" component={ChallengeDetails} options={{ headerTitle: 'ChallengeDetails' }}/>
+
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>
