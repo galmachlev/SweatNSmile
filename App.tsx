@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, Animated } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, Animated, LogBox } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -27,6 +27,7 @@ import DailyDashboard from './screens/client/DailyDashboard';
 import DailyMenu2 from './screens/client/Menus/DailyMenuTest';
 import AdminEditUser from './screens/admin/AdminEditUser';
 import WeeklyChallenge from './screens/client/Challenges/WeeklyChallenge';
+import ChallengeDetails from './screens/client/Challenges/ChallengeDetails';
 
 LogBox.ignoreLogs([
   'VirtualizedLists should never be nested inside plain ScrollViews', // Ignore VirtualizedLists warning
