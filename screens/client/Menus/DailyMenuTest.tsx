@@ -75,7 +75,7 @@ const DailyMenu: React.FC = () => {
     Protein: 0.35,
     Fat: 0.15,
     Carb: 0.35,
-    Vegetable: 0.075, // 7.5% כאשר יש גם פרי וגם ירק
+    Vegetable: 0.075,
     Fruit: 0.075,
   };
 
@@ -133,24 +133,36 @@ const DailyMenu: React.FC = () => {
   const generateDailyMenu = () => {
     const meals = ['Breakfast', 'Lunch', 'Dinner', 'Extras'];
     const updatedSelectedItems: SelectedItemsType = { Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} };
-
+  
+    // אובייקט לשמירה על קלוריות לכל קטגוריה
+    const allocatedCalories: { [key: string]: { [key: string]: number } } = {
+      Breakfast: {},
+      Lunch: {},
+      Dinner: {},
+      Extras: {},
+    };
+  
     // Calculate the distribution based on the daily calories
     const distribution = calculateMealNutrientDistribution(dailyCalories);
-
+  
     meals.forEach(mealType => {
       const mealCalories = distribution.mealCalories[mealType];
-
+  
       // Create an item for each category according to the macronutrient distribution
       Object.keys(nutrientDistribution).forEach(nutrient => {
         const nutrientCalories = mealCalories * nutrientDistribution[nutrient as keyof typeof nutrientDistribution];
         const item = getRandomItemForCategory(mealType, nutrient, nutrientCalories);
-
+  
         if (item) {
-          updatedSelectedItems[mealType][nutrient] = adjustFoodItem(item, nutrientCalories);
+          const adjustedItem = adjustFoodItem(item, nutrientCalories);
+          updatedSelectedItems[mealType][nutrient] = adjustedItem;
+  
+          // הוסף קלוריות לקטגוריה המתאימה
+          allocatedCalories[mealType][nutrient] = adjustedItem.calories;
         }
       });
     });
-
+  
     setSelectedItems(updatedSelectedItems); // Update selected items state
     updateMacros(updatedSelectedItems); // Update macro values based on selected items
     setExtrasCalories(0);
@@ -193,24 +205,29 @@ const DailyMenu: React.FC = () => {
 };
   
   // Handle item selection
-  const handleSelect = (selected: string | null, mealType: string, category: string, items: FoodItem[]) => {
+  const handleSelect = (selected: string | null, mealType: string, category: string, items: FoodItem[], targetCalories: number) => {
     if (selected) {
-      const item = items.find(item => item.name === selected) || null;
-      setSelectedItems(prev => {
-        const newSelectedItems = {
-          ...prev,
-          [mealType]: {
-            ...prev[mealType],
-            [category]: item,
-          },
-        };
-        updateMacros(newSelectedItems); 
-        return newSelectedItems;
-      });
-    }};
+        const item = items.find(item => item.name === selected); // לא צריך || null כי אם לא נמצא, הפונקציה תפסיק
+        if (item) {
+            const adjustedItem = adjustFoodItem(item, targetCalories); // מתאימים את הפריט לפי קלוריות יעד
 
-    // פונקציה לטיפול בפריט שנבחר מהחיפוש והוספתו למאקרו ולחישוב היומי
-    const handleSelectFood = (item: any) => {
+            setSelectedItems(prev => {
+                const newSelectedItems = {
+                    ...prev,
+                    [mealType]: {
+                        ...prev[mealType],
+                        [category]: adjustedItem, // מעדכנים את הפריט החדש בסטייט
+                    },
+                };
+                updateMacros(newSelectedItems); // מעדכנים את הערכים הכוללים
+                return newSelectedItems; // מחזירים את הסטייט החדש
+            });
+        }
+    }
+  };
+
+  // Handle Extras item selection and adding to selected items after searching item
+  const handleSelectFood = (item: any) => {
       if (item.food) {
         const newFood: FoodItem = {
           id: item.food.foodId,
@@ -259,7 +276,7 @@ const DailyMenu: React.FC = () => {
         setSearchQuery('');
         setSearchResults([]);
       }
-    };
+  };
       
   // Update macros based on selected items
   const updateMacros = (selectedItems: SelectedItemsType) => {
@@ -297,7 +314,7 @@ const DailyMenu: React.FC = () => {
   
     return (
       <Text style={styles.selectedItemDetails}>
-        Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs} | Quantity(g): {item.quantity}
+         Quantity(g): {item.quantity} | Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs}
       </Text>
     );
   };
@@ -513,7 +530,7 @@ const DailyMenu: React.FC = () => {
                     <View style={styles.selectContainer}>
                     <SelectList 
                         data={subcategory.items.map(item => ({ value: item.name, key: item.id }))}
-                        setSelected={() => {}} 
+                        setSelected={() => {}} // לא נדרש כאן, כי זה כבר מתמלא אוטומטית
                         placeholder={selectedItems[mealType][subcategory.category]?.name || "Select Food"}
                         selected={selectedItems[mealType][subcategory.category]?.name || null}
                     />
@@ -632,32 +649,6 @@ const DailyMenu: React.FC = () => {
 
 // Styles
 const styles = StyleSheet.create({
-  overBudget: {
-    color: 'red', // צבע אדום
-  },
-  selectedItemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-    marginLeft: 10,
-  },
-  itemContainer: {
-    borderWidth: 1,
-    borderColor: '#999', // Change to your desired border color
-    borderRadius: 9,
-    backgroundColor: '#FFFFFF', // Optional: background color
-    padding: 12,
-  },
-  selectedItemName: {
-    fontSize: 14, // עדכן את גודל הפונט כך שיתאים לשאר הפריטים
-    paddingLeft: 20,
-    paddingTop: 10,
-  },
-    infoButtonE: {
-    marginLeft: 20,
-  },
   container: {
     flex: 1,
     padding: 20,
@@ -1013,6 +1004,32 @@ const styles = StyleSheet.create({
     color: '#696B6D',
     marginTop: 2,
     paddingLeft: 20,
+  },
+  overBudget: {
+    color: 'red', // צבע אדום
+  },
+  selectedItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    marginLeft: 10,
+  },
+  itemContainer: {
+    borderWidth: 1,
+    borderColor: '#999', // Change to your desired border color
+    borderRadius: 9,
+    backgroundColor: '#FFFFFF', // Optional: background color
+    padding: 12,
+  },
+  selectedItemName: {
+    fontSize: 14, // עדכן את גודל הפונט כך שיתאים לשאר הפריטים
+    paddingLeft: 20,
+    paddingTop: 10,
+  },
+    infoButtonE: {
+    marginLeft: 20,
   },
 });
 

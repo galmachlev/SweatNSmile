@@ -50,7 +50,7 @@ export const mealData: Meal[] = [
                     { id: 'BP3', name: 'Cottage Cheese', calories: 98, protein: 11, fat: 4.3, carbs: 3.4, quantity: 100 },
                     { id: 'BP4', name: 'Almond Butter', calories: 614, protein: 21, fat: 54, carbs: 18, quantity: 100 },
                     { id: 'BP5', name: 'Turkey Slices', calories: 189, protein: 29, fat: 7, carbs: 0, quantity: 100 },
-                    { id: 'BP6', name: 'Whey Protein', calories: 120, protein: 25, fat: 1, carbs: 3, quantity: 30 },
+                    { id: 'BP6', name: 'Whey Protein', calories: 400, protein: 83.3, fat: 3.3, carbs: 10, quantity: 100 },
                     { id: 'BP7', name: 'Chia Seeds', calories: 486, protein: 17, fat: 31, carbs: 42, quantity: 100 },
                     { id: 'BP8', name: 'Tempeh', calories: 192, protein: 20, fat: 11, carbs: 9, quantity: 100 },
                     { id: 'BP9', name: 'Canned Light Tuna in Water', calories: 132, protein: 29, fat: 0.5, carbs: 0, quantity: 100 },

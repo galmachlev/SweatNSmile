@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   saveChangesButton: {
-    backgroundColor: '#d9534f', // צבע רקע שונה בעת השינוי
+    backgroundColor: '#d9534f',
   },
   updateButtonText: {
     color: 'white',
