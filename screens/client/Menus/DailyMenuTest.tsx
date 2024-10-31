@@ -32,6 +32,7 @@ const DailyMenu: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({});
   const [mealCalories, setMealCalories] = useState<{ [key: string]: number }>({});
+  const [extrasCalories, setExtrasCalories] = useState(0);
 
   // Function to get the border color based on the meal type
   const getBorderColor = (mealType: string): string => {
@@ -152,6 +153,7 @@ const DailyMenu: React.FC = () => {
 
     setSelectedItems(updatedSelectedItems); // Update selected items state
     updateMacros(updatedSelectedItems); // Update macro values based on selected items
+    setExtrasCalories(0);
   };
 
   // Select a random item based on category and target calories
@@ -180,15 +182,15 @@ const DailyMenu: React.FC = () => {
   }, [subcategories]);
   
   // Toggle visibility for specific subcategory
-  const toggleDetails = (mealType: string, category: string) => {
+  const toggleDetails = (mealType: string, itemId: string) => {
     setDetailsVisibility(prev => ({
-      ...prev,
-      [mealType]: {
-        ...prev[mealType],
-        [category]: !prev[mealType]?.[category],
-      },
+        ...prev,
+        [mealType]: {
+            ...prev[mealType],
+            [itemId]: !prev[mealType]?.[itemId],
+        },
     }));
-  };
+};
   
   // Handle item selection
   const handleSelect = (selected: string | null, mealType: string, category: string, items: FoodItem[]) => {
@@ -206,7 +208,59 @@ const DailyMenu: React.FC = () => {
         return newSelectedItems;
       });
     }};
-  
+
+    // פונקציה לטיפול בפריט שנבחר מהחיפוש והוספתו למאקרו ולחישוב היומי
+    const handleSelectFood = (item: any) => {
+      if (item.food) {
+        const newFood: FoodItem = {
+          id: item.food.foodId,
+          name: item.food.label,
+          calories: item.food.nutrients.ENERC_KCAL,
+          protein: item.food.nutrients.PROCNT,
+          fat: item.food.nutrients.FAT,
+          carbs: item.food.nutrients.CHOCDF,
+          quantity: item.food.measure || 'grams' // המידה אם קיימת
+        };
+    
+        // עדכון `selectedItems` כך שהפריט יופיע ישירות בקטגוריית "Extras"
+        setSelectedItems(prevItems => ({
+          ...prevItems,
+          Extras: {
+            ...prevItems.Extras,
+            [newFood.name]: newFood, // הגדרת השם ישירות כערך המוצג
+          },
+        }));
+    
+        // עדכון המאקרו הכולל לפי הפריט החדש
+        setMacros(prevMacros => ({
+          protein: parseFloat((prevMacros.protein + newFood.protein).toFixed(1)),
+          fat: parseFloat((prevMacros.fat + newFood.fat).toFixed(1)),
+          carbs: parseFloat((prevMacros.carbs + newFood.carbs).toFixed(1)),
+          calories: parseFloat((prevMacros.calories + newFood.calories).toFixed(1)),
+        }));
+    
+        // עדכון הקלוריות של האקסטרות
+        setExtrasCalories(prevCalories => prevCalories + newFood.calories);
+    
+        // הוספת הפריט לקטגוריית "Extras" ב-`subcategories` להצגה ישירה
+        setSubcategories(prevSubcategories => ({
+          ...prevSubcategories,
+          Extras: [
+            ...(prevSubcategories.Extras || []),
+            {
+              category: "Extras",
+              items: [...(prevSubcategories.Extras?.find(cat => cat.category === "Extras")?.items || []), newFood]
+            }
+          ],
+        }));
+    
+        // איפוס תוצאות החיפוש וסגירת תיבת החיפוש
+        setShowSearch(false);
+        setSearchQuery('');
+        setSearchResults([]);
+      }
+    };
+      
   // Update macros based on selected items
   const updateMacros = (selectedItems: SelectedItemsType) => {
     if (!selectedItems) return; // Check if selectedItems exist
@@ -324,72 +378,6 @@ const DailyMenu: React.FC = () => {
       setSearchQuery('');
       setSearchResults([]);
   };
-  
-  // Adds a selected snack to the "Extras" category
-  const handleAddToSnacks = (item: any) => {
-    if (!item.food) return; // Check if food data exists
-
-    // Create a new snack item based on the FoodItem interface
-    const newSnack: FoodItem = {
-        id: item.food.foodId || Date.now().toString(), // Ensure to use an id from the API if available
-        name: item.food.label,
-        calories: item.food.nutrients.ENERC_KCAL,
-        protein: item.food.nutrients.PROCNT,
-        fat: item.food.nutrients.FAT,
-        carbs: item.food.nutrients.CHOCDF,
-        quantity: 1, // Set the default quantity
-        food: item.food.foodId, // Assign the food ID if needed
-    };
-
-    // Update the selected state to include the new snack item directly
-    setSelectedItems(prevSelectedItems => ({
-        ...prevSelectedItems,
-        Extras: { snack: newSnack }, // Directly set the snack without nesting it in a category
-    }));
-
-    // Update state to include the new snack in the Extras category if needed
-    setSubcategories(prevSubcategories => {
-        const extras = prevSubcategories.Extras || [];
-
-        // Check if "Extras" category exists
-        if (extras.length > 0) {
-            // Check if the snack already exists in the Extras category
-            const existingItem = extras.find(extra =>
-                extra.items.some(snack => snack.id === newSnack.id) // Check by id
-            );
-
-            if (!existingItem) {
-                // Add the new snack to the existing Extras category
-                return {
-                    ...prevSubcategories,
-                    Extras: extras.map(extra =>
-                        extra.category === 'Extras'
-                            ? { ...extra, items: [...extra.items, newSnack] } // Append new snack
-                            : extra
-                    ),
-                };
-            }
-        } else {
-            // If "Extras" category does not exist, create it
-            const newSnackCategory: FoodCategory = {
-                category: 'Extras',
-                items: [newSnack],
-            };
-
-            return {
-                ...prevSubcategories,
-                Extras: [newSnackCategory], // Create new category with the snack
-            };
-        }
-
-        return prevSubcategories; // Return previous state if no updates were made
-    });
-
-    // Close the search view
-    setShowSearch(false);
-    setSearchQuery('');
-    setSearchResults([]);
-  };
      
   //Reset Menu button
   const resetMenu = () => {
@@ -406,6 +394,7 @@ const DailyMenu: React.FC = () => {
       calories: 0,
     });
     setShowModal(false);
+    setExtrasCalories(0);
     generateDailyMenu();
     setDetailsVisibility({
       Breakfast: {
@@ -509,7 +498,7 @@ const DailyMenu: React.FC = () => {
         {error && <Text style={styles.errorText}>{error}</Text>}
 
         {/* Meal Sections */}
-        {(['Breakfast', 'Lunch', 'Dinner', 'Extras'] as Array<string>).map((mealType) => (
+        {(['Breakfast', 'Lunch', 'Dinner'] as Array<string>).map((mealType) => (
           <View key={mealType} style={[styles.mealSection, { borderColor: getBorderColor(mealType) }]}>
             <Text style={styles.mealTitle}>
             {mealType} - <Text style={styles.caloriesText}>{Math.round(mealCalories[mealType] || 0)} kcal</Text>
@@ -524,7 +513,7 @@ const DailyMenu: React.FC = () => {
                     <View style={styles.selectContainer}>
                     <SelectList 
                         data={subcategory.items.map(item => ({ value: item.name, key: item.id }))}
-                        setSelected={() => {}} // לא נדרש כאן, כי זה כבר מתמלא אוטומטית
+                        setSelected={() => {}} 
                         placeholder={selectedItems[mealType][subcategory.category]?.name || "Select Food"}
                         selected={selectedItems[mealType][subcategory.category]?.name || null}
                     />
@@ -541,6 +530,43 @@ const DailyMenu: React.FC = () => {
             )}
           </View>
         ))}
+
+        {/* Extras Section */}
+        <View style={[styles.mealSection, { borderColor: getBorderColor('Extras') }]}>
+        <Text style={[styles.mealTitle, styles.caloriesText]} >
+          Extras - {' '}
+          <Text 
+            style={[
+              styles.caloriesText,
+              extrasCalories > Math.round(mealCalories['Extras'] || 0) ? styles.overBudget : null
+            ]}
+          >
+            {Math.round(extrasCalories || 0)} 
+          </Text> 
+          / {Math.round(mealCalories['Extras'] || 0)} kcal
+        </Text>
+          {selectedItems.Extras && Object.values(selectedItems.Extras).length > 0 ? (
+            Object.values(selectedItems.Extras).map((item: any) => (
+              <View key={item.id} style={styles.subcategory}>
+                <Text style={[styles.selectedItemName, styles.itemContainer]}>{item.name}</Text>
+                <TouchableOpacity onPress={() => toggleDetails('Extras', item.id)} style={styles.infoButton}>
+                  <Icon name="info" size={20} color="#696B6D" />
+                </TouchableOpacity>
+                {/* Display details below the selected item */}
+                <View style={styles.selectContainer}>
+                  {detailsVisibility['Extras']?.[item.id] && (
+                    <Text style={styles.selectedItemDetails}>
+                      Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text>No extras added yet.</Text>
+          )}
+        </View>
+
 
         {/* Floating Add Button */}
         <TouchableOpacity onPress={handleSearchIconPress} style={styles.floatingButton}>
@@ -566,31 +592,31 @@ const DailyMenu: React.FC = () => {
                   ) : error ? (
                     <Text style={styles.errorText}>{error}</Text>
                   ) : (
-                    <FlatList
+                  <FlatList
                       data={searchResults}
                       renderItem={({ item }) => (
-                        <TouchableOpacity
-                          style={styles.resultItem}
-                          onPress={() => handleAddToSnacks(item)}
-                        >
-                          <Text style={styles.resultText}>{item.food?.label || 'Unknown Food'}</Text>
-                          <Text style={styles.resultDetail}>
-                            Calories: {Number(item.food?.nutrients?.ENERC_KCAL || 0).toFixed(2)} kcal
-                          </Text>
-                          <Text style={styles.resultDetail}>
-                            Carbohydrates: {Number(item.food?.nutrients?.CHOCDF || 0).toFixed(2)} g
-                          </Text>
-                          <Text style={styles.resultDetail}>
-                            Fat: {Number(item.food?.nutrients?.FAT || 0).toFixed(2)} g
-                          </Text>
-                          <Text style={styles.resultDetail}>
-                            Protein: {Number(item.food?.nutrients?.PROCNT || 0).toFixed(2)} g
-                          </Text>
-                        </TouchableOpacity>
+                          <TouchableOpacity
+                              style={styles.resultItem}
+                              onPress={() => handleSelectFood(item)}
+                          >
+                              <Text style={styles.resultText}>{item.food?.label || 'Unknown Food'}</Text>
+                              <Text style={styles.resultDetail}>
+                                  Calories: {Number(item.food?.nutrients?.ENERC_KCAL || 0).toFixed(2)} kcal
+                              </Text>
+                              <Text style={styles.resultDetail}>
+                                  Carbohydrates: {Number(item.food?.nutrients?.CHOCDF || 0).toFixed(2)} g
+                              </Text>
+                              <Text style={styles.resultDetail}>
+                                  Fat: {Number(item.food?.nutrients?.FAT || 0).toFixed(2)} g
+                              </Text>
+                              <Text style={styles.resultDetail}>
+                                  Protein: {Number(item.food?.nutrients?.PROCNT || 0).toFixed(2)} g
+                              </Text>
+                          </TouchableOpacity>
                       )}
-                      keyExtractor={(item) => item.food?.foodId.toString() || Math.random().toString()} // Use a random key if foodId is not available
+                      keyExtractor={(item) => item.food?.foodId.toString() || Math.random().toString()}
                       ListEmptyComponent={() => <Text>No results found</Text>}
-                    />
+                  />
                   )}
                 </View>
               </TouchableWithoutFeedback>
@@ -606,11 +632,37 @@ const DailyMenu: React.FC = () => {
 
 // Styles
 const styles = StyleSheet.create({
+  overBudget: {
+    color: 'red', // צבע אדום
+  },
+  selectedItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    marginLeft: 10,
+  },
+  itemContainer: {
+    borderWidth: 1,
+    borderColor: '#999', // Change to your desired border color
+    borderRadius: 9,
+    backgroundColor: '#FFFFFF', // Optional: background color
+    padding: 12,
+  },
+  selectedItemName: {
+    fontSize: 14, // עדכן את גודל הפונט כך שיתאים לשאר הפריטים
+    paddingLeft: 20,
+    paddingTop: 10,
+  },
+    infoButtonE: {
+    marginLeft: 20,
+  },
   container: {
     flex: 1,
     padding: 20,
     backgroundColor: '#F9FAFE',
-    paddingBottom: 60,
+    paddingBottom: 100,
   },
   caloriesContainer: {
     alignItems: 'center',
