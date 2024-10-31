@@ -34,10 +34,10 @@ export const DonutChart: React.FC = () => {
   }, []);
 
   const data = [
-    { name: 'Not Very Active', population: activityLevels.notVeryActive, color: '#FFCE76', legendFontColor: '#333', legendFontSize: 15 },
-    { name: 'Lightly Active', population: activityLevels.lightlyActive, color: '#FDE598', legendFontColor: '#333', legendFontSize: 15 },
-    { name: 'Active', population: activityLevels.active, color: '#F8D675', legendFontColor: '#333', legendFontSize: 15 },
-    { name: 'Very Active', population: activityLevels.veryActive, color: '#E8A54B', legendFontColor: '#333', legendFontSize: 15 },
+    { name: 'Not Very Active', population: activityLevels.notVeryActive, color: '#FFCE76', legendFontColor: '#333', legendFontSize: 12 },
+    { name: 'Lightly Active', population: activityLevels.lightlyActive, color: '#FDE598', legendFontColor: '#333', legendFontSize: 12 },
+    { name: 'Active', population: activityLevels.active, color: '#F8D675', legendFontColor: '#333', legendFontSize: 12 },
+    { name: 'Very Active', population: activityLevels.veryActive, color: '#E8A54B', legendFontColor: '#333', legendFontSize: 12 },
   ];
 
   if (loading) {
@@ -60,7 +60,7 @@ export const DonutChart: React.FC = () => {
         }}
         accessor="population"
         backgroundColor="transparent"
-        paddingLeft="15"
+        paddingLeft="2"
       />
     </View>
   );

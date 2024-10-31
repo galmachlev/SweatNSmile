@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#5AA72A',
+    color: '#3E6613',
   },
   dateText: {
     fontSize: 14,
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   updateButton: {
-    backgroundColor: '#5EAD2C',
+    backgroundColor: '#3E6613',
     paddingVertical: 20,
     paddingHorizontal: 25,
     borderRadius: 15,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   saveChangesButton: {
-    backgroundColor: '#d9534f', // צבע רקע שונה בעת השינוי
+    backgroundColor: '#d9534f',
   },
   updateButtonText: {
     color: 'white',

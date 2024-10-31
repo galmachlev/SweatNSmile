@@ -27,10 +27,11 @@ import DailyDashboard from './screens/client/DailyDashboard';
 import DailyMenu2 from './screens/client/Menus/DailyMenuTest';
 import AdminEditUser from './screens/admin/AdminEditUser';
 import WeeklyChallenge from './screens/client/Challenges/WeeklyChallenge';
-import ChallengeDetails from './screens/client/Challenges/ChallengeDetails';
 
-
-
+LogBox.ignoreLogs([
+  'VirtualizedLists should never be nested inside plain ScrollViews', // Ignore VirtualizedLists warning
+  'Warning: Encountered two children with the same key' // Ignore duplicate key warning
+]);
 
 
 const Tab = createBottomTabNavigator();

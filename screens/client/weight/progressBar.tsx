@@ -25,8 +25,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ startWeight, currentWeight, g
     {
       name: `Achieved`,
       population: progressPercentage,
-      color: '#5AA72A',
-      legendFontColor: '#5AA72A',
+      color: '#3E6613',
+      legendFontColor: '#3E6613',
       legendFontSize: 14,
     },
     {
