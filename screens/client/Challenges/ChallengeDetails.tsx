@@ -280,13 +280,14 @@ const ChallengeDetails = ({ route }) => {
         )}
 
         <Button
-          mode="outlined"
-          onPress={() => navigation.navigate('WeeklyChallenge')}
-          style={styles.backButton}
-          contentStyle={styles.backButtonContent}
+        mode="outlined"
+        onPress={() => navigation.navigate('WeeklyChallenge')}
+        style={styles.backButton}
+        contentStyle={styles.backButtonContent}
         >
-          Back to Challenges
+        Back to Challenges
         </Button>
+
       </View>
     </ImageBackground>
   );

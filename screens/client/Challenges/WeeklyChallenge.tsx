@@ -25,14 +25,28 @@ const WeeklyChallenge = () => {
 
   useEffect(() => {
     const today = new Date();
-    // Check if there's an expired challenge or no active weekly goals
+    // If there's an expired challenge, clear it
     if (currentUser?.weeklyGoals?.[0]?.endDate && new Date(currentUser.weeklyGoals[0].endDate) < today) {
       updateUserDetails(currentUser.email, { weeklyGoals: [] });
       setIsChoosingNewChallenge(true);
     } else {
-      setIsChoosingNewChallenge(!currentUser?.weeklyGoals?.length);
+      // If there's an active challenge, navigate directly to ChallengeDetails
+      if (currentUser?.weeklyGoals?.length) {
+        navigation.navigate('ChallengeDetails', { goalType: currentUser.weeklyGoals[0].goalType });
+      } else {
+        setIsChoosingNewChallenge(true);
+      }
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!isChoosingNewChallenge) {
+      // Automatically navigate back to challenges when active challenge is displayed
+      setTimeout(() => {
+        setIsChoosingNewChallenge(true);
+      }, 0);
+    }
+  }, [isChoosingNewChallenge]);
 
   const selectChallenge = (goalType: ChallengeOption['goalType'], targetValue: number) => {
     const endDate = new Date();
@@ -89,36 +103,7 @@ const WeeklyChallenge = () => {
 
     return (
       <View style={styles.activeChallengeContainer}>
-        <Text style={styles.header}>This Week's Challenge</Text>
-        <Text style={styles.challengeText}>
-          {activeChallenge.goalType === 'workouts' && `Complete ${activeChallenge.targetValue} workouts this week.`}
-          {activeChallenge.goalType === 'sleep' && `Sleep ${activeChallenge.targetValue} hours each night.`}
-          {activeChallenge.goalType === 'activeDays' && `Stay active every day this week.`}
-          {activeChallenge.goalType === 'tryNew' && `Try a new activity this week.`}
-        </Text>
-
-        <Text style={styles.progressText}>
-          Progress: {activeChallenge.progressValue} / {activeChallenge.targetValue}
-        </Text>
-
-        <Progress.Bar
-          progress={progress}
-          width={null}
-          height={10}
-          color="#4CAF50"
-          unfilledColor="#C8E6C9"
-          borderRadius={5}
-          style={styles.progressBar}
-        />
-
-        {activeChallenge.isCompleted && <Text style={styles.completedText}>Challenge Completed!</Text>}
-
-        <View style={styles.changeChallengeContainer}>
-          <Text style={styles.changeChallengeText}>Don't want this challenge anymore?</Text>
-          <TouchableOpacity onPress={() => setIsChoosingNewChallenge(true)}>
-            <Text style={styles.changeChallengeButton}>Change Weekly Challenge</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.changeChallengeButton}>going back to challenges...</Text>
       </View>
     );
   };
@@ -200,35 +185,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     flex: 1,
-  },
-  challengeText: {
-    fontSize: 18,
-    color: '#3E6613',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  progressText: {
-    fontSize: 16,
-    color: '#3E6613',
-  },
-  progressBar: {
-    marginTop: 10,
-    width: '80%',
-  },
-  completedText: {
-    fontSize: 18,
-    color: '#4CAF50',
-    marginTop: 20,
-    fontWeight: 'bold',
-  },
-  changeChallengeContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  changeChallengeText: {
-    fontSize: 14,
-    color: '#3E6613',
-    marginBottom: 5,
   },
   changeChallengeButton: {
     color: '#FF6347',
