@@ -42,6 +42,7 @@ const DailyGeminiChat: React.FC = () => {
         "Generate a new nutrition tip",
         "What’s your motivational health tip for today?",
         "Share an interesting dieting fact",
+        "Tell a random fact about food",
       ];
 
       // Randomly select a prompt from the array

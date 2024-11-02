@@ -6,12 +6,12 @@ import { useUser } from '../../context/UserContext';
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { currentUser, profileImage } = useUser();
 
-  const userName = currentUser?.firstName || 'User';
+  const userName = currentUser ? `${currentUser.firstName}` : 'User';
   const startingWeight = currentUser?.startWeight || 0;
   const currentWeight = currentUser?.currentWeight || 0;
   const targetWeight = currentUser?.goalWeight || 0;
   const profile_img = currentUser?.profileImageUrl;
-
+  const targetDate = currentUser?.targetDate || new Date();
 
   // Calculate weight progress percentage
   const totalWeightToLose = startingWeight - targetWeight;
@@ -22,6 +22,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     navigation.navigate(componentName);
   };
 
+  // PDF link "Open Training Progaram"
   const openPDF = () => {
     const pdfUrl = 'https://www.spinplus.co.il/wp-content/uploads/2019/03/%D7%AA%D7%9B%D7%A0%D7%99%D7%AA-%D7%90%D7%99%D7%9E%D7%95%D7%9F-%D7%9E%D7%AA%D7%97%D7%99%D7%9C%D7%99%D7%9D.pdf';
     Linking.openURL(pdfUrl);
@@ -34,7 +35,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <Image source={profile_img ? { uri: profile_img } : require('../../Images/profile_img.jpg')} style={styles.profileImage} />
         <Text style={styles.greeting}>Hello, {userName}</Text>
         </View>
-
         <View style={styles.progressBarContainer}>
           <Text style={styles.progressBarTextLeft}>Start: {startingWeight} kg</Text>
           <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
@@ -44,26 +44,26 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.details}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
-            <Text style={styles.textbelow}>Target Date: 2024-09-08</Text>
-          </View>
+            <Text style={styles.textbelow}>Target Date: {targetDate.toLocaleDateString()}</Text>
+            </View>
         </View>
 
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={[styles.button, styles.GalleryButton]} onPress={() => handleNavigation('Gallery')}>
             <Image source={require('../../Images/GalleryIcon.png')} style={styles.iconImage} />
-            <Text>Gallery</Text>
+            <Text style={styles.btnText}>Gallery</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.WeightButton]} onPress={() => handleNavigation('DailyDashboard')}>
             <Image source={require('../../Images/WeightIcon.png')} style={styles.iconImage} />
-            <Text>Track</Text>
+            <Text style={styles.btnText}>Track</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('DailyMenu')}>
             <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
-            <Text>Menu</Text>
+            <Text style={styles.btnText}>Menu</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('WeeklyChallenge')}>
-            <Image source={require('../../Images/MoreIcon.png')} style={styles.iconImage} />
-            <Text>Weekly Challenge</Text>
+            <Image source={require('../../Images/TargetIcon.png')} style={styles.iconImage} />
+            <Text style={styles.btnText}>{'Challenge'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -165,6 +165,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 10,
   },
+  btnText: {
+    fontSize: 13,
+    paddingTop: 5,
+    fontWeight: '500',
+  },
   iconImage: {
     width: 45,
     height: 45,
@@ -173,22 +178,18 @@ const styles = StyleSheet.create({
   GalleryButton: {
     backgroundColor: '#FFCE76',
     paddingVertical: 35,
-    paddingHorizontal: 23,
   },
   WeightButton: {
     backgroundColor: '#FDE598',
     paddingVertical: 35,
-    paddingHorizontal: 23,
   },
   MenuButton: {
     backgroundColor: '#F8D675',
     paddingVertical: 35,
-    paddingHorizontal: 23,
   },
   MoreButton: {
     backgroundColor: '#E8A54B',
-    paddingVertical: 15,
-    paddingHorizontal: 1,
+    paddingVertical: 35,
   },
   chatContainer: {
     backgroundColor: '#F0F0F0',
