@@ -12,10 +12,10 @@ type ChallengeOption = {
 };
 
 const challengeOptions: ChallengeOption[] = [
-  { goalType: 'workouts', label: 'Workouts per week', description: 'Complete X workouts per week.', image: require('../../../Images/lunch.jpeg') },
-  { goalType: 'sleep', label: 'Sleep Hours', description: 'Sleep X hours each night.', image: require('../../../Images/lunch.jpeg') },
-  { goalType: 'activeDays', label: 'Active Days', description: 'Be active every day this week.', image: require('../../../Images/lunch.jpeg') },
-  { goalType: 'trySomethingNew', label: 'Try Something New', description: 'Try a new activity this week.', image: require('../../../Images/lunch.jpeg') },
+  { goalType: 'workouts', label: '3 Workouts', description: 'Complete 3 workouts per week.', image: require('../../../Images/run.png') },
+  { goalType: 'sleep', label: 'Sleep Hours', description: 'Sleep X hours each night.', image: require('../../../Images/Sleep.png') },
+  { goalType: 'activeDays', label: 'Active Days', description: 'Be active every day this week.', image: require('../../../Images/kik.jpg') },
+  { goalType: 'trySomethingNew', label: 'Try new activity', description: 'Try a new activity this week.', image: require('../../../Images/lifting.jpg') },
 ];
 
 const WeeklyChallenge = () => {
@@ -146,12 +146,13 @@ const styles = StyleSheet.create({
   challengeCardWrapper: {
     width: screenWidth * 0.42,
     marginVertical: 10,
+    marginHorizontal: 5,
     borderRadius: 15,
     overflow: 'hidden',
   },
   challengeCard: {
     width: '100%',
-    height: screenWidth * 0.5,
+    maxHeight: screenWidth * 0.6,
     padding: 10,
     justifyContent: 'space-between',
     shadowColor: '#000',
@@ -160,11 +161,13 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 7,
     backgroundColor: '#9AB28B',
+    paddingBottom: 20,
   },
   challengeImage: {
     width: '100%',
-    height: '50%',
+    height: '70%',
     borderRadius: 10,
+
   },
   challengeLabel: {
     fontSize: 16,
