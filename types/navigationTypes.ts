@@ -16,7 +16,7 @@ export type RootStackParamList = {
     DailyDashboard: undefined;
     DailyMenu: undefined;
     HomeStore: undefined;
-    StoreComingSoonScreen: undefined;
+    Store: undefined;
     HealthyRecipesScreen: undefined;
     Login: undefined;
     GeminiRecipes: undefined;

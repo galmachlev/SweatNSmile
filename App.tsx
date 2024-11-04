@@ -14,7 +14,6 @@ import DailyMenu from './screens/client/Menus/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
 import Login from './screens/stack/Login';
 import { UserProvider } from './context/UserContext';
-import StoreComingSoonScreen from './screens/client/StoreComingSoon';
 import HealthyRecipesScreen from './screens/client/recipes/HealthyRecipesScreen';
 import GeminiRecipes from './screens/client/recipes/GeminiRecipes';
 import RecipeCategoryScreen from './screens/client/recipes/RecipeCategoryScreen';
@@ -29,6 +28,7 @@ import AdminEditUser from './screens/admin/AdminEditUser';
 import WeeklyChallenge from './screens/client/Challenges/WeeklyChallenge';
 import ChallengeDetails from './screens/client/Challenges/ChallengeDetails';
 import { PaperProvider } from 'react-native-paper';
+import StoreScreen from './screens/client/StoreScreen';
 
 LogBox.ignoreLogs([
   'VirtualizedLists should never be nested inside plain ScrollViews', // Ignore VirtualizedLists warning
@@ -41,7 +41,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 const menuItems = [
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
-  { name: 'Store', icon: 'cart', routeName: 'StoreComingSoonScreen' },
+  { name: 'Store', icon: 'cart', routeName: 'Store' },
   { name: 'Recipes', icon: 'nutrition', routeName: 'HealthyRecipesScreen' },
 ];
 
@@ -188,7 +188,7 @@ export default function App() {
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="HealthyRecipesScreen" component={HealthyRecipesScreen}  options={{ headerTitle: '' }}/>
           <Stack.Screen name="HomeStore" component={HomeScreen} />
-          <Stack.Screen name="StoreComingSoonScreen" component={StoreComingSoonScreen} />
+          <Stack.Screen name="Store" component={StoreScreen} />
           <Stack.Screen name="GeminiRecipes" component={GeminiRecipes} options={{ headerTitle: '' }}/>
           <Stack.Screen name="RecipeCategoryScreen" component={RecipeCategoryScreen} options={{ headerTitle: '' }}/>
           <Stack.Screen name="HomeAdmin" component={HomeAdmin} options={{ headerTitle: 'HomeAdmin' }} />
