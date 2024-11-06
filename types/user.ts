@@ -32,4 +32,9 @@ export type User = {
         endDate: Date; // End date of the challenge (usually a week later)
         isCompleted?: boolean; // Tracks if the challenge is completed
     }[];
+
+    cart?: {
+        productId: string;
+        quantity: number;
+    }[];
 };
