@@ -165,6 +165,7 @@ const DailyMenu: React.FC = () => {
     });
   
     setSelectedItems(updatedSelectedItems); // Update selected items state
+    setTempSelections(updatedSelectedItems);
     updateMacros(updatedSelectedItems); // Update macro values based on selected items
     setResetClicked(false);
     setExtrasCalories(0);
@@ -319,6 +320,7 @@ const DailyMenu: React.FC = () => {
     });
   };
     
+     
   // Show selected item details below each selected food item
   const renderSelectedItemDetails = (mealType: string, category: string) => {
     const item = selectedItems[mealType]?.[category];
@@ -432,6 +434,10 @@ const DailyMenu: React.FC = () => {
     });
   };
 
+  const deleteItem = (mealType: string, itemId: string) => {
+    // implementation to delete the item
+  };
+
   return (
     <ScrollView>
       
@@ -472,8 +478,15 @@ const DailyMenu: React.FC = () => {
             <View style={styles.middleCircle}>
               <View style={styles.inner2Circle}>
                 <View style={styles.inner1Circle}>
-                  <Text style={styles.caloriesNum}>{macros.calories}/</Text>
-                  <Text style={styles.caloriesNum}>{dailyCalories}</Text>
+                <Text 
+    style={[
+      styles.caloriesNum, 
+      macros.calories > dailyCalories ? styles.overBudget : null
+    ]}
+  >
+    {macros.calories}/
+  </Text>
+  <Text style={styles.caloriesNum}>{dailyCalories}</Text>
                   <Text style={styles.caloriesLabel}>calories</Text>
                 </View>
               </View>
@@ -511,13 +524,15 @@ const DailyMenu: React.FC = () => {
               subcategories[mealType].map((subcategory) => {
                 const isVisible = detailsVisibility[mealType]?.[subcategory.category];
 
+                console.log(selectedItems[mealType][subcategory.category]?.name)
+
                 return (
                   <View key={subcategory.category} style={styles.subcategory}>
                     <Text style={styles.subcategoryTitle}>{subcategory.category}</Text>
                     <View style={styles.selectContainer}>
                     <SelectList 
                         data={subcategory.items.map(item => ({ value: item.name, key: item.id }))}
-                        setSelected={(item: any) =>  {resetClicked? setTempSelections({}) :setTempSelections(item)}}
+                        setSelected={(item: any) =>  {resetClicked? setTempSelections({}) : setTempSelections(item)}}
                         placeholder={selectedItems[mealType][subcategory.category]?.name || "Select Food"}
                         onSelect={() => FindItem(tempSelections)}
                     />
@@ -537,7 +552,7 @@ const DailyMenu: React.FC = () => {
 
         {/* Extras Section */}
         <View style={[styles.mealSection, { borderColor: getBorderColor('Extras') }]}>
-        <Text style={[styles.mealTitle, styles.caloriesText]} >
+        <Text style={[styles.mealTitle, styles.caloriesText]}>
           Extras - {' '}
           <Text 
             style={[
@@ -556,10 +571,13 @@ const DailyMenu: React.FC = () => {
                 <TouchableOpacity onPress={() => toggleDetails('Extras', item.id)} style={styles.infoButton}>
                   <Icon name="info" size={20} color="#696B6D" />
                 </TouchableOpacity>
-ר                <View style={styles.selectContainer}>
+                <TouchableOpacity onPress={() => deleteItem('Extras', item.id)} style={styles.deleteButton}>
+                  <Icon name="delete" size={20} color="#f00" />
+                </TouchableOpacity>
+                <View style={styles.selectContainer}>
                   {detailsVisibility['Extras']?.[item.id] && (
                     <Text style={styles.selectedItemDetails}>
-                      Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs}
+                      Calories: {item.calories.toFixed(0)} | P(g): {item.protein.toFixed(1)} | F(g): {item.fat.toFixed(1)} | C(g): {item.carbs.toFixed(1)}
                     </Text>
                   )}
                 </View>
@@ -587,7 +605,7 @@ const DailyMenu: React.FC = () => {
                     placeholder="Search for food to add"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
-                    onSubmitEditing={handleSearch} // Ensure handleSearch is implemented properly
+                    onSubmitEditing={handleSearch}
                     autoFocus
                   />
                   {loading ? (
