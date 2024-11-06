@@ -33,6 +33,8 @@ const DailyMenu: React.FC = () => {
   const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({});
   const [mealCalories, setMealCalories] = useState<{ [key: string]: number }>({});
   const [extrasCalories, setExtrasCalories] = useState(0);
+  const [tempSelections, setTempSelections] = useState<SelectedItemsType>({});
+  const [resetClicked, setResetClicked] = useState(false);
 
   // Function to get the border color based on the meal type
   const getBorderColor = (mealType: string): string => {
@@ -156,7 +158,6 @@ const DailyMenu: React.FC = () => {
         if (item) {
           const adjustedItem = adjustFoodItem(item, nutrientCalories);
           updatedSelectedItems[mealType][nutrient] = adjustedItem;
-  
           // הוסף קלוריות לקטגוריה המתאימה
           allocatedCalories[mealType][nutrient] = adjustedItem.calories;
         }
@@ -165,6 +166,7 @@ const DailyMenu: React.FC = () => {
   
     setSelectedItems(updatedSelectedItems); // Update selected items state
     updateMacros(updatedSelectedItems); // Update macro values based on selected items
+    setResetClicked(false);
     setExtrasCalories(0);
   };
 
@@ -205,26 +207,36 @@ const DailyMenu: React.FC = () => {
 };
   
   // Handle item selection
-  const handleSelect = (selected: string | null, mealType: string, category: string, items: FoodItem[], targetCalories: number) => {
+  const handleSelect = (selected: FoodItem | null, mealType: string, category: string, targetCalories: number) => {
     if (selected) {
-        const item = items.find(item => item.name === selected); // לא צריך || null כי אם לא נמצא, הפונקציה תפסיק
-        if (item) {
-            const adjustedItem = adjustFoodItem(item, targetCalories); // מתאימים את הפריט לפי קלוריות יעד
-
-            setSelectedItems(prev => {
-                const newSelectedItems = {
-                    ...prev,
-                    [mealType]: {
-                        ...prev[mealType],
-                        [category]: adjustedItem, // מעדכנים את הפריט החדש בסטייט
-                    },
-                };
-                updateMacros(newSelectedItems); // מעדכנים את הערכים הכוללים
-                return newSelectedItems; // מחזירים את הסטייט החדש
-            });
-        }
+      const adjustedItem = adjustFoodItem(selected, targetCalories); // מתאימים את הפריט לפי קלוריות יעד
+      setSelectedItems(prev => {
+        const newSelectedItems = {
+          ...prev,
+          [mealType]: {
+            ...prev[mealType],
+            [category]: adjustedItem, // מעדכנים את הפריט החדש בסטייט
+          },
+        };
+        updateMacros(newSelectedItems); // מעדכנים את הערכים הכוללים
+        return newSelectedItems; // מחזירים את הסטייט החדש
+      });
     }
   };
+  
+  const FindItem = (id: string) => { 
+    let categories = mealData.find(meal => meal.mealName[0] === id[0])?.categories || []; 
+    let items = categories.find(cat => cat.code === id[1])?.items || []; 
+    let item = items.find(item => item.id === id) || null; 
+    let mealType = id[0]=='B'?'Breakfast':id[0]=='L'?'Lunch':id[0]=='D'?'Dinner':'Extras'; 
+    let cat = categories.find(cat => cat.code === id[1])?.category || ''; 
+    let targetCalories = mealCalories[mealType] * nutrientDistribution[cat];
+
+    handleSelect(item, mealType, cat, targetCalories);
+    console.log("Selected Item:", item);
+    console.log("Target Calories:", targetCalories); 
+    console.log("ID:", id);
+  }
 
   // Handle Extras item selection and adding to selected items after searching item
   const handleSelectFood = (item: any) => {
@@ -279,22 +291,22 @@ const DailyMenu: React.FC = () => {
   };
       
   // Update macros based on selected items
-  const updateMacros = (selectedItems: SelectedItemsType) => {
-    if (!selectedItems) return; // Check if selectedItems exist
+  const updateMacros = (tempSelections: SelectedItemsType) => {
+    if (!tempSelections) return; // Check if selectedItems exist
     let totalProtein = 0;
     let totalFat = 0;
     let totalCarbs = 0;
     let totalCalories = 0;
 
-    Object.keys(selectedItems).forEach(mealType => {
-      const categories = selectedItems[mealType] || {};
+    Object.keys(tempSelections).forEach(mealType => {
+      const categories = tempSelections[mealType] || {};
       Object.keys(categories).forEach(category => {
-        const selectedItem = categories[category];
-        if (selectedItem) {
-          totalProtein += selectedItem.protein || 0;
-          totalFat += selectedItem.fat || 0;
-          totalCarbs += selectedItem.carbs || 0;
-          totalCalories += selectedItem.calories || 0;
+        const tempSelections = categories[category];
+        if (tempSelections) {
+          totalProtein += tempSelections.protein || 0;
+          totalFat += tempSelections.fat || 0;
+          totalCarbs += tempSelections.carbs || 0;
+          totalCalories += tempSelections.calories || 0;
         }
       });
     });
@@ -395,56 +407,31 @@ const DailyMenu: React.FC = () => {
       setSearchQuery('');
       setSearchResults([]);
   };
-     
+  
+  useEffect(() => {
+    if (resetClicked) {
+      generateDailyMenu();
+      setTempSelections({});
+      setResetClicked(false); // Reset the flag after generating the menu
+    }
+  }, [resetClicked]); // This useEffect is triggered only when resetClicked is set to true
+  
   //Reset Menu button
   const resetMenu = () => {
-    setSelectedItems({
-      Breakfast: {},
-      Lunch: {},
-      Dinner: {},
-      Extras: {},
-    });
-    setMacros({
-      protein: 0,
-      carbs: 0,
-      fat: 0,
-      calories: 0,
-    });
     setShowModal(false);
+    setResetClicked(true);
+    setSelectedItems({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} });
+    setMacros({ protein: 0, carbs: 0, fat: 0, calories: 0 });
     setExtrasCalories(0);
-    generateDailyMenu();
+    setTempSelections({});
     setDetailsVisibility({
-      Breakfast: {
-        Carb: false,
-        Fat: false,
-        Fruit: false,
-        Protein: false,
-        Vegetable: false,
-      },
-      Lunch: {
-        Carb: false,
-        Fat: false,
-        Fruit: false,
-        Protein: false,
-        Vegetable: false,
-      },
-      Dinner: {
-        Carb: false,
-        Fat: false,
-        Fruit: false,
-        Protein: false,
-        Vegetable: false,
-      },
-      Extras: {
-        Carb: false,
-        Fat: false,
-        Fruit: false,
-        Protein: false,
-        Vegetable: false,
-      },
+      Breakfast: { Carb: false, Fat: false, Fruit: false, Protein: false, Vegetable: false },
+      Lunch: { Carb: false, Fat: false, Fruit: false, Protein: false, Vegetable: false },
+      Dinner: { Carb: false, Fat: false, Fruit: false, Protein: false, Vegetable: false },
+      Extras: { Carb: false, Fat: false, Fruit: false, Protein: false, Vegetable: false },
     });
   };
-  
+
   return (
     <ScrollView>
       
@@ -530,9 +517,9 @@ const DailyMenu: React.FC = () => {
                     <View style={styles.selectContainer}>
                     <SelectList 
                         data={subcategory.items.map(item => ({ value: item.name, key: item.id }))}
-                        setSelected={() => {}} // לא נדרש כאן, כי זה כבר מתמלא אוטומטית
+                        setSelected={(item: any) =>  {resetClicked? setTempSelections({}) :setTempSelections(item)}}
                         placeholder={selectedItems[mealType][subcategory.category]?.name || "Select Food"}
-                        selected={selectedItems[mealType][subcategory.category]?.name || null}
+                        onSelect={() => FindItem(tempSelections)}
                     />
                       <TouchableOpacity onPress={() => toggleDetails(mealType, subcategory.category)} style={styles.infoButton}>
                         <Icon name="info" size={20} color="#696B6D" />
@@ -569,8 +556,7 @@ const DailyMenu: React.FC = () => {
                 <TouchableOpacity onPress={() => toggleDetails('Extras', item.id)} style={styles.infoButton}>
                   <Icon name="info" size={20} color="#696B6D" />
                 </TouchableOpacity>
-                {/* Display details below the selected item */}
-                <View style={styles.selectContainer}>
+ר                <View style={styles.selectContainer}>
                   {detailsVisibility['Extras']?.[item.id] && (
                     <Text style={styles.selectedItemDetails}>
                       Calories: {item.calories} | P(g): {item.protein} | F(g): {item.fat} | C(g): {item.carbs}
@@ -695,7 +681,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   caloriesNum: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#696B6D',
   },

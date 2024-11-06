@@ -17,6 +17,8 @@ export interface FoodItem {
 export interface FoodCategory {
     category: string;
     items: FoodItem[];
+    code?: string;
+
 }
 
 export interface Meal {
@@ -43,6 +45,7 @@ export const mealData: Meal[] = [
         mealName: 'Breakfast',
         categories: [
             {
+                code: 'P',
                 category: 'Protein',
                 items: [
                     { id: 'BP1', name: 'Eggs', calories: 155, protein: 13, fat: 11, carbs: 1.1, quantity: 100 },
@@ -60,6 +63,7 @@ export const mealData: Meal[] = [
                 ],
             },
             {
+                code: 'C',
                 category: 'Carb',
                 items: [
                     { id: 'BC1', name: 'Brown Rice', calories: 111, protein: 2.6, fat: 0.9, carbs: 23, quantity: 100 },
@@ -86,6 +90,7 @@ export const mealData: Meal[] = [
                 ],
             },
             {
+                code: 'F',
                 category: 'Fat',
                 items: [
                     { id: 'BF1', name: 'Avocado', calories: 160, protein: 2, fat: 15, carbs: 9, quantity: 100 },
@@ -109,6 +114,7 @@ export const mealData: Meal[] = [
                 ],
                             },
             {
+                code: 'V',
                 category: 'Vegetable',
                 items: [
                     { id: 'BV1', name: 'Spinach', calories: 23, protein: 2.9, fat: 0.4, carbs: 3.6, quantity: 100 },
@@ -128,29 +134,31 @@ export const mealData: Meal[] = [
                 ],
                             },
             {
+                code: 'R',
                 category: 'Fruit',
                 items: [
-                    { id: 'BF1', name: 'Banana', calories: 89, protein: 1.1, fat: 0.3, carbs: 23, quantity: 100 },
-                    { id: 'BF2', name: 'Apple', calories: 52, protein: 0.3, fat: 0.2, carbs: 14, quantity: 100 },
-                    { id: 'BF3', name: 'Blueberries', calories: 57, protein: 0.7, fat: 0.3, carbs: 14, quantity: 100 },
-                    { id: 'BF4', name: 'Strawberries', calories: 32, protein: 0.7, fat: 0.3, carbs: 7.7, quantity: 100 },
-                    { id: 'BF5', name: 'Mango', calories: 60, protein: 0.8, fat: 0.4, carbs: 15, quantity: 100 },
-                    { id: 'BF6', name: 'Orange', calories: 47, protein: 0.9, fat: 0.1, carbs: 12, quantity: 100 },
-                    { id: 'BF7', name: 'Kiwi', calories: 61, protein: 1.1, fat: 0.5, carbs: 15, quantity: 100 },
-                    { id: 'BF8', name: 'Plum', calories: 46, protein: 0.7, fat: 0.3, carbs: 11, quantity: 100 },
-                    { id: 'BF9', name: 'Papaya', calories: 43, protein: 0.5, fat: 0.3, carbs: 11, quantity: 100 },
-                    { id: 'BF10', name: 'Watermelon', calories: 30, protein: 0.6, fat: 0.2, carbs: 8, quantity: 100 },
-                    { id: 'BF11', name: 'Grapes', calories: 69, protein: 0.7, fat: 0.2, carbs: 18, quantity: 100 },
-                    { id: 'BF12', name: 'Peach', calories: 39, protein: 0.9, fat: 0.3, carbs: 10, quantity: 100 },
-                    { id: 'BF13', name: 'Pineapple', calories: 50, protein: 0.5, fat: 0.1, carbs: 13, quantity: 100 },
+                    { id: 'BR1', name: 'Banana', calories: 89, protein: 1.1, fat: 0.3, carbs: 23, quantity: 100 },
+                    { id: 'BR2', name: 'Apple', calories: 52, protein: 0.3, fat: 0.2, carbs: 14, quantity: 100 },
+                    { id: 'BR3', name: 'Blueberries', calories: 57, protein: 0.7, fat: 0.3, carbs: 14, quantity: 100 },
+                    { id: 'BR4', name: 'Strawberries', calories: 32, protein: 0.7, fat: 0.3, carbs: 7.7, quantity: 100 },
+                    { id: 'BR5', name: 'Mango', calories: 60, protein: 0.8, fat: 0.4, carbs: 15, quantity: 100 },
+                    { id: 'BR6', name: 'Orange', calories: 47, protein: 0.9, fat: 0.1, carbs: 12, quantity: 100 },
+                    { id: 'BR7', name: 'Kiwi', calories: 61, protein: 1.1, fat: 0.5, carbs: 15, quantity: 100 },
+                    { id: 'BR8', name: 'Plum', calories: 46, protein: 0.7, fat: 0.3, carbs: 11, quantity: 100 },
+                    { id: 'BR9', name: 'Papaya', calories: 43, protein: 0.5, fat: 0.3, carbs: 11, quantity: 100 },
+                    { id: 'BR10', name: 'Watermelon', calories: 30, protein: 0.6, fat: 0.2, carbs: 8, quantity: 100 },
+                    { id: 'BR11', name: 'Grapes', calories: 69, protein: 0.7, fat: 0.2, carbs: 18, quantity: 100 },
+                    { id: 'BR12', name: 'Peach', calories: 39, protein: 0.9, fat: 0.3, carbs: 10, quantity: 100 },
+                    { id: 'BR13', name: 'Pineapple', calories: 50, protein: 0.5, fat: 0.1, carbs: 13, quantity: 100 },
                 ],
-                            },
+            },
         ],
     },
     {
         mealName: 'Lunch',
         categories: [
                 {
+                    code: 'P',
                     category: 'Protein',
                     items: [
                         { id: 'LP1', name: 'Chicken Breast', calories: 165, protein: 31, fat: 3.6, carbs: 0, quantity: 100 },
@@ -171,6 +179,7 @@ export const mealData: Meal[] = [
                     ],
                 },
                 {
+                    code: 'C',
                     category: 'Carb',
                     items: [
                         { id: 'LC1', name: 'Brown Rice', calories: 111, protein: 2.6, fat: 0.9, carbs: 23, quantity: 100 },
@@ -197,6 +206,7 @@ export const mealData: Meal[] = [
                     ],
                 },
                 {
+                    code: 'F',
                     category: 'Fat',
                     items: [
                         { id: 'LF1', name: 'Avocado', calories: 160, protein: 2, fat: 15, carbs: 9, quantity: 100 },
@@ -220,48 +230,51 @@ export const mealData: Meal[] = [
                         ],
                 },
                     {
-                category: 'Vegetable',
-                items: [
-                    { id: 'LV1', name: 'Spinach', calories: 23, protein: 2.9, fat: 0.4, carbs: 3.6, quantity: 100 },
-                    { id: 'LV2', name: 'Tomato', calories: 18, protein: 0.9, fat: 0.2, carbs: 3.9, quantity: 100 },
-                    { id: 'LV3', name: 'Bell Pepper', calories: 31, protein: 1, fat: 0.3, carbs: 6, quantity: 100 },
-                    { id: 'LV4', name: 'Cucumber', calories: 16, protein: 0.7, fat: 0.1, carbs: 3.6, quantity: 100 },
-                    { id: 'LV5', name: 'Carrot', calories: 41, protein: 0.9, fat: 0.2, carbs: 10, quantity: 100 },
-                    { id: 'LV6', name: 'Kale', calories: 35, protein: 2.9, fat: 0.6, carbs: 4.4, quantity: 100 },
-                    { id: 'LV7', name: 'Zucchini', calories: 17, protein: 1.2, fat: 0.3, carbs: 3.1, quantity: 100 },
-                    { id: 'LV8', name: 'Eggplant', calories: 25, protein: 1, fat: 0.2, carbs: 6, quantity: 100 },
-                    { id: 'LV9', name: 'Cabbage', calories: 25, protein: 1.3, fat: 0.1, carbs: 6, quantity: 100 },
-                    { id: 'LV10', name: 'Sweet Potato', calories: 86, protein: 1.6, fat: 0.1, carbs: 20, quantity: 100 },
-                    { id: 'LV11', name: 'Radish', calories: 16, protein: 0.7, fat: 0.1, carbs: 3.4, quantity: 100 },
-                    { id: 'LV12', name: 'Beets', calories: 43, protein: 1.6, fat: 0.2, carbs: 10, quantity: 100 },
-                    { id: 'LV13', name: 'Lettuce', calories: 15, protein: 1.4, fat: 0.2, carbs: 2.9, quantity: 100 },
-                    { id: 'LV14', name: 'Kale', calories: 49, protein: 4.3, fat: 0.9, carbs: 9, quantity: 100 },
-                ],
-            },
-            {
-                category: 'Fruit',
-                items: [
-                    { id: 'LF1', name: 'Banana', calories: 89, protein: 1.1, fat: 0.3, carbs: 23, quantity: 100 },
-                    { id: 'LF2', name: 'Apple', calories: 52, protein: 0.3, fat: 0.2, carbs: 14, quantity: 100 },
-                    { id: 'LF3', name: 'Blueberries', calories: 57, protein: 0.7, fat: 0.3, carbs: 14, quantity: 100 },
-                    { id: 'LF4', name: 'Strawberries', calories: 32, protein: 0.7, fat: 0.3, carbs: 7.7, quantity: 100 },
-                    { id: 'LF5', name: 'Mango', calories: 60, protein: 0.8, fat: 0.4, carbs: 15, quantity: 100 },
-                    { id: 'LF6', name: 'Orange', calories: 47, protein: 0.9, fat: 0.1, carbs: 12, quantity: 100 },
-                    { id: 'LF7', name: 'Kiwi', calories: 61, protein: 1.1, fat: 0.5, carbs: 15, quantity: 100 },
-                    { id: 'LF8', name: 'Plum', calories: 46, protein: 0.7, fat: 0.3, carbs: 11, quantity: 100 },
-                    { id: 'LF9', name: 'Papaya', calories: 43, protein: 0.5, fat: 0.3, carbs: 11, quantity: 100 },
-                    { id: 'LF10', name: 'Watermelon', calories: 30, protein: 0.6, fat: 0.2, carbs: 8, quantity: 100 },
-                    { id: 'LF11', name: 'Grapes', calories: 69, protein: 0.7, fat: 0.2, carbs: 18, quantity: 100 },
-                    { id: 'LF12', name: 'Peach', calories: 39, protein: 0.9, fat: 0.3, carbs: 10, quantity: 100 },
-                    { id: 'LF13', name: 'Pineapple', calories: 50, protein: 0.5, fat: 0.1, carbs: 13, quantity: 100 },
-                ],
-            },
+                    code: 'V',
+                    category: 'Vegetable',
+                    items: [
+                        { id: 'LV1', name: 'Spinach', calories: 23, protein: 2.9, fat: 0.4, carbs: 3.6, quantity: 100 },
+                        { id: 'LV2', name: 'Tomato', calories: 18, protein: 0.9, fat: 0.2, carbs: 3.9, quantity: 100 },
+                        { id: 'LV3', name: 'Bell Pepper', calories: 31, protein: 1, fat: 0.3, carbs: 6, quantity: 100 },
+                        { id: 'LV4', name: 'Cucumber', calories: 16, protein: 0.7, fat: 0.1, carbs: 3.6, quantity: 100 },
+                        { id: 'LV5', name: 'Carrot', calories: 41, protein: 0.9, fat: 0.2, carbs: 10, quantity: 100 },
+                        { id: 'LV6', name: 'Kale', calories: 35, protein: 2.9, fat: 0.6, carbs: 4.4, quantity: 100 },
+                        { id: 'LV7', name: 'Zucchini', calories: 17, protein: 1.2, fat: 0.3, carbs: 3.1, quantity: 100 },
+                        { id: 'LV8', name: 'Eggplant', calories: 25, protein: 1, fat: 0.2, carbs: 6, quantity: 100 },
+                        { id: 'LV9', name: 'Cabbage', calories: 25, protein: 1.3, fat: 0.1, carbs: 6, quantity: 100 },
+                        { id: 'LV10', name: 'Sweet Potato', calories: 86, protein: 1.6, fat: 0.1, carbs: 20, quantity: 100 },
+                        { id: 'LV11', name: 'Radish', calories: 16, protein: 0.7, fat: 0.1, carbs: 3.4, quantity: 100 },
+                        { id: 'LV12', name: 'Beets', calories: 43, protein: 1.6, fat: 0.2, carbs: 10, quantity: 100 },
+                        { id: 'LV13', name: 'Lettuce', calories: 15, protein: 1.4, fat: 0.2, carbs: 2.9, quantity: 100 },
+                        { id: 'LV14', name: 'Kale', calories: 49, protein: 4.3, fat: 0.9, carbs: 9, quantity: 100 },
+                    ],
+                },
+                {
+                    code: 'R',
+                    category: 'Fruit',
+                    items: [
+                        { id: 'LR1', name: 'Banana', calories: 89, protein: 1.1, fat: 0.3, carbs: 23, quantity: 100 },
+                        { id: 'LR2', name: 'Apple', calories: 52, protein: 0.3, fat: 0.2, carbs: 14, quantity: 100 },
+                        { id: 'LR3', name: 'Blueberries', calories: 57, protein: 0.7, fat: 0.3, carbs: 14, quantity: 100 },
+                        { id: 'LR4', name: 'Strawberries', calories: 32, protein: 0.7, fat: 0.3, carbs: 7.7, quantity: 100 },
+                        { id: 'LR5', name: 'Mango', calories: 60, protein: 0.8, fat: 0.4, carbs: 15, quantity: 100 },
+                        { id: 'LR6', name: 'Orange', calories: 47, protein: 0.9, fat: 0.1, carbs: 12, quantity: 100 },
+                        { id: 'LR7', name: 'Kiwi', calories: 61, protein: 1.1, fat: 0.5, carbs: 15, quantity: 100 },
+                        { id: 'LR8', name: 'Plum', calories: 46, protein: 0.7, fat: 0.3, carbs: 11, quantity: 100 },
+                        { id: 'LR9', name: 'Papaya', calories: 43, protein: 0.5, fat: 0.3, carbs: 11, quantity: 100 },
+                        { id: 'LR10', name: 'Watermelon', calories: 30, protein: 0.6, fat: 0.2, carbs: 8, quantity: 100 },
+                        { id: 'LR11', name: 'Grapes', calories: 69, protein: 0.7, fat: 0.2, carbs: 18, quantity: 100 },
+                        { id: 'LR12', name: 'Peach', calories: 39, protein: 0.9, fat: 0.3, carbs: 10, quantity: 100 },
+                        { id: 'LR13', name: 'Pineapple', calories: 50, protein: 0.5, fat: 0.1, carbs: 13, quantity: 100 },
+                    ],
+                },
         ],
     },
     {
         mealName: 'Dinner',
         categories: [
             {
+                code: 'P',
                 category: 'Protein',
                 items: [
                     { id: 'DP1', name: 'Tofu', calories: 76, protein: 8, fat: 4.8, carbs: 1.9, quantity: 100 },
@@ -277,6 +290,7 @@ export const mealData: Meal[] = [
                 ],
             },
             {
+                code: 'C',
                 category: 'Carb',
                 items: [
                     { id: 'DC1', name: 'Brown Rice', calories: 111, protein: 2.6, fat: 0.9, carbs: 23, quantity: 100 },
@@ -303,6 +317,7 @@ export const mealData: Meal[] = [
                 ],
             },
             {
+                code: 'F',
                 category: 'Fat',
                 items: [
                     { id: 'DF1', name: 'Avocado', calories: 160, protein: 2, fat: 15, carbs: 9, quantity: 100 },
@@ -326,6 +341,7 @@ export const mealData: Meal[] = [
                 ],
             },
             {
+                code: 'V',
                 category: 'Vegetable',
                 items: [
                     { id: 'DV1', name: 'Spinach', calories: 23, protein: 2.9, fat: 0.4, carbs: 3.6, quantity: 100 },
@@ -345,21 +361,22 @@ export const mealData: Meal[] = [
                 ],
             },
             {
+                code: 'R',
                 category: 'Fruit',
                 items: [
-                    { id: 'DF1', name: 'Banana', calories: 89, protein: 1.1, fat: 0.3, carbs: 23, quantity: 100 },
-                    { id: 'DF2', name: 'Apple', calories: 52, protein: 0.3, fat: 0.2, carbs: 14, quantity: 100 },
-                    { id: 'DF3', name: 'Blueberries', calories: 57, protein: 0.7, fat: 0.3, carbs: 14, quantity: 100 },
-                    { id: 'DF4', name: 'Strawberries', calories: 32, protein: 0.7, fat: 0.3, carbs: 7.7, quantity: 100 },
-                    { id: 'DF5', name: 'Mango', calories: 60, protein: 0.8, fat: 0.4, carbs: 15, quantity: 100 },
-                    { id: 'DF6', name: 'Orange', calories: 47, protein: 0.9, fat: 0.1, carbs: 12, quantity: 100 },
-                    { id: 'DF7', name: 'Kiwi', calories: 61, protein: 1.1, fat: 0.5, carbs: 15, quantity: 100 },
-                    { id: 'DF8', name: 'Plum', calories: 46, protein: 0.7, fat: 0.3, carbs: 11, quantity: 100 },
-                    { id: 'DF9', name: 'Papaya', calories: 43, protein: 0.5, fat: 0.3, carbs: 11, quantity: 100 },
-                    { id: 'DF10', name: 'Watermelon', calories: 30, protein: 0.6, fat: 0.2, carbs: 8, quantity: 100 },
-                    { id: 'DF11', name: 'Grapes', calories: 69, protein: 0.7, fat: 0.2, carbs: 18, quantity: 100 },
-                    { id: 'DF12', name: 'Peach', calories: 39, protein: 0.9, fat: 0.3, carbs: 10, quantity: 100 },
-                    { id: 'DF13', name: 'Pineapple', calories: 50, protein: 0.5, fat: 0.1, carbs: 13, quantity: 100 },
+                    { id: 'DR1', name: 'Banana', calories: 89, protein: 1.1, fat: 0.3, carbs: 23, quantity: 100 },
+                    { id: 'DR2', name: 'Apple', calories: 52, protein: 0.3, fat: 0.2, carbs: 14, quantity: 100 },
+                    { id: 'DR3', name: 'Blueberries', calories: 57, protein: 0.7, fat: 0.3, carbs: 14, quantity: 100 },
+                    { id: 'DR4', name: 'Strawberries', calories: 32, protein: 0.7, fat: 0.3, carbs: 7.7, quantity: 100 },
+                    { id: 'DR5', name: 'Mango', calories: 60, protein: 0.8, fat: 0.4, carbs: 15, quantity: 100 },
+                    { id: 'DR6', name: 'Orange', calories: 47, protein: 0.9, fat: 0.1, carbs: 12, quantity: 100 },
+                    { id: 'DR7', name: 'Kiwi', calories: 61, protein: 1.1, fat: 0.5, carbs: 15, quantity: 100 },
+                    { id: 'DR8', name: 'Plum', calories: 46, protein: 0.7, fat: 0.3, carbs: 11, quantity: 100 },
+                    { id: 'DR9', name: 'Papaya', calories: 43, protein: 0.5, fat: 0.3, carbs: 11, quantity: 100 },
+                    { id: 'DR10', name: 'Watermelon', calories: 30, protein: 0.6, fat: 0.2, carbs: 8, quantity: 100 },
+                    { id: 'DR11', name: 'Grapes', calories: 69, protein: 0.7, fat: 0.2, carbs: 18, quantity: 100 },
+                    { id: 'DR12', name: 'Peach', calories: 39, protein: 0.9, fat: 0.3, carbs: 10, quantity: 100 },
+                    { id: 'DR13', name: 'Pineapple', calories: 50, protein: 0.5, fat: 0.1, carbs: 13, quantity: 100 },
                 ],
             },
         ],
