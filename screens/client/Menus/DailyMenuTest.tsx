@@ -30,6 +30,7 @@ const DailyMenu: React.FC = () => {
   const [subcategories, setSubcategories] = useState<Record<string, FoodCategory[]>>({});
   const [selectedItems, setSelectedItems] = useState<Record<string, Record<string, FoodItem | null>>>({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} });
   const [showModal, setShowModal] = useState(false);
+  const [showModalSave, setShowModalSave] = useState(false);  
   const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({});
   const [mealCalories, setMealCalories] = useState<{ [key: string]: number }>({});
   const [extrasCalories, setExtrasCalories] = useState(0);
@@ -571,9 +572,9 @@ const DailyMenu: React.FC = () => {
                 <TouchableOpacity onPress={() => toggleDetails('Extras', item.id)} style={styles.infoButton}>
                   <Icon name="info" size={20} color="#696B6D" />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => deleteItem('Extras', item.id)} style={styles.deleteButton}>
+                {/* <TouchableOpacity onPress={() => deleteItem('Extras', item.id)} style={styles.deleteButton}>
                   <Icon name="delete" size={20} color="#f00" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <View style={styles.selectContainer}>
                   {detailsVisibility['Extras']?.[item.id] && (
                     <Text style={styles.selectedItemDetails}>
@@ -646,6 +647,36 @@ const DailyMenu: React.FC = () => {
         )}
 
       </View>
+
+      {/* Save Menu Button */}
+      <TouchableOpacity 
+          onPress={() => setShowModalSave(true)} 
+          style={styles.saveButton}
+        >
+          <Text style={styles.resetButtonText}>
+          Save Menu
+          </Text>
+          <MaterialIcons name="save" size={24} color="#FFF" />
+      </TouchableOpacity>
+
+      {/* Save Menu Button Modal */}
+      <Modal transparent={true} visible={showModalSave} animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Save Menu</Text>
+              <Text style={styles.modalMessage}>Would you like to save this version as today's menu?</Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity onPress={() => setShowModalSave(false)} style={styles.yesButton}>
+                  <Text style={styles.confirmButtonText}>Yes</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowModalSave(false)} style={styles.cancelButton}>
+                  <Text style={styles.cancelButtonText}>No</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+      </Modal>
+
     </ScrollView>
   );
 };
@@ -930,9 +961,17 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 10,
   },
+  saveButton: {
+    padding: 20,
+    marginBottom: 70,
+    backgroundColor: '#3E6613', // צבע הרקע של הכפתור
+    flexDirection: 'row', // מאפשר הצגת האייקון והטקסט באותה שורה
+    alignItems: 'center', // ממרכז את התוכן
+    justifyContent: 'center', // מרכז את האייקון
+  },
   resetButton: {
     padding: 15,
-    backgroundColor: '#D3D3D3', // צבע הרקע של הכפתור
+    backgroundColor: '#FF7B7B', // צבע הרקע של הכפתור
     flexDirection: 'row', // מאפשר הצגת האייקון והטקסט באותה שורה
     alignItems: 'center', // ממרכז את התוכן
     justifyContent: 'center', // מרכז את האייקון
@@ -982,6 +1021,12 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: '#FFF',
     textAlign: 'center',
+  },
+  yesButton: {
+    backgroundColor: '#3E6613', // Same as reset button
+    padding: 10,
+    borderRadius: 5,
+    width: '45%',
   },
   cancelButton: {
     backgroundColor: '#ccc', // Neutral color
