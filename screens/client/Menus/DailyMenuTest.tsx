@@ -36,6 +36,7 @@ const DailyMenu: React.FC = () => {
   const [extrasCalories, setExtrasCalories] = useState(0);
   const [tempSelections, setTempSelections] = useState<SelectedItemsType>({});
   const [resetClicked, setResetClicked] = useState(false);
+  const [resetCounter, setResetCounter] = useState(0);
 
   // Function to get the border color based on the meal type
   const getBorderColor = (mealType: string): string => {
@@ -419,8 +420,88 @@ const DailyMenu: React.FC = () => {
     }
   }, [resetClicked]); // This useEffect is triggered only when resetClicked is set to true
   
-  //Reset Menu button
-  const resetMenu = () => {
+  const deleteItem = (mealType: string, itemId: string) => {
+    // מצא את האייטם עם פונקציית FindItem
+    const item = FindItem(itemId);
+    if (!item) {
+      console.log("Item not found, nothing to delete");
+      return;
+    }
+  
+    console.log("Deleting Item:", item); // בדוק אם האייטם נמצא
+  
+    setSelectedItems((prevSelectedItems) => {
+      const mealItems = prevSelectedItems[mealType];
+      if (!mealItems || !mealItems[itemId]) {
+        console.log("Item not found in mealItems, nothing to update");
+        return prevSelectedItems;
+      }
+  
+      // עדכון רשימת האייטמים על ידי מחיקת האייטם
+      const updatedMealItems = { ...mealItems };
+      delete updatedMealItems[itemId];
+  
+      console.log("Updated Meal Items:", updatedMealItems); // בדוק אם הרשימה התעדכנה
+  
+      // החזר את ה-state המעודכן
+      return {
+        ...prevSelectedItems,
+        [mealType]: updatedMealItems,
+      };
+    });
+  
+    // חשב את המאקרו מחדש
+    const newMacros = calculateMacros(selectedItems);
+    setMacros(newMacros);
+  
+    // עדכון קלוריות בהתאם למחיקה
+    const mealItems = selectedItems[mealType];
+    const itemToRemove = mealItems?.[itemId];
+    if (!itemToRemove) return;
+  
+    if (mealType === "Extras") {
+      setExtrasCalories((prevCalories) => prevCalories - (itemToRemove.calories || 0));
+    } else {
+      setMealCalories((prevMealCalories) => ({
+        ...prevMealCalories,
+        [mealType]: prevMealCalories[mealType] - (itemToRemove.calories || 0),
+      }));
+    }
+  };
+  
+    
+  
+  const calculateMacros = (tempSelections: SelectedItemsType) => {
+    let totalProtein = 0;
+    let totalFat = 0;
+    let totalCarbs = 0;
+    let totalCalories = 0;
+  
+    Object.keys(tempSelections).forEach(mealType => {
+      const categories = tempSelections[mealType] || {};
+      Object.values(categories).forEach((item) => {
+        if (item) {
+          totalProtein += item.protein || 0;
+          totalFat += item.fat || 0;
+          totalCarbs += item.carbs || 0;
+          totalCalories += item.calories || 0;
+        }
+      });
+    });
+  
+    return {
+      protein: parseFloat(totalProtein.toFixed(1)),
+      fat: parseFloat(totalFat.toFixed(1)),
+      carbs: parseFloat(totalCarbs.toFixed(1)),
+      calories: parseFloat(totalCalories.toFixed(1)),
+    };
+  };
+  
+
+    //Reset Menu button
+  const handleReset = () => {
+    // עדכן את המונה כדי לגרום לאתחול מחדש
+    setResetCounter(prevCounter => prevCounter + 1);
     setShowModal(false);
     setResetClicked(true);
     setSelectedItems({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} });
@@ -433,10 +514,6 @@ const DailyMenu: React.FC = () => {
       Dinner: { Carb: false, Fat: false, Fruit: false, Protein: false, Vegetable: false },
       Extras: { Carb: false, Fat: false, Fruit: false, Protein: false, Vegetable: false },
     });
-  };
-
-  const deleteItem = (mealType: string, itemId: string) => {
-    // implementation to delete the item
   };
 
   return (
@@ -460,7 +537,7 @@ const DailyMenu: React.FC = () => {
             <Text style={styles.modalTitle}>Reset Menu</Text>
             <Text style={styles.modalMessage}>Are you sure you want to reset the menu?</Text>
             <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={resetMenu} style={styles.confirmButton}>
+              <TouchableOpacity onPress={handleReset} style={styles.confirmButton}>
                 <Text style={styles.confirmButtonText}>Yes</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setShowModal(false)} style={styles.cancelButton}>
@@ -471,7 +548,7 @@ const DailyMenu: React.FC = () => {
         </View>
       </Modal>
 
-      <View style={styles.container}>
+      <View style={styles.container}  key={resetCounter}>
 
         {/* Calories Circle */}
         <View style={styles.caloriesContainer}>
@@ -480,14 +557,14 @@ const DailyMenu: React.FC = () => {
               <View style={styles.inner2Circle}>
                 <View style={styles.inner1Circle}>
                 <Text 
-    style={[
-      styles.caloriesNum, 
-      macros.calories > dailyCalories ? styles.overBudget : null
-    ]}
-  >
-    {macros.calories}/
-  </Text>
-  <Text style={styles.caloriesNum}>{dailyCalories}</Text>
+                    style={[
+                      styles.caloriesNum, 
+                      macros.calories > dailyCalories ? styles.overBudget : null
+                    ]}
+                  >
+                    {macros.calories.toFixed(0)}/
+                  </Text>
+                  <Text style={styles.caloriesNum}>{dailyCalories}</Text>
                   <Text style={styles.caloriesLabel}>calories</Text>
                 </View>
               </View>
@@ -519,7 +596,7 @@ const DailyMenu: React.FC = () => {
         {(['Breakfast', 'Lunch', 'Dinner'] as Array<string>).map((mealType) => (
           <View key={mealType} style={[styles.mealSection, { borderColor: getBorderColor(mealType) }]}>
             <Text style={styles.mealTitle}>
-            {mealType} - <Text style={styles.caloriesText}>{Math.round(mealCalories[mealType] || 0)} kcal</Text>
+            {mealType} - <Text style={styles.caloriesText}>{Math.round(mealCalories[mealType] || 0)} cal</Text>
             </Text>
             {subcategories[mealType]?.length ? (
               subcategories[mealType].map((subcategory) => {
@@ -563,7 +640,7 @@ const DailyMenu: React.FC = () => {
           >
             {Math.round(extrasCalories || 0)} 
           </Text> 
-          / {Math.round(mealCalories['Extras'] || 0)} kcal
+          / {Math.round(mealCalories['Extras'] || 0)} cal
         </Text>
           {selectedItems.Extras && Object.values(selectedItems.Extras).length > 0 ? (
             Object.values(selectedItems.Extras).map((item: any) => (
@@ -572,9 +649,9 @@ const DailyMenu: React.FC = () => {
                 <TouchableOpacity onPress={() => toggleDetails('Extras', item.id)} style={styles.infoButton}>
                   <Icon name="info" size={20} color="#696B6D" />
                 </TouchableOpacity>
-                {/* <TouchableOpacity onPress={() => deleteItem('Extras', item.id)} style={styles.deleteButton}>
+                <TouchableOpacity onPress={() => deleteItem('Extras', item.id)} style={styles.deleteButton}>
                   <Icon name="delete" size={20} color="#f00" />
-                </TouchableOpacity> */}
+                </TouchableOpacity>       
                 <View style={styles.selectContainer}>
                   {detailsVisibility['Extras']?.[item.id] && (
                     <Text style={styles.selectedItemDetails}>
@@ -588,7 +665,6 @@ const DailyMenu: React.FC = () => {
             <Text>No extras added yet.</Text>
           )}
         </View>
-
 
         {/* Floating Add Button */}
         <TouchableOpacity onPress={handleSearchIconPress} style={styles.floatingButton}>
@@ -623,7 +699,7 @@ const DailyMenu: React.FC = () => {
                           >
                               <Text style={styles.resultText}>{item.food?.label || 'Unknown Food'}</Text>
                               <Text style={styles.resultDetail}>
-                                  Calories: {Number(item.food?.nutrients?.ENERC_KCAL || 0).toFixed(2)} kcal
+                                  Calories: {Number(item.food?.nutrients?.ENERC_KCAL || 0).toFixed(2)} cal
                               </Text>
                               <Text style={styles.resultDetail}>
                                   Carbohydrates: {Number(item.food?.nutrients?.CHOCDF || 0).toFixed(2)} g
@@ -694,37 +770,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   outerCircle: {
-    width: 140,
-    height: 140,
+    width: 155,
+    height: 155,
     borderRadius: 100,
-    borderWidth: 10,
+    borderWidth: 7,
     borderColor: '#E8A54B',
     justifyContent: 'center',
     alignItems: 'center',
   },
   middleCircle: {
-    width: 125,
-    height: 125,
+    width: 145,
+    height: 145,
     borderRadius: 100,
-    borderWidth: 10,
+    borderWidth: 7,
     borderColor: '#FFCE76',
     justifyContent: 'center',
     alignItems: 'center',
   },
   inner2Circle: {
-    width: 110,
-    height: 110,
+    width: 135,
+    height: 135,
     borderRadius: 100,
-    borderWidth: 5,
+    borderWidth: 7,
     borderColor: '#F8D675',
     justifyContent: 'center',
     alignItems: 'center',
   },
   inner1Circle: {
-    width: 100,
-    height: 100,
+    width: 125,
+    height: 125,
     borderRadius: 100,
-    borderWidth: 5,
+    borderWidth: 7,
     borderColor: '#FDE598',
     justifyContent: 'center',
     alignItems: 'center',
@@ -964,6 +1040,8 @@ const styles = StyleSheet.create({
   saveButton: {
     padding: 20,
     marginBottom: 70,
+    marginHorizontal: 20,
+    borderRadius: 15,
     backgroundColor: '#3E6613', // צבע הרקע של הכפתור
     flexDirection: 'row', // מאפשר הצגת האייקון והטקסט באותה שורה
     alignItems: 'center', // ממרכז את התוכן
@@ -1013,7 +1091,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   confirmButton: {
-    backgroundColor: '#FF4C4C', // Same as reset button
+    backgroundColor: '#FF7B7B', // Same as reset button
     padding: 10,
     borderRadius: 5,
     width: '45%',
@@ -1021,9 +1099,10 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: '#FFF',
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   yesButton: {
-    backgroundColor: '#3E6613', // Same as reset button
+    backgroundColor: '#3E6613', 
     padding: 10,
     borderRadius: 5,
     width: '45%',
@@ -1037,6 +1116,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#000',
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   selectContainer: {
     position: 'relative', // הגדרת מיקום עבור הילד
@@ -1055,7 +1135,7 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
   },
   overBudget: {
-    color: 'red', // צבע אדום
+    color: '#FF7B7B', // צבע אדום
   },
   selectedItemContainer: {
     flexDirection: 'row',

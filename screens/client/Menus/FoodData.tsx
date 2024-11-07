@@ -59,7 +59,14 @@ export const mealData: Meal[] = [
                     { id: 'BP9', name: 'Canned Light Tuna in Water', calories: 132, protein: 29, fat: 0.5, carbs: 0, quantity: 100 },
                     { id: 'BP10', name: 'Canned White Tuna (Albacore) in Water', calories: 165, protein: 36, fat: 1, carbs: 0, quantity: 100 },
                     { id: 'BP11', name: 'Canned Tuna in Olive Oil', calories: 191, protein: 27, fat: 9, carbs: 0, quantity: 100 },
-                    { id: 'BP12', name: 'Canned Yellowfin Tuna in Water', calories: 140, protein: 29, fat: 1, carbs: 0, quantity: 100 },            
+                    { id: 'BP12', name: 'Canned Yellowfin Tuna in Water', calories: 140, protein: 29, fat: 1, carbs: 0, quantity: 100 },      
+                    { id: 'BP13', name: 'Smoked Salmon', calories: 117, protein: 18, fat: 4, carbs: 0, quantity: 100 },
+                    { id: 'BP14', name: 'Smoked Trout', calories: 151, protein: 20, fat: 7, carbs: 0, quantity: 100 },
+                    { id: 'BP15', name: 'Mackerel (Smoked)', calories: 305, protein: 25, fat: 23, carbs: 0, quantity: 100 },
+                    { id: 'BP16', name: 'Ricotta Cheese', calories: 174, protein: 11, fat: 13, carbs: 3, quantity: 100 },
+                    { id: 'BP17', name: 'Skyr (Icelandic Yogurt)', calories: 59, protein: 10, fat: 0.2, carbs: 3.5, quantity: 100 },
+                    { id: 'BP18', name: 'Quark Cheese', calories: 70, protein: 12, fat: 0.2, carbs: 4, quantity: 100 },   
+                    { id: 'BP19', name: 'Mozzarella Cheese', calories: 237, protein: 23, fat: 11, carbs: 0, quantity: 100 },                                     
                 ],
             },
             {
@@ -112,7 +119,7 @@ export const mealData: Meal[] = [
                     { id: 'BF17', name: 'Pecans', calories: 691, protein: 9, fat: 72, carbs: 14, quantity: 100 },
                     { id: 'BF18', name: 'Macadamia Nuts', calories: 718, protein: 8, fat: 76, carbs: 14, quantity: 100 },
                 ],
-                            },
+            },
             {
                 code: 'V',
                 category: 'Vegetable',
@@ -132,7 +139,7 @@ export const mealData: Meal[] = [
                     { id: 'BV13', name: 'Lettuce', calories: 15, protein: 1.4, fat: 0.2, carbs: 2.9, quantity: 100 },
                     { id: 'BV14', name: 'Kale', calories: 49, protein: 4.3, fat: 0.9, carbs: 9, quantity: 100 },
                 ],
-                            },
+            },
             {
                 code: 'R',
                 category: 'Fruit',
@@ -229,7 +236,7 @@ export const mealData: Meal[] = [
                         { id: 'LF18', name: 'Macadamia Nuts', calories: 718, protein: 8, fat: 76, carbs: 14, quantity: 100 },
                         ],
                 },
-                    {
+                {
                     code: 'V',
                     category: 'Vegetable',
                     items: [
