@@ -1105,7 +1105,9 @@ const styles = StyleSheet.create({
   modalMessage: {
     fontSize: 16,
     marginBottom: 40,
+    paddingHorizontal: 30,
     textAlign: 'center',
+    lineHeight: 24,
   },
   modalButtons: {
     flexDirection: 'row',
