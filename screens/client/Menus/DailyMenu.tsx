@@ -5,7 +5,7 @@ import { useUser } from '../../../context/UserContext';
 import { searchFood } from './edamamApi';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { Meal, mealData } from './FoodData';
-import { FoodItem, FoodCategory, FoodData } from './FoodData'; // Import from the new file
+import { FoodItem, FoodCategory, FoodData } from '../Menus/FoodData'; // Import from the new file
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface DetailsVisibility {
@@ -37,6 +37,8 @@ const DailyMenu: React.FC = () => {
   const [tempSelections, setTempSelections] = useState<SelectedItemsType>({});
   const [resetClicked, setResetClicked] = useState(false);
   const [resetCounter, setResetCounter] = useState(0);
+  const [showModalDelete, setShowModalDelete] = useState(false); // מצב המודל
+  const [itemToDelete, setItemToDelete] = useState(null); // אחסון הפריט למחיקה
 
   // Function to get the border color based on the meal type
   const getBorderColor = (mealType: string): string => {
@@ -420,57 +422,46 @@ const DailyMenu: React.FC = () => {
     }
   }, [resetClicked]); // This useEffect is triggered only when resetClicked is set to true
   
-  const deleteItem = (mealType: string, itemId: string) => {
-    // מצא את האייטם עם פונקציית FindItem
-    const item = FindItem(itemId);
-    if (!item) {
-      console.log("Item not found, nothing to delete");
+  const deleteExtraItem = (itemName: string) => {
+    const itemToRemove = selectedItems.Extras?.[itemName];
+  
+    if (!itemToRemove) {
+      console.log("Item not found in Extras, nothing to delete");
       return;
     }
   
-    console.log("Deleting Item:", item); // בדוק אם האייטם נמצא
+    console.log("Deleting Extra Item:", itemToRemove);
   
+    // עדכון הקלוריות
+    setExtrasCalories((prevCalories) => prevCalories - (itemToRemove.calories || 0));
+  
+    // מחיקת הפריט מתוך ה-state של Extras
     setSelectedItems((prevSelectedItems) => {
-      const mealItems = prevSelectedItems[mealType];
-      if (!mealItems || !mealItems[itemId]) {
-        console.log("Item not found in mealItems, nothing to update");
-        return prevSelectedItems;
-      }
-  
-      // עדכון רשימת האייטמים על ידי מחיקת האייטם
-      const updatedMealItems = { ...mealItems };
-      delete updatedMealItems[itemId];
-  
-      console.log("Updated Meal Items:", updatedMealItems); // בדוק אם הרשימה התעדכנה
-  
-      // החזר את ה-state המעודכן
+      const updatedExtras = { ...prevSelectedItems.Extras };
+      delete updatedExtras[itemName]; // מחיקת הפריט מתוך Extras
       return {
         ...prevSelectedItems,
-        [mealType]: updatedMealItems,
+        Extras: updatedExtras,
       };
     });
-  
-    // חשב את המאקרו מחדש
+  };
+
+  // פונקציה לטיפול באישור מחיקה
+  const handleDeleteExtraItem = () => {
+    if (itemToDelete) {
+      deleteExtraItem(itemToDelete); // מחיקת הפריט
+    }
+    setShowModalDelete(false); // סגירת המודל
+    setItemToDelete(null); // איפוס הפריט למחיקה
+  };
+
+
+  useEffect(() => {
+    // חישוב המאקרו מחדש כאשר `selectedItems` מתעדכן
     const newMacros = calculateMacros(selectedItems);
     setMacros(newMacros);
-  
-    // עדכון קלוריות בהתאם למחיקה
-    const mealItems = selectedItems[mealType];
-    const itemToRemove = mealItems?.[itemId];
-    if (!itemToRemove) return;
-  
-    if (mealType === "Extras") {
-      setExtrasCalories((prevCalories) => prevCalories - (itemToRemove.calories || 0));
-    } else {
-      setMealCalories((prevMealCalories) => ({
-        ...prevMealCalories,
-        [mealType]: prevMealCalories[mealType] - (itemToRemove.calories || 0),
-      }));
-    }
-  };
-  
-    
-  
+  }, [selectedItems]); // trigger when selectedItems change
+      
   const calculateMacros = (tempSelections: SelectedItemsType) => {
     let totalProtein = 0;
     let totalFat = 0;
@@ -514,7 +505,10 @@ const DailyMenu: React.FC = () => {
       Dinner: { Carb: false, Fat: false, Fruit: false, Protein: false, Vegetable: false },
       Extras: { Carb: false, Fat: false, Fruit: false, Protein: false, Vegetable: false },
     });
-  };
+  };        
+  
+  console.log(selectedItems.Extras)
+
 
   return (
     <ScrollView>
@@ -645,13 +639,40 @@ const DailyMenu: React.FC = () => {
           {selectedItems.Extras && Object.values(selectedItems.Extras).length > 0 ? (
             Object.values(selectedItems.Extras).map((item: any) => (
               <View key={item.id} style={styles.subcategory}>
-                <Text style={[styles.selectedItemName, styles.itemContainer]}>{item.name}</Text>
+                <Text style={[styles.selectedItemName, styles.itemContainer]}>{item.name}</Text>              
+                
+                  {/* Delete Extra item Button */}
+                  <TouchableOpacity 
+                    onPress={() => { 
+                      setShowModalDelete(true); // הצגת המודל
+                      setItemToDelete(item.name); // הגדרת הפריט למחיקה
+                    }} 
+                    style={styles.deleteButton}
+                  >
+                    <Icon name="delete" size={20} color="#f00" />
+                  </TouchableOpacity>
+
+                  {/* Delete Extra item Button Modal */}
+                  <Modal transparent={true} visible={showModalDelete} animationType="fade">
+                    <View style={styles.modalOverlay}>
+                      <View style={styles.modalContainer}>
+                        <Text style={styles.modalMessage}>Are you sure you want to delete this item?</Text>
+                        <View style={styles.modalButtons}>
+                          <TouchableOpacity onPress={handleDeleteExtraItem} style={styles.confirmButton}>
+                            <Text style={styles.confirmButtonText}>Yes</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => setShowModalDelete(false)} style={styles.cancelButton}>
+                            <Text style={styles.cancelButtonText}>No</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </Modal>
+
+                {/* Info Button */}
                 <TouchableOpacity onPress={() => toggleDetails('Extras', item.id)} style={styles.infoButton}>
                   <Icon name="info" size={20} color="#696B6D" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => deleteItem('Extras', item.id)} style={styles.deleteButton}>
-                  <Icon name="delete" size={20} color="#f00" />
-                </TouchableOpacity>       
+                </TouchableOpacity>                
                 <View style={styles.selectContainer}>
                   {detailsVisibility['Extras']?.[item.id] && (
                     <Text style={styles.selectedItemDetails}>
@@ -659,6 +680,7 @@ const DailyMenu: React.FC = () => {
                     </Text>
                   )}
                 </View>
+
               </View>
             ))
           ) : (
@@ -1114,7 +1136,7 @@ const styles = StyleSheet.create({
     width: '45%',
   },
   cancelButtonText: {
-    color: '#000',
+    color: '#FFF',
     textAlign: 'center',
     fontWeight: 'bold',
   },
@@ -1125,6 +1147,12 @@ const styles = StyleSheet.create({
   infoButton: {
     position: 'absolute', // הפוך את הכפתור למיקום מוחלט
     right: -30, // מיקום הכפתור בקצה הימני של הקונטיינר
+    top: '50%', // מרכז את הכפתור אנכית
+    transform: [{ translateY: -10 }], // תיקון מרכז האנכי של הכפתור
+  },
+  deleteButton: {
+    position: 'absolute', // הפוך את הכפתור למיקום מוחלט
+    right: 10, // מיקום הכפתור בקצה הימני של הקונטיינר
     top: '50%', // מרכז את הכפתור אנכית
     transform: [{ translateY: -10 }], // תיקון מרכז האנכי של הכפתור
   },
@@ -1156,6 +1184,7 @@ const styles = StyleSheet.create({
     fontSize: 14, // עדכן את גודל הפונט כך שיתאים לשאר הפריטים
     paddingLeft: 20,
     paddingTop: 10,
+    paddingRight: 30,
   },
     infoButtonE: {
     marginLeft: 20,

@@ -38,7 +38,6 @@ export interface FoodNutrients {
     FAT: number; // Fat
     CHOCDF: number; // Carbohydrates
 }
-  
 
 export const mealData: Meal[] = [
     {
