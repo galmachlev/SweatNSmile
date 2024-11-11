@@ -23,12 +23,12 @@ import UserTable from './screens/admin/UserTable';
 import HomeAdmin from './screens/admin/HomeAdmin';
 import UserWeights from './screens/admin/UserWeights';
 import DailyDashboard from './screens/client/DailyDashboard';
-import DailyMenu2 from './screens/client/Menus/DailyMenuTest';
 import AdminEditUser from './screens/admin/AdminEditUser';
 import WeeklyChallenge from './screens/client/Challenges/WeeklyChallenge';
 import ChallengeDetails from './screens/client/Challenges/ChallengeDetails';
 import { PaperProvider } from 'react-native-paper';
 import StoreScreen from './screens/client/StoreScreen';
+import AllMenusTable from './screens/client/AllMenusTable';
 
 LogBox.ignoreLogs([
   'VirtualizedLists should never be nested inside plain ScrollViews', // Ignore VirtualizedLists warning
@@ -163,7 +163,7 @@ function TabNavigator() {
             ) 
           }} 
         />
-        <Tab.Screen name="Menu" component={DailyMenu2}  options={{ headerTitle: 'Daily menu' }} />
+        <Tab.Screen name="Menu" component={DailyMenu}  options={{ headerTitle: 'Daily menu' }} />
         <Tab.Screen name="Profile" component={Profile} />
       </Tab.Navigator>
       <MoreMenu visible={moreMenuVisible} onClose={() => setMoreMenuVisible(false)} />
@@ -183,7 +183,7 @@ export default function App() {
           <Stack.Screen name="DailyCalories" component={DailyCalories} />
           <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
           <Stack.Screen name="Gallery" component={Gallery} />
-          <Stack.Screen name="DailyMenu" component={DailyMenu} />
+          <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
           <Stack.Screen name="DailyDashboard" component={DailyDashboard} options={{ headerTitle: 'Daily Progress' }} />
           <Stack.Screen name="Profile" component={Profile} />
           <Stack.Screen name="HealthyRecipesScreen" component={HealthyRecipesScreen}  options={{ headerTitle: '' }}/>
@@ -198,7 +198,6 @@ export default function App() {
           <Stack.Screen name="AdminEditUser" component={AdminEditUser} options={{ headerTitle: 'AdminEditUser' }}/>
           <Stack.Screen name="WeeklyChallenge" component={WeeklyChallenge} options={{ headerTitle: 'WeeklyChallenge' }}/>
           <Stack.Screen name="ChallengeDetails" component={ChallengeDetails} options={{ headerTitle: 'ChallengeDetails' }}/>
-
         </Stack.Navigator>
       </UserProvider>
     </NavigationContainer>

@@ -16,37 +16,37 @@ const recipes: { [key in RecipeCategory]: { id: string; title: string; image: an
             id: '1', 
             title: 'Pancakes', 
             image: require('../../../Images/pancakes.jpg'), 
-            details: 'Ingredients: 1 cup flour, 1 tbsp sugar, 1 tsp baking powder, 1/2 tsp salt, 1 cup milk, 1 egg, 2 tbsp melted butter. Instructions: Mix dry ingredients, then add wet ingredients. Cook on a hot, greased pan until bubbles form; flip and cook until golden.'
+            details: '1 cup flour, 1 tbsp sugar, 1 tsp baking powder, 1/2 tsp salt, 1 cup milk, 1 egg, 2 tbsp melted butter. Instructions: Mix dry ingredients, then add wet ingredients. Cook on a hot, greased pan until bubbles form; flip and cook until golden.'
         },
         { 
             id: '2', 
             title: 'Omelette', 
             image: require('../../../Images/omelette.jpg'), 
-            details: 'Ingredients: 2 eggs, 2 tbsp milk, salt and pepper to taste, 1/4 cup shredded cheese, 1/4 cup chopped veggies. Instructions: Beat eggs with milk, season with salt and pepper. Cook in a pan, add cheese and veggies, fold and cook until set.'
+            details: '2 eggs, 2 tbsp milk, salt and pepper to taste, 1/4 cup shredded cheese, 1/4 cup chopped veggies. Instructions: Beat eggs with milk, season with salt and pepper. Cook in a pan, add cheese and veggies, fold and cook until set.'
         },
         { 
             id: '3', 
             title: 'Smoothie Bowl', 
             image: require('../../../Images/smoothie-bowl.jpg'), 
-            details: 'Ingredients: 1 banana, 1/2 cup mixed berries, 1/2 cup yogurt. Instructions: Blend banana, berries, and yogurt until smooth. Pour into a bowl and top with granola and fresh fruits.'
+            details: '1 banana, 1/2 cup mixed berries, 1/2 cup yogurt. Instructions: Blend banana, berries, and yogurt until smooth. Pour into a bowl and top with granola and fresh fruits.'
         },
         { 
             id: '4', 
             title: 'Avocado Toast', 
             image: require('../../../Images/avocado-toast.jpg'), 
-            details: 'Ingredients: 1 ripe avocado, 2 slices of bread, salt, pepper, lemon juice. Instructions: Toast the bread, mash the avocado with salt, pepper, and lemon juice. Spread on toast.'
+            details: '1 ripe avocado, 2 slices of bread, salt, pepper, lemon juice. Instructions: Toast the bread, mash the avocado with salt, pepper, and lemon juice. Spread on toast.'
         },
         { 
             id: '5', 
             title: 'Chia Pudding', 
             image: require('../../../Images/chia-pudding.jpg'), 
-            details: 'Ingredients: 1/4 cup chia seeds, 1 cup milk, 1 tbsp honey (optional). Instructions: Mix chia seeds with milk and honey. Refrigerate overnight. Top with fruits before serving.'
+            details: '1/4 cup chia seeds, 1 cup milk, 1 tbsp honey (optional). Instructions: Mix chia seeds with milk and honey. Refrigerate overnight. Top with fruits before serving.'
         },
         { 
             id: '6', 
             title: 'Granola', 
             image: require('../../../Images/granola.jpg'), 
-            details: 'Ingredients: 2 cups oats, 1/2 cup honey, 1/4 cup melted coconut oil, 1/2 cup nuts, 1/2 cup dried fruit. Instructions: Mix all ingredients, spread on a baking sheet, bake at 350°F (175°C) for 20-25 minutes, stirring halfway through.'
+            details: '2 cups oats, 1/2 cup honey, 1/4 cup melted coconut oil, 1/2 cup nuts, 1/2 cup dried fruit. Instructions: Mix all ingredients, spread on a baking sheet, bake at 350°F (175°C) for 20-25 minutes, stirring halfway through.'
         },
     ],
     Lunch: [
@@ -54,37 +54,37 @@ const recipes: { [key in RecipeCategory]: { id: string; title: string; image: an
             id: '1', 
             title: 'Chicken Salad', 
             image: require('../../../Images/chicken-salad.jpg'), 
-            details: 'Ingredients: 2 cups cooked chicken, 1/2 cup mayo, 1/4 cup chopped celery, 1/4 cup chopped onion, salt and pepper to taste. Instructions: Mix all ingredients in a bowl. Chill before serving.'
+            details: '2 cups cooked chicken, 1/2 cup mayo, 1/4 cup chopped celery, 1/4 cup chopped onion, salt and pepper to taste. Instructions: Mix all ingredients in a bowl. Chill before serving.'
         },
         { 
             id: '2', 
             title: 'Quinoa Bowl', 
             image: require('../../../Images/quinoa-salad.jpg'), 
-            details: 'Ingredients: 1 cup cooked quinoa, 1 cup chopped veggies (bell peppers, cucumbers), 1/4 cup feta cheese, 2 tbsp olive oil, 1 tbsp lemon juice. Instructions: Combine all ingredients in a bowl. Toss with olive oil and lemon juice.'
+            details: '1 cup cooked quinoa, 1 cup chopped veggies (bell peppers, cucumbers), 1/4 cup feta cheese, 2 tbsp olive oil, 1 tbsp lemon juice. Instructions: Combine all ingredients in a bowl. Toss with olive oil and lemon juice.'
         },
         { 
             id: '3', 
             title: 'Veggie Wrap', 
             image: require('../../../Images/veggie-wrap.jpg'), 
-            details: 'Ingredients: 1 large tortilla, 1/2 cup hummus, 1 cup mixed veggies (lettuce, bell peppers, carrots), 1/4 cup shredded cheese. Instructions: Spread hummus on the tortilla, layer veggies and cheese, then roll up tightly.'
+            details: '1 large tortilla, 1/2 cup hummus, 1 cup mixed veggies (lettuce, bell peppers, carrots), 1/4 cup shredded cheese. Instructions: Spread hummus on the tortilla, layer veggies and cheese, then roll up tightly.'
         },
         { 
             id: '4', 
             title: 'Lentil Soup', 
             image: require('../../../Images/lentil-soup.jpg'), 
-            details: 'Ingredients: 1 cup lentils, 1 onion, 2 carrots, 2 celery stalks, 4 cups vegetable broth, 1 tsp cumin. Instructions: Sauté onions, carrots, and celery. Add lentils, broth, and cumin. Simmer for 30 minutes.'
+            details: '1 cup lentils, 1 onion, 2 carrots, 2 celery stalks, 4 cups vegetable broth, 1 tsp cumin. Instructions: Sauté onions, carrots, and celery. Add lentils, broth, and cumin. Simmer for 30 minutes.'
         },
         { 
             id: '5', 
             title: 'Grilled Chicken', 
             image: require('../../../Images/grilled-chicken.jpg'), 
-            details: 'Ingredients: 2 chicken breasts, 2 tbsp olive oil, 1 tsp garlic powder, 1 tsp paprika, salt and pepper to taste. Instructions: Rub chicken with olive oil and spices. Grill over medium heat for 6-8 minutes per side.'
+            details: '2 chicken breasts, 2 tbsp olive oil, 1 tsp garlic powder, 1 tsp paprika, salt and pepper to taste. Instructions: Rub chicken with olive oil and spices. Grill over medium heat for 6-8 minutes per side.'
         },
         { 
             id: '6', 
             title: 'Couscous Salad', 
             image: require('../../../Images/couscous-salad.jpg'), 
-            details: 'Ingredients: 1 cup couscous, 1/2 cup cherry tomatoes, 1/4 cup chopped cucumber, 1/4 cup olives, 2 tbsp olive oil, 1 tbsp lemon juice. Instructions: Cook couscous according to package. Mix with veggies, olives, olive oil, and lemon juice.'
+            details: '1 cup couscous, 1/2 cup cherry tomatoes, 1/4 cup chopped cucumber, 1/4 cup olives, 2 tbsp olive oil, 1 tbsp lemon juice. Instructions: Cook couscous according to package. Mix with veggies, olives, olive oil, and lemon juice.'
         },
     ],
     Dinner: [
@@ -92,37 +92,37 @@ const recipes: { [key in RecipeCategory]: { id: string; title: string; image: an
             id: '1', 
             title: 'Spaghetti', 
             image: require('../../../Images/spaghetti.jpg'), 
-            details: 'Ingredients: 200g spaghetti, 1 jar marinara sauce, 1/4 cup grated Parmesan cheese. Instructions: Cook spaghetti according to package. Heat marinara sauce. Toss spaghetti with sauce and cheese.'
+            details: '200g spaghetti, 1 jar marinara sauce, 1/4 cup grated Parmesan cheese. Instructions: Cook spaghetti according to package. Heat marinara sauce. Toss spaghetti with sauce and cheese.'
         },
         { 
             id: '2', 
             title: 'Stir-Fry', 
             image: require('../../../Images/stir-fry.jpg'), 
-            details: 'Ingredients: 2 cups mixed vegetables (broccoli, bell peppers), 1 cup cooked chicken, 2 tbsp soy sauce, 1 tbsp sesame oil. Instructions: Stir-fry vegetables in sesame oil, add chicken and soy sauce. Cook until veggies are tender.'
+            details: '2 cups mixed vegetables (broccoli, bell peppers), 1 cup cooked chicken, 2 tbsp soy sauce, 1 tbsp sesame oil. Instructions: Stir-fry vegetables in sesame oil, add chicken and soy sauce. Cook until veggies are tender.'
         },
         { 
             id: '3', 
             title: 'Stuffed Peppers', 
             image: require('../../../Images/stuffed-peppers.jpg'), 
-            details: 'Ingredients: 4 bell peppers, 1 cup cooked rice, 1/2 cup ground beef, 1/2 cup tomato sauce, 1/4 cup cheese. Instructions: Mix rice, beef, and sauce. Stuff peppers and top with cheese. Bake at 375°F (190°C) for 30 minutes.'
+            details: '4 bell peppers, 1 cup cooked rice, 1/2 cup ground beef, 1/2 cup tomato sauce, 1/4 cup cheese. Instructions: Mix rice, beef, and sauce. Stuff peppers and top with cheese. Bake at 375°F (190°C) for 30 minutes.'
         },
         { 
             id: '4', 
             title: 'Baked Salmon', 
             image: require('../../../Images/baked-salmon.jpg'), 
-            details: 'Ingredients: 2 salmon fillets, 1 tbsp olive oil, 1 lemon, salt and pepper. Instructions: Brush fillets with olive oil, season, and place lemon slices on top. Bake at 400°F (200°C) for 15-20 minutes.'
+            details: '2 salmon fillets, 1 tbsp olive oil, 1 lemon, salt and pepper. Instructions: Brush fillets with olive oil, season, and place lemon slices on top. Bake at 400°F (200°C) for 15-20 minutes.'
         },
         { 
             id: '5', 
             title: 'Vegetable Curry', 
             image: require('../../../Images/vegetable-curry.jpg'), 
-            details: 'Ingredients: 2 cups mixed vegetables, 1 can coconut milk, 2 tbsp curry powder. Instructions: Sauté vegetables, add curry powder and coconut milk. Simmer for 20 minutes.'
+            details: '2 cups mixed vegetables, 1 can coconut milk, 2 tbsp curry powder. Instructions: Sauté vegetables, add curry powder and coconut milk. Simmer for 20 minutes.'
         },
         { 
             id: '6', 
             title: 'Chicken Tacos', 
             image: require('../../../Images/chicken-tacos.jpg'), 
-            details: 'Ingredients: 1 cup cooked chicken, 4 taco shells, 1/2 cup shredded lettuce, 1/4 cup diced tomatoes, 1/4 cup shredded cheese. Instructions: Fill taco shells with chicken, lettuce, tomatoes, and cheese.'
+            details: '1 cup cooked chicken, 4 taco shells, 1/2 cup shredded lettuce, 1/4 cup diced tomatoes, 1/4 cup shredded cheese. Instructions: Fill taco shells with chicken, lettuce, tomatoes, and cheese.'
         },
     ],
     Snacks: [
@@ -130,37 +130,37 @@ const recipes: { [key in RecipeCategory]: { id: string; title: string; image: an
             id: '1', 
             title: 'Fruit Salad', 
             image: require('../../../Images/fruit-salad.jpg'), 
-            details: 'Ingredients: 1 cup mixed fruits (apple, berries, banana). Instructions: Chop fruits and mix in a bowl.'
+            details: '1 cup mixed fruits (apple, berries, banana). Instructions: Chop fruits and mix in a bowl.'
         },
         { 
             id: '2', 
             title: 'Hummus and Veggies', 
             image: require('../../../Images/hummus-veggies.jpg'), 
-            details: 'Ingredients: 1 cup hummus, 1 cup mixed veggies (carrots, cucumbers). Instructions: Serve hummus with sliced veggies for dipping.'
+            details: '1 cup hummus, 1 cup mixed veggies (carrots, cucumbers). Instructions: Serve hummus with sliced veggies for dipping.'
         },
         { 
             id: '3', 
             title: 'Energy Balls', 
             image: require('../../../Images/energy-balls.jpg'), 
-            details: 'Ingredients: 1 cup oats, 1/2 cup peanut butter, 1/4 cup honey, 1/4 cup chocolate chips. Instructions: Mix all ingredients, form into balls, and refrigerate.'
+            details: '1 cup oats, 1/2 cup peanut butter, 1/4 cup honey, 1/4 cup chocolate chips. Instructions: Mix all ingredients, form into balls, and refrigerate.'
         },
         { 
             id: '4', 
             title: 'Greek Yogurt', 
             image: require('../../../Images/greek-yogurt.jpg'), 
-            details: 'Ingredients: 1 cup Greek yogurt, 1 tbsp honey, 1/4 cup granola. Instructions: Top yogurt with honey and granola.'
+            details: '1 cup Greek yogurt, 1 tbsp honey, 1/4 cup granola. Instructions: Top yogurt with honey and granola.'
         },
         { 
             id: '5', 
             title: 'Apple Slices with Peanut Butter', 
             image: require('../../../Images/apple-peanut-butter.jpg'), 
-            details: 'Ingredients: 1 apple, 2 tbsp peanut butter. Instructions: Slice apple and spread with peanut butter.'
+            details: '1 apple, 2 tbsp peanut butter. Instructions: Slice apple and spread with peanut butter.'
         },
         { 
             id: '6', 
             title: 'Nut Mix', 
             image: require('../../../Images/nut-mix.jpg'), 
-            details: 'Ingredients: 1 cup mixed nuts (almonds, walnuts, cashews). Instructions: Combine nuts in a bowl.'
+            details: '1 cup mixed nuts (almonds, walnuts, cashews). Instructions: Combine nuts in a bowl.'
         },
     ],
 };
@@ -175,12 +175,24 @@ const RecipeItem = ({ title, image, onPress }: { title: string; image: any; onPr
     </View>
 );
 
+const RecipeDetails = ({ details }: { details: string }) => {
+    const [ingredients, instructions] = details.split('Instructions:');
+
+    return (
+        <View>
+            <Text style={styles.modalTitle}>Ingredients</Text>
+            <Text style={styles.modalText}>{ingredients.trim()}</Text>
+
+            <Text style={styles.modalTitle}>Instructions</Text>
+            <Text style={styles.modalText}>{instructions.trim()}</Text>
+        </View>
+    );
+};
+
+
 const RecipeCategoryScreen: React.FC<{ route: any }> = ({ route }) => {
     const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
     const { category } = route.params;
-    
-    console.log('Selected Category:', category); // Debugging line
-
     const data = recipes[category as RecipeCategory] || [];
 
     const handleRecipePress = (details: string) => {
@@ -191,7 +203,7 @@ const RecipeCategoryScreen: React.FC<{ route: any }> = ({ route }) => {
         <View style={styles.container}>
             <Text style={styles.header}>{category}</Text>
             <FlatList
-                data={data} // Use the fallback data here
+                data={data}
                 renderItem={({ item }) => (
                     <RecipeItem
                         title={item.title}
@@ -209,7 +221,7 @@ const RecipeCategoryScreen: React.FC<{ route: any }> = ({ route }) => {
             >
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContent}>
-                        <Text>{selectedRecipe}</Text>
+                        {selectedRecipe && <RecipeDetails details={selectedRecipe} />}
                         <Pressable onPress={() => setSelectedRecipe(null)} style={styles.closeButton}>
                             <Text style={styles.closeButtonText}>Close</Text>
                         </Pressable>
@@ -220,6 +232,7 @@ const RecipeCategoryScreen: React.FC<{ route: any }> = ({ route }) => {
     );
 };
 
+// עיצובים
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -277,6 +290,19 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         width: '80%',
         maxWidth: 400,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#3E6613',
+        marginBottom: 8,
+        marginTop: 16,
+    },
+    modalText: {
+        fontSize: 16,
+        color: '#333',
+        lineHeight: 24,
+        textAlign: 'left',
     },
     closeButton: {
         marginTop: 50,

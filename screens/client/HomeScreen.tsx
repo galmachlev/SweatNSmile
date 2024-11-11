@@ -57,9 +57,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Image source={require('../../Images/WeightIcon.png')} style={styles.iconImage} />
             <Text style={styles.btnText}>Track</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('DailyMenu')}>
+          <TouchableOpacity style={[styles.button, styles.MenuButton]} onPress={() => handleNavigation('AllMenusTable')}>
             <Image source={require('../../Images/MenuIcon.png')} style={styles.iconImage} />
-            <Text style={styles.btnText}>Menu</Text>
+            <Text style={styles.btnText}>Menus</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.button, styles.MoreButton]} onPress={() => handleNavigation('WeeklyChallenge')}>
             <Image source={require('../../Images/TargetIcon.png')} style={styles.iconImage} />
