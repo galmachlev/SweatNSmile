@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity,TextInput,ActivityIndicator,ScrollView,TouchableWithoutFeedback, Modal,} from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity,TextInput,ActivityIndicator,ScrollView,TouchableWithoutFeedback, Modal, Alert,} from 'react-native';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../../../context/UserContext';
 import { searchFood } from './edamamApi';
@@ -51,6 +51,35 @@ const DailyMenu: React.FC = () => {
       return colors[mealType] || '#FBF783';
   };
   
+  const saveMenu = async () => {
+    const email = currentUser?.email; 
+    const menuData = {
+        email,
+        meals: selectedItems,
+        totalMacros: macros,
+    };
+
+    try {
+        let res = await fetch('https://database-s-smile.onrender.com/api/users/saveMenu', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(menuData),
+        });
+
+        if (res.ok) {
+            Alert.alert('Success', 'Menu saved successfully!');
+        } else {
+            Alert.alert('Error', 'Failed to save the menu.');
+        }
+    } catch (error) {
+        console.error('Error saving menu:', error);
+        Alert.alert('Error', 'An error occurred while saving the menu.');
+    }
+};
+
+
   // Calculate daily calories when current user or related data changes
   useEffect(() => {
       if (currentUser) {
@@ -747,15 +776,11 @@ const DailyMenu: React.FC = () => {
       </View>
 
       {/* Save Menu Button */}
-      <TouchableOpacity 
-          onPress={() => setShowModalSave(true)} 
-          style={styles.saveButton}
-        >
-          <Text style={styles.resetButtonText}>
-          Save Menu
-          </Text>
-          <MaterialIcons name="save" size={24} color="#FFF" />
+      <TouchableOpacity onPress={saveMenu} style={styles.saveButton}>
+    <Text style={styles.resetButtonText}>Save Menu</Text>
+    <MaterialIcons name="save" size={24} color="#FFF" />
       </TouchableOpacity>
+
 
       {/* Save Menu Button Modal */}
       <Modal transparent={true} visible={showModalSave} animationType="fade">
