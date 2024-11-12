@@ -52,7 +52,7 @@ const AllMenusTable = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Your Saved Menus</Text>
+      <Text style={styles.headerText}>All Your Menus</Text>
       {loading && <ActivityIndicator size="large" color="#3E6613" />}
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
       {!loading && menus.length === 0 ? <Text style={styles.noMenusText}>No menus found.</Text> : null}
