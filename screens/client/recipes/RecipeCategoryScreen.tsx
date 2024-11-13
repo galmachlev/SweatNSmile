@@ -1,16 +1,21 @@
 /*
- * This component renders a screen with a list of recipes in the selected category.
- * The recipes are displayed as a FlatList with a title and an image.
- * When the user presses a recipe, the component navigates to the RecipeDetailsScreen
- * with the selected recipe as a parameter.
- */
+ * המסך השני שמוצג לאחר לחיצה על ארוחה כלשהי בדף המתכונים
+ * רכיב זה מציג מסך עם רשימת מתכונים בקטגוריה הנבחרת.
+ * המתכונים מוצגים כ-FlatList הכוללת שם ותמונה של כל מתכון.
+ * כאשר המשתמש לוחץ על מתכון, הרכיב פותח מודל המציג מתכון מפורט (RecipeDetailsScreen)
+ * עם פרטי המתכון שנבחר כפרמטר.
+*/
 
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 
+// הגדרת טיפוסי קטגוריות המתכונים
 type RecipeCategory = 'Breakfast' | 'Lunch' | 'Dinner' | 'Snacks';
 
+// רשימת המתכונים המאורגנת לפי קטגוריות
 const recipes: { [key in RecipeCategory]: { id: string; title: string; image: any; details: string }[] } = {
+    
+    // כל מתכון מכיל את הפרטים הבאים: מזהה, שם, תמונה והוראות הכנה
     Breakfast: [
         { 
             id: '1', 
@@ -165,19 +170,20 @@ const recipes: { [key in RecipeCategory]: { id: string; title: string; image: an
     ],
 };
 
+// לאחר לחיצה על ארוחה כלשהי - תוצג רשימה מתכונים שכל אחד מהם מורכב מתמונה קטנה, שם המתכון וכפתור להצגת הפרטים המלאים
 const RecipeItem = ({ title, image, onPress }: { title: string; image: any; onPress: () => void }) => (
     <View style={styles.recipeItem}>
         <Image source={image} style={styles.recipeImage} />
         <Text style={styles.recipeTitle}>{title}</Text>
-        <TouchableOpacity onPress={onPress} style={styles.detailsButton}>
+        <TouchableOpacity onPress={onPress} style={styles.detailsButton}>{/* RecipeDetailsכפתור להצגת הפרטים המלאים שיפעיל את רכיב ה */}
             <Text style={styles.detailsButtonText}>Details</Text>
         </TouchableOpacity>
     </View>
 );
 
+// הצגת תוכן פרטי המתכון - חלוקת התצוגה ל-2 קבוצות: מרכיבים והוראות ההכנה
 const RecipeDetails = ({ details }: { details: string }) => {
     const [ingredients, instructions] = details.split('Instructions:');
-
     return (
         <View>
             <Text style={styles.modalTitle}>Ingredients</Text>
@@ -189,39 +195,49 @@ const RecipeDetails = ({ details }: { details: string }) => {
     );
 };
 
-
+// מסך קטגוריית המתכונים הראשי
 const RecipeCategoryScreen: React.FC<{ route: any }> = ({ route }) => {
-    const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
-    const { category } = route.params;
-    const data = recipes[category as RecipeCategory] || [];
-
+    const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null); // מצב המתכון הנוכחי - בהתחלה כלום ואז בהתאם לבחירת המשתמש
+    // פונקציה להגדרת המתכון הנבחר להצגה במודל
     const handleRecipePress = (details: string) => {
         setSelectedRecipe(details);
     };
+    
+    const { category } = route.params; // קבלת הקטגוריה מהפרמטרים שהועברו מהמסך הקודם בעת הניווט
+    const data = recipes[category as RecipeCategory] || [];  // שליפת והצגת המתכונים לפי קטגוריה נבחרת
+    
 
     return (
         <View style={styles.container}>
+
+            {/* כותרת המסך שמציגה את שם הקטגוריה של המתכונים שנבחרה */}
             <Text style={styles.header}>{category}</Text>
+            
+            {/* רכיב FlatList להצגת רשימת המתכונים לפי הקטגוריה שנבחרה */}
             <FlatList
-                data={data}
-                renderItem={({ item }) => (
+                data={data} // הנתונים של המתכונים בקטגוריה הנבחרת
+                renderItem={({ item }) => ( // פונקציה לרינדור כל פריט ברשימה
                     <RecipeItem
-                        title={item.title}
-                        image={item.image}
-                        onPress={() => handleRecipePress(item.details)}
+                        title={item.title} // כותרת המתכון
+                        image={item.image} // תמונת המתכון
+                        onPress={() => handleRecipePress(item.details)} // פעולה לבחירת המתכון בלחיצה על הפריט
                     />
                 )}
-                keyExtractor={item => item.id}
+                keyExtractor={item => item.id}  // מזהה ייחודי עבור כל פריט כדי לשפר ביצועים
             />
+            {/* מודל להצגת פרטי המתכון שנבחר */}
             <Modal
-                visible={!!selectedRecipe}
+                visible={!!selectedRecipe} // יחזיר אמת אם יש מתכון שנבחר ושקר אם לא
                 transparent={true}
-                animationType="fade"
-                onRequestClose={() => setSelectedRecipe(null)}
+                animationType="fade" 
+                onRequestClose={() => setSelectedRecipe(null)} 
             >
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContent}>
+                        {/* מציג את רכיב פרטי המתכון אם יש מתכון שנבחר */}
                         {selectedRecipe && <RecipeDetails details={selectedRecipe} />}
+                        
+                        {/* כפתור סגירה של המודל */}
                         <Pressable onPress={() => setSelectedRecipe(null)} style={styles.closeButton}>
                             <Text style={styles.closeButtonText}>Close</Text>
                         </Pressable>
@@ -232,7 +248,7 @@ const RecipeCategoryScreen: React.FC<{ route: any }> = ({ route }) => {
     );
 };
 
-// עיצובים
+// סטיילים
 const styles = StyleSheet.create({
     container: {
         flex: 1,

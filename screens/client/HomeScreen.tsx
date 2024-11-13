@@ -44,7 +44,9 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.details}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
-            <Text style={styles.textbelow}>Target Date: {targetDate.toLocaleDateString()}</Text>
+            <Text style={styles.textbelow}>
+            Target Date: {targetDate instanceof Date ? targetDate.toLocaleDateString() : new Date().toLocaleDateString()}
+            </Text>
             </View>
         </View>
 

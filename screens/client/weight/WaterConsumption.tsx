@@ -1,98 +1,108 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button, Image, Dimensions, Alert } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
-import ConfettiCannon from 'react-native-confetti-cannon';
-import { useUser } from '../../../context/UserContext';
+/*
+ * רכיב זה מציג את כמות המים שהמשתמש שתה ביום הנוכחי, עם אפשרות להוסיף כוס מים על ידי לחיצה על כפתור.
+ * הגרף מעודכן באופן אנימטיבי, ומציג את כמות המים הנצרכת ביחס ליעד היומי.
+ * במקרה שהמשתמש שותה את כמות המים היומית, מוצגת אנימציה של קונפטי והודעה קופצת המברכת אותו.
+ * המערכת משתמשת במערכת חישוב הדינמית של צריכת מים, ומעדכנת את הסטטיסטיקות בכל פעם שהמשתמש מוסיף כוס מים.
+ * בנוסף, אם המשתמש לוחץ על כפתור "אפס" (Reset), המידע של צריכת המים מתאפס.
+ * בנוסף, מוצגת מודל עם עובדה מעניינת על צריכת מים.
+ */
+
+import React, { useState, useRef, useEffect } from 'react'; 
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Button, Image, Dimensions, Alert } from 'react-native'; 
+import Svg, { Circle } from 'react-native-svg'; 
+import ConfettiCannon from 'react-native-confetti-cannon'; 
+import { useUser } from '../../../context/UserContext'; 
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import { Ionicons } from '@expo/vector-icons'; 
 
-const circleImage = require('../../../Images/water.png');
+const circleImage = require('../../../Images/water.png'); // תמונה של הטיפת מים שתוצג על המסך
 
 const WaterConsumption = () => {
-  const { currentUser } = useUser();
-  const userId = currentUser?.email ?? 'defaultUserEmail'; 
-  const userGenderValue = currentUser?.gender ?? 'male';
-      
-  const waterGoal = userGenderValue === 'male' ? 2600 : 1800; // Water goal based on gender
-  const { width } = Dimensions.get('window');
-  const radius = 50;
-  const strokeWidth = 10;
-  const circumference = 2 * Math.PI * radius;
-  const [waterIntake, setWaterIntake] = useState(0);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [isGoalReached, setIsGoalReached] = useState(false);
-  const [showFactModal, setShowFactModal] = useState(false);
-  const animatedValue = useRef(new Animated.Value(0)).current;
-
-  // Sync with AsyncStorage
+  const { currentUser } = useUser(); // מקבל את המשתמש הנוכחי מתוך הקונטקסט
+  const userId = currentUser?.email ?? 'defaultUserEmail'; // אם לא קיים אימייל, משתמש בברירת מחדל
+  const userGenderValue = currentUser?.gender ?? 'male'; // אם אין מידע על המגדר, ברירת המחדל היא 'male'
+  const waterGoal = userGenderValue === 'male' ? 2600 : 1800; // קביעת כמות המים שהמשתמש צריך לשתות לפי מגדר
+  const { width } = Dimensions.get('window'); // מקבל את רוחב המסך למטרת התאמה
+  const radius = 50; // רדיוס מעגל
+  const strokeWidth = 10; // רוחב הקו
+  const circumference = 2 * Math.PI * radius; // היקף המעגל (הקוטר * פאי)
+  const [waterIntake, setWaterIntake] = useState(0); // כמות המים שנשתתה
+  const [showConfetti, setShowConfetti] = useState(false); // מצב אם להציג קונפטי
+  const [showModal, setShowModal] = useState(false); // מצב אם להראות את המודאל של הגעה ליעד
+  const [isGoalReached, setIsGoalReached] = useState(false); // מצב אם היעד הושג
+  const [showFactModal, setShowFactModal] = useState(false); // מצב אם להראות מודאל עם עובדה על שתיית מים
+  const animatedValue = useRef(new Animated.Value(0)).current; // ערך אנימציה שנע בין 0 ל-1
+  
+  // שמירת הנתונים באמצעות AsyncStorage - מאפשר לשמור נתונים באופן אסינכרוני במכשיר המקומי ללא שימוש במסד נתונים מקומי או חיבור אינטרנט
   useEffect(() => {
     const loadWaterIntake = async () => {
-      const storedIntake = await AsyncStorage.getItem('waterIntake');
-      const storedDate = await AsyncStorage.getItem('lastIntakeDate');
-      const today = new Date().toISOString().slice(0, 10);
-
+      const storedIntake = await AsyncStorage.getItem('waterIntake'); // שולף את הכמות שנשתתה מהזיכרון
+      const storedDate = await AsyncStorage.getItem('lastIntakeDate'); // שולף את תאריך הצריכה האחרון
+      const today = new Date().toISOString().slice(0, 10); // מקבל את התאריך של היום
+  
       if (storedDate !== today) {
-        await AsyncStorage.setItem('waterIntake', '0'); // Reset daily intake
-        await AsyncStorage.setItem('lastIntakeDate', today);
+        await AsyncStorage.setItem('waterIntake', '0'); // מאפס את כמות המים אם היום לא תואם
+        await AsyncStorage.setItem('lastIntakeDate', today); // מעדכן את התאריך של היום
       } else {
-        setWaterIntake(Number(storedIntake) || 0);
+        setWaterIntake(Number(storedIntake) || 0); // אם יש ערך - מגדיר את כמות המים שנשתתה
       }
     };
-
-    loadWaterIntake();
-  }, []);
-
-// בתוך ה-useEffect המעדכן את animatedValue
-useEffect(() => {
-  const progress = waterIntake / waterGoal; // חישוב ההתקדמות
-  Animated.timing(animatedValue, {
-    toValue: progress, // עדכון הערך המתקדם
-    duration: 500,
-    useNativeDriver: true,
-  }).start();
-
-  if (waterIntake >= waterGoal && !isGoalReached) {
-    setShowConfetti(true);
-    setShowModal(true);
-    setIsGoalReached(true);
-  }
-
-  // עדכון כמות המים ב-AsyncStorage
-  const updateWaterIntake = async () => {
-    await AsyncStorage.setItem('waterIntake', String(waterIntake));
-  };
   
-  updateWaterIntake();
-}, [waterIntake]);
+    loadWaterIntake();
+  }, []); // מתבצע רק בפעם הראשונה שהקומפוננטה נטענת
 
-// ה-strokeDashoffset
-const strokeDashoffset = animatedValue.interpolate({
-  inputRange: [0, 1],
-  outputRange: [circumference, 0],
-});
+  // בתוך ה-useEffect המעדכן את animatedValue
+  useEffect(() => {
+    const progress = waterIntake / waterGoal; // חישוב ההתקדמות
+    Animated.timing(animatedValue, { // מניע את האנימציה
+      toValue: progress, // הערך שאליו האנימציה שואפת
+      duration: 500, // משך האנימציה
+      useNativeDriver: true, // שימוש במדריך Native לעיבוד מהיר יותר
+    }).start();
+  
+    if (waterIntake >= waterGoal && !isGoalReached) { // אם היעד הושג
+      setShowConfetti(true); // מציג קונפטי
+      setShowModal(true); // מציג מודאל של ברכות
+      setIsGoalReached(true); // מעדכן שהיעד הושג
+    }
+  
+    // עדכון כמות המים ב-AsyncStorage
+    const updateWaterIntake = async () => {
+      await AsyncStorage.setItem('waterIntake', String(waterIntake)); // שומר את הערך החדש
+    };
+    
+    updateWaterIntake();
+  }, [waterIntake]); // הפעולה הזו מתבצעת כל פעם שכמות המים משתנה
+  
+  // חישוב ה-strokeDashoffset (החלק הממולא במעגל)
+  const strokeDashoffset = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [circumference, 0], // מכיל את ההיקף עד לנקודת ההשלמה
+  });
 
+  // הצגת התראה כל 3 דקות אם לא הגענו ליעד
   useEffect(() => {
     const interval = setInterval(() => {
       const remainingWater = waterGoal - waterIntake;
       if (remainingWater > 0) {
         Alert.alert('Reminder', `You have ${remainingWater} ml left to drink today!`);
       }
-    }, 180000); //שינוי תזמון עד להצגת ההתראה - 3 דק'
+    }, 180000); // 3 דקות
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // סיום עם יציאת הקומפוננטה
   }, [waterIntake]);
 
+  // הוספת כוס מים
   const handleAddGlass = () => {
-    setWaterIntake(prev => prev + 240);
+    setWaterIntake(prev => prev + 240); // מוסיף 240 מ"ל (כוס מים)
   };
 
+  // הצגת מודאל עם עובדה על שתיית מים
   const handleImagePress = () => {
     setShowFactModal(true);
   };
 
-
-  // Function to reset intake
+  // פונקציה לאיפוס הצריכה
   const resetWaterIntake = () => {
     Alert.alert(
       'Reset Water Intake',
@@ -100,15 +110,15 @@ const strokeDashoffset = animatedValue.interpolate({
       [
         {
           text: 'No',
-          style: 'cancel',
+          style: 'cancel', // מבטל את הפעולה
         },
         {
           text: 'Yes',
           onPress: () => {
-            setWaterIntake(0); // Reset intake
-            AsyncStorage.setItem('waterIntake', '0'); // Update in AsyncStorage
-            setShowConfetti(false); // Reset confetti state
-            setIsGoalReached(false); // Reset goal reached state
+            setWaterIntake(0); // מאפס את הצריכה
+            AsyncStorage.setItem('waterIntake', '0'); // מעדכן את AsyncStorage
+            setShowConfetti(false); // מאפס את מצב הקונפטי
+            setIsGoalReached(false); // מאפס את מצב הגעה ליעד
           },
         },
       ],
@@ -118,14 +128,20 @@ const strokeDashoffset = animatedValue.interpolate({
 
   return (
     <View style={[styles.container, { width: width * 0.4 }]}>
+      {/* כותרת של הקומפוננטה */}
       <Text style={styles.title}>Daily Water Consumption</Text>
+      
+      {/* כפתור ריסט של צריכת המים, כשלוחצים עליו הוא מפעיל את הפונקציה resetWaterIntake */}
       <TouchableOpacity style={styles.resetButton} onPress={resetWaterIntake}>
         <Ionicons name="refresh" size={24} color="#3b5998" />
       </TouchableOpacity>
 
+      {/* כפתור ללחיצה על התמונה, הפונקציה handleImagePress תופעל בעת לחיצה */}
       <TouchableOpacity style={styles.imageContainer} onPress={handleImagePress}>
         <Image source={circleImage} style={styles.image} />
       </TouchableOpacity>
+      
+      {/* רכיב SVG שמציג מעגל עם אנימציה על פי צריכת המים */}
       <Svg height="150" width="150" viewBox="0 0 120 120" style={styles.svg}>
         <Circle
           cx="60"
@@ -135,6 +151,7 @@ const strokeDashoffset = animatedValue.interpolate({
           strokeWidth={strokeWidth}
           fill="none"
         />
+        {/* מעגל אנימציה שמציג את צריכת המים, מעודכן על ידי strokeDashoffset */}
         <AnimatedCircle
           cx="60"
           cy="60"
@@ -142,21 +159,27 @@ const strokeDashoffset = animatedValue.interpolate({
           stroke="#3b5998"
           strokeWidth={strokeWidth}
           fill="none"
-          strokeDasharray={`${circumference} ${circumference}`} // ערך נכון
-          strokeDashoffset={strokeDashoffset}
+          strokeDasharray={`${circumference} ${circumference}`} // הגדרת ערך נכון של strokeDasharray
+          strokeDashoffset={strokeDashoffset} // עדכון המרחק של הקו האנימטיבי
           strokeLinecap="round"
-          rotation={270} // התחלה מהחלק העליון
-          originX={60} // מרכז הסיבוב
-          originY={60} // מרכז הסיבוב
-        />
+          rotation={270} // סיבוב 270 מעלות (התחלה מהחלק העליון)
+          originX={60} // מגדיר את מרכז הסיבוב
+          originY={60} // מגדיר את מרכז הסיבוב
+          />
       </Svg>
+
+      {/* תצוגת כמות המים הנצרכת והיעד */}
        <View style={styles.textContainer}>
         <Text style={styles.text}>{`${waterIntake} ml`}</Text>
         <Text style={styles.subText}>Goal: {waterGoal} ml</Text>
       </View>
+
+      {/* כפתור להוספת כוס מים */}
       <TouchableOpacity style={styles.button} onPress={handleAddGlass}>
         <Text style={styles.buttonText}>Add Glass of Water</Text>
       </TouchableOpacity>
+
+      {/* תצוגת קונפטי שמופיעה כאשר מגיעים ליעד המים */}
       {showConfetti && (
         <ConfettiCannon
           count={300}
@@ -166,6 +189,8 @@ const strokeDashoffset = animatedValue.interpolate({
           onAnimationEnd={() => setShowConfetti(false)}
         />
       )}
+
+      {/* מודל הצגת ברכות כאשר מגיעים ליעד המים */}
       <Modal
         visible={showModal}
         animationType="fade"
@@ -180,6 +205,8 @@ const strokeDashoffset = animatedValue.interpolate({
           </View>
         </View>
       </Modal>
+
+      {/* מודל הצגת מידע על המלצות צריכת מים */}
       <Modal
         visible={showFactModal}
         animationType="slide"
@@ -196,12 +223,15 @@ const strokeDashoffset = animatedValue.interpolate({
           </View>
         </View>
       </Modal>
+
     </View>
   );
 };
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+//רכיב Circle שמסביבו מבוצעת אנימציה עם רכיב Animated.createAnimatedComponent
+const AnimatedCircle = Animated.createAnimatedComponent(Circle); 
 
+//סטיילים
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',

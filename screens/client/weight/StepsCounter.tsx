@@ -1,8 +1,8 @@
 /*
- * This component displays a graph of the user's step count over the past 5 hours.
- * It uses the Expo Pedometer API to get the step count data.
- * The graph is rendered as a bar chart with 5 bars, each representing the number of steps taken in the past 5 hours.
- * On press, the user is presented with a modal containing the number of steps taken in the last hour and the total number of steps taken in the past 24 hours.
+ * רכיב זה מציג גרף של מספר הצעדים של המשתמש ב-5 השעות האחרונות.
+ * בלחיצה על עמודה כלשהי בגרף, המשתמש רואה את מספר הצעדים באותה שעה ספצפית שנלחצה.
+ * (יממה)בעת לחיצה על הכפתור "סיכום" יוצג מודל המפרט: כמות צעדים שנמדדו בשעה האחרונה, כמות צעדים שנמדדו מ00 בלילה(יום) וכמות הצעדים שנמדדו ב-24 השעות האחרונות
+ * הוא משתמש ב-Expo Pedometer API כדי לקבל את נתוני הצעדים.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -11,68 +11,73 @@ import Svg, { Rect, Text as SvgText, Line, Defs, LinearGradient, Stop } from 're
 import { Pedometer } from 'expo-sensors';
 
 interface HourlyStep {
-  hour: number;
-  steps: number;
+  hour: number; // שעה שבה נמדדו הצעדים
+  steps: number; // מספר הצעדים שנעשו בשעה זו
 }
 
 const HealthGraph = () => {
   const { width } = Dimensions.get('window');
-  const [showModal, setShowModal] = useState(false);
-  const [hourlySteps, setHourlySteps] = useState<HourlyStep[]>([]);
+  const [showModal, setShowModal] = useState(false); // משתנה למעקב אם המודל מוצג או לא
+  const [hourlySteps, setHourlySteps] = useState<HourlyStep[]>([]); // נתוני הצעדים של כל שעה
   const [summaryData, setSummaryData] = useState({
-    lastHour: 0,
-    today: 0,
-    last24Hours: 0,
+    lastHour: 0, // מספר הצעדים בשעה האחרונה
+    today: 0, // מספר הצעדים היום
+    last24Hours: 0, // מספר הצעדים ב-24 השעות האחרונות
   });
-  const [selectedHour, setSelectedHour] = useState<HourlyStep | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const barWidth = 15;
-  const barSpacing = 10;
-  const graphHeight = 190;
-  const graphWidth = (barWidth + barSpacing) * 5;
+  const [selectedHour, setSelectedHour] = useState<HourlyStep | null>(null); // המשתנה ששומר את השעה הנבחרת מתוך 5 השעות האחרונות
+  const [error, setError] = useState<string | null>(null); // משתנה לניהול שגיאות
+  const barWidth = 15; // רוחב כל עמודה בגרף
+  const barSpacing = 10; // רווח בין העמודות
+  const graphHeight = 190; // גובה הגרף
+  const graphWidth = (barWidth + barSpacing) * 5; // רוחב הגרף הכולל (5 עמודות)
 
   useEffect(() => {
+    // פונקציה טוענת ומציגה נתונים בזמן אמת - שליפת נתונים ממקורות חיצוניים וקבלת תשובות בצורה אסינכרונית
     const fetchData = async () => {
-      const end = new Date();
-      const startLast24Hours = new Date(end.getTime() - 24 * 60 * 60 * 1000);
-      const startSince00Today = new Date(end);
-      startSince00Today.setHours(0, 0, 0, 0);
+      const end = new Date(); // השורה הזו מקבלת את הזמן הנוכחי, כלומר את התאריך והשעה הנוכחיים ברגע הריצה של הקוד.
+      const startLast24Hours = new Date(end.getTime() - 24 * 60 * 60 * 1000); // זמן התחלה ל-24 השעות האחרונות
+      const startSince00Today = new Date(end); // זמן התחלה להיום בשעה 00:00
+      startSince00Today.setHours(0, 0, 0, 0); // הגדרת השעה 00:00 - מוודא שהשעה, הדקה, השנייה והמילישנייה יוגדרו לאפס.
 
       const hourlyData: HourlyStep[] = [];
+      // לולאה לאיסוף נתוני צעדים בכל אחת מחמש השעות האחרונות
       for (let i = 4; i >= 0; i--) {
-        const hourStart = new Date(end.getTime() - i * 60 * 60 * 1000);
-        const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+        const hourStart = new Date(end.getTime() - i * 60 * 60 * 1000); // תחילת השעה
+        const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000); // סיום השעה
         try {
-          const result = await Pedometer.getStepCountAsync(hourStart, hourEnd);
+          // קבלת נתוני הצעדים - ממתינים עד לסיום ביצוע הפעולה האסינכרונית לפני שממשיכים לקוד הבא
+          const result = await Pedometer.getStepCountAsync(hourStart, hourEnd); 
           hourlyData.push({ hour: hourStart.getHours(), steps: result.steps });
         } catch (error) {
-          setError('Error reading step data.');
+          setError('Error reading step data.'); // טיפול בשגיאה
         }
       }
-      setHourlySteps(hourlyData);
+      setHourlySteps(hourlyData); // עדכון נתוני הצעדים השעתיים
 
       try {
+        // איסוף סיכום נתוני צעדים עבור 24 שעות אחרונות, היום והשעה האחרונה
+        // פונקציה שמורה שמקבלת 2 תאריכים ומחזירה כמות צעדים בטווח הזה 
         const past24HoursResult = await Pedometer.getStepCountAsync(startLast24Hours, end);
         const todayResult = await Pedometer.getStepCountAsync(startSince00Today, end);
         const lastHourResult = await Pedometer.getStepCountAsync(new Date(end.getTime() - 60 * 60 * 1000), end);
 
         setSummaryData({
-          lastHour: lastHourResult.steps,
-          today: todayResult.steps,
-          last24Hours: past24HoursResult.steps,
+          lastHour: lastHourResult.steps, // עדכון מספר הצעדים בשעה האחרונה
+          today: todayResult.steps, // עדכון מספר הצעדים היום
+          last24Hours: past24HoursResult.steps, // עדכון מספר הצעדים ב-24 שעות אחרונות
         });
       } catch (error) {
-        setError('Error reading step data.');
+        setError('Error reading step data.'); // טיפול בשגיאה
       }
     };
 
     fetchData();
-  }, []);
+  }, []); // פעולה זו תקרה פעם אחת לאחר טעינת הרכיב
 
-  const maxSteps = Math.max(...hourlySteps.map(item => item.steps));
-  const maxBarHeight = graphHeight * 0.9; // 90% of graph height
+  const maxSteps = Math.max(...hourlySteps.map(item => item.steps)); // חישוב מספר הצעדים הגבוה ביותר
+  const maxBarHeight = graphHeight * 0.9; // גובה מקסימלי לעמודה (90% מגובה הגרף)
 
+  // פונקציה שמציירת את העמודות בגרף
   const renderBars = () => {
     return hourlySteps.map((item, index) => (
       <React.Fragment key={index}>
@@ -83,17 +88,18 @@ const HealthGraph = () => {
           </LinearGradient>
         </Defs>
         <Rect
-          x={index * (barWidth + barSpacing) + barSpacing / 2}
-          y={graphHeight - (item.steps / maxSteps) * maxBarHeight}
-          width={barWidth}
-          height={(item.steps / maxSteps) * maxBarHeight}
-          fill={`url(#grad${index})`}
+          x={index * (barWidth + barSpacing) + barSpacing / 2} // חישוב המיקום של כל עמודה
+          y={graphHeight - (item.steps / maxSteps) * maxBarHeight} // חישוב הגובה של כל עמודה
+          width={barWidth} // רוחב העמודה
+          height={(item.steps / maxSteps) * maxBarHeight} // גובה העמודה תלוי במספר הצעדים
+          fill={`url(#grad${index})`} // צבע עבור כל עמודה
           stroke="#D89E4E"
           strokeWidth="1"
-          onPress={() => setSelectedHour(item)}
+          onPress={() => setSelectedHour(item)} // לחיצה תציג את הכמות צעדים באותה שעה
         />
         <SvgText
-          x={index * (barWidth + barSpacing) + barWidth / 2 + barSpacing / 2}
+          // מיקום הטקסט תחת כל עמודה
+          x={index * (barWidth + barSpacing) + barWidth / 2 + barSpacing / 2} 
           y={graphHeight + 15}
           fontSize="10"
           fill="#333"
@@ -107,27 +113,34 @@ const HealthGraph = () => {
 
   return (
     <View style={[styles.container, { width: width * 0.4 }]}>
+      
+      {/* כותרת של הקומפוננטה */}
       <Text style={styles.title}>Hourly Steps</Text>
+
+      {/* גרף 5 עמודות של השעות */}
       <Svg height={graphHeight + 30} width={graphWidth} style={styles.svg}>
-        <Line x1="0" y1={graphHeight} x2={graphWidth} y2={graphHeight} stroke="#ccc" strokeWidth="1" />
-        {renderBars()}
+        <Line x1="0" y1={graphHeight} x2={graphWidth} y2={graphHeight} stroke="#ccc" strokeWidth="1" /> 
+        {renderBars()}{/* קריאה לפונקציה לציור העמודות */}
       </Svg>
+
       {selectedHour ? (
         <Text style={styles.selectedHourText}>
-          {`${selectedHour.hour}:00 - ${selectedHour.steps} steps`}
+          {`${selectedHour.hour}:00 - ${selectedHour.steps} steps`}{/* מציג את הצעדים בשעה הנבחרת */}
         </Text>
       ) : (
         <Text style={styles.selectedHourText}>
-          {`${new Date().getHours()}:00 - ${hourlySteps.find(item => item.hour === new Date().getHours())?.steps ?? 0} steps`}
+          {`${new Date().getHours()}:00 - ${hourlySteps.find(item => item.hour === new Date().getHours())?.steps ?? 0} steps`}{/* אחרת מציג את הצעדים בשעה הנוכחית או 0 אם אין נתון זמין */}
         </Text>
       )}
       {error ? (
-        <Text style={styles.errorMessage}>{error}</Text>
+        <Text style={styles.errorMessage}>{error}{/* במידה ויש שגיאה בהצגת הנתונים הצגת השגיאה, אחרת הצגת כפתור הסיכום */}</Text>
       ) : (
         <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
           <Text style={styles.buttonText}>Show Summary</Text>
         </TouchableOpacity>
       )}
+
+      {/* מודל הצגת מסך הסיכום של נתוני הצעדים */}
       <Modal
         visible={showModal}
         animationType="fade"
@@ -144,10 +157,12 @@ const HealthGraph = () => {
           </View>
         </View>
       </Modal>
+
     </View>
   );
 };
 
+// סטיילים
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',

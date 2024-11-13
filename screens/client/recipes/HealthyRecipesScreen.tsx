@@ -1,14 +1,16 @@
 /*
- * This component renders a screen with a list of recipe categories.
- * Each category is represented as a tile with an image and a title.
- * When the user presses a category, the component navigates to the RecipeCategoryScreen
- * with the selected category as a parameter.
+ * המסך הראשון בעת כניסה לדף המתכונים
+ * רכיב זה מציג מסך עם רשימה של קטגוריות מתכונים.
+ * כל קטגוריה מיוצגת באמצעות תצוגה הכוללת תמונה וכותרת.
+ * כאשר המשתמש לוחץ על קטגוריה, הרכיב עובר למסך "RecipeCategoryScreen"
+ * ומעביר אליו את הקטגוריה שנבחרה כפרמטר.
  */
 
 import React from 'react';
 import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+// רשימת קטגוריות המתכונים עם מזהה, כותרת ותמונה לכל קטגוריה
 const categories = [
   { id: '1', title: 'Breakfast', image: require('../../../Images/breakfast.jpg') },
   { id: '2', title: 'Lunch', image: require('../../../Images/lunch.jpeg') },
@@ -16,6 +18,7 @@ const categories = [
   { id: '4', title: 'Snacks', image: require('../../../Images/snacks.jpg') },
 ];
 
+// רכיב ליצירת פריט קטגוריה יחיד עם כותרת, תמונה ואירוע לחיצה
 const CategoryItem = ({ title, image, onPress }: { title: string; image: any; onPress: () => void }) => (
   <TouchableOpacity style={styles.categoryItem} onPress={onPress}>
     <Image source={image} style={styles.categoryImage} />
@@ -23,14 +26,19 @@ const CategoryItem = ({ title, image, onPress }: { title: string; image: any; on
   </TouchableOpacity>
 );
 
+// רכיב עיקרי שמייצג את מסך הקטגוריות "HealthyRecipesScreen"
 const HealthyRecipesScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  // פונקציה שמנווטת למסך המתאים בעת לחיצה על קטגוריה מסוימת
   const handleCategoryPress = (category: string) => {
     navigation.navigate('RecipeCategoryScreen', { category });
   };
 
   return (
     <View style={styles.container}>
+      {/* כותרת המסך */}
       <Text style={styles.header}>Healthy Recipes</Text>
+      
+      {/* תצוגה של רשימת הקטגוריות כרשת של פריטים */}
       <View style={styles.grid}>
         {categories.map(category => (
           <CategoryItem
@@ -41,6 +49,8 @@ const HealthyRecipesScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           />
         ))}
       </View>
+      
+      {/* כפתור מעבר למסך צ'אט עם המלצות מתכונים בהתאם לפריטים שהמשתמש מזין */}
       <TouchableOpacity 
         style={styles.chatButton} 
         onPress={() => navigation.navigate('GeminiRecipes')}>
@@ -51,6 +61,7 @@ const HealthyRecipesScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
   );
 };
 
+// סטיילים
 const styles = StyleSheet.create({
   container: {
     flex: 1,
