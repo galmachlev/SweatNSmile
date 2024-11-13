@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../../../context/UserContext';
 
 const AllMenusTable = () => {
   const { currentUser } = useUser();
@@ -50,6 +50,17 @@ const AllMenusTable = () => {
     </View>
   );
 
+    // Function to get the border color based on the meal type
+    const getBorderColor = (mealType: string): string => {
+      const colors: Record<string, string> = {
+        Breakfast: '#FFCE76',
+        Lunch: '#F8D675',
+        Dinner: '#FDE598',
+        Extras: '#E8A54B',
+      };
+      return colors[mealType] || '#FBF783';
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>All Your Menus</Text>
@@ -67,16 +78,17 @@ const AllMenusTable = () => {
           <View style={styles.modalContainer}>
             <ScrollView>
               <Text style={styles.modalTitle}>Menu Details</Text>
+
               {selectedMenu && (
                 <View>
                   {Object.keys(selectedMenu.meals).map((mealType) => (
-                    <View key={mealType} style={styles.mealDetailsContainer}>
+                    <View key={mealType} style={[styles.mealSection, { borderColor: getBorderColor(mealType) }]}>
                       <Text style={styles.mealTitle}>{mealType}</Text>
                       {Object.keys(selectedMenu.meals[mealType]).length > 0 ? (
                         Object.entries(selectedMenu.meals[mealType]).map(([category, item]) => (
                           <View key={item.id} style={styles.itemDetails}>
                             <Text style={styles.itemName}>{item.name}</Text>
-                            <Text style={styles.itemInfo}>Calories: {item.calories} | Protein: {item.protein}g | Fat: {item.fat}g | Carbs: {item.carbs}g</Text>
+                            <Text style={styles.itemInfo}>Quantity: {item.quantity}g | Calories: {item.calories} | {"\n"}Protein: {item.protein}g | Fat: {item.fat}g | Carbs: {item.carbs}g</Text>
                           </View>
                         ))
                       ) : (
@@ -86,6 +98,24 @@ const AllMenusTable = () => {
                   ))}
                 </View>
               )}
+
+              {/* Creation date and time */}
+              {selectedMenu && (
+                <>
+                <Text style={styles.menuDateLabel}>Created at:</Text>
+                <Text style={styles.menuDateText}>
+                  {new Date(selectedMenu.date).toLocaleString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Text>
+                </>
+              )}
+
               <TouchableOpacity onPress={() => setShowModal(false)} style={styles.closeButton}>
                 <Text style={styles.closeButtonText}>Close</Text>
               </TouchableOpacity>
@@ -127,6 +157,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#696B6D',
   },
+  menuDateText: {
+    fontSize: 14,
+    color: '#3E6613', // צבע ירוק כהה שמותאם לצבעים באפליקציה
+    textAlign: 'center',
+    marginBottom: 15,
+    lineHeight: 20, // להוסיף ריווח בין השורות
+  },
+  menuDateLabel: {
+    marginTop: 20,
+    fontSize: 14,
+    color: '#3E6613', // צבע ירוק כהה שמותאם לצבעים באפליקציה
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },  
   detailsButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -171,6 +215,20 @@ const styles = StyleSheet.create({
   },
   mealDetailsContainer: {
     marginBottom: 20,
+  },
+  mealSection: {
+    backgroundColor: '#FFF',
+    borderRadius: 15,
+    padding: 15,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+    borderLeftWidth: 25,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
   },
   mealTitle: {
     fontSize: 18,

@@ -28,7 +28,7 @@ import WeeklyChallenge from './screens/client/Challenges/WeeklyChallenge';
 import ChallengeDetails from './screens/client/Challenges/ChallengeDetails';
 import { PaperProvider } from 'react-native-paper';
 import StoreScreen from './screens/client/StoreScreen';
-import AllMenusTable from './screens/client/AllMenusTable';
+import AllMenusTable from './screens/client/Menus/AllMenusTable';
 
 LogBox.ignoreLogs([
   'VirtualizedLists should never be nested inside plain ScrollViews', // Ignore VirtualizedLists warning
