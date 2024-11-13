@@ -3,12 +3,34 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../../../context/UserContext';
 
+type FoodItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+};
+
+type Meal = {
+  [category: string]: FoodItem;
+};
+
+type Menu = {
+  date: string | number | Date;
+  menuId: string;
+  meals: {
+    [mealType: string]: Meal;
+  };
+};
+
 const AllMenusTable = () => {
   const { currentUser } = useUser();
-  const [menus, setMenus] = useState([]);
+  const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedMenu, setSelectedMenu] = useState(null);
+  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   // Fetch user menus from the backend
@@ -35,12 +57,25 @@ const AllMenusTable = () => {
     fetchUserMenus();
   }, [currentUser]);
 
-  const handleViewDetails = (menu) => {
+  const handleViewDetails = (menu: Menu) => {
     setSelectedMenu(menu);
     setShowModal(true);
   };
 
-  const renderMenuItem = ({ item }) => (
+  // Calculate total calories for the entire menu
+  const calculateTotalCalories = (menu: Menu) => {
+    return Object.values(menu.meals).reduce(
+      (sum, meal) => sum + calculateMealCalories(meal),
+      0
+    );
+  };
+
+  // Calculate total calories for each meal
+  const calculateMealCalories = (meal: Meal) => {
+    return Object.values(meal).reduce((sum, item) => sum + item.calories, 0);
+  };
+
+  const renderMenuItem = ({ item }: { item: Menu }) => (
     <View style={styles.menuItem}>
       <Text style={styles.dateText}>{new Date(item.date).toLocaleDateString()}</Text>
       <TouchableOpacity style={styles.detailsButton} onPress={() => handleViewDetails(item)}>
@@ -50,17 +85,17 @@ const AllMenusTable = () => {
     </View>
   );
 
-    // Function to get the border color based on the meal type
-    const getBorderColor = (mealType: string): string => {
-      const colors: Record<string, string> = {
-        Breakfast: '#FFCE76',
-        Lunch: '#F8D675',
-        Dinner: '#FDE598',
-        Extras: '#E8A54B',
-      };
-      return colors[mealType] || '#FBF783';
+  // Function to get the border color based on the meal type
+  const getBorderColor = (mealType: string) => {
+    const colors: { [key: string]: string } = {
+      Breakfast: '#FFCE76',
+      Lunch: '#F8D675',
+      Dinner: '#FDE598',
+      Extras: '#E8A54B',
+    };
+    return colors[mealType] || '#FBF783';
   };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>All Your Menus</Text>
@@ -79,41 +114,32 @@ const AllMenusTable = () => {
             <ScrollView>
               <Text style={styles.modalTitle}>Menu Details</Text>
 
-              {selectedMenu && (
-                <View>
-                  {Object.keys(selectedMenu.meals).map((mealType) => (
-                    <View key={mealType} style={[styles.mealSection, { borderColor: getBorderColor(mealType) }]}>
-                      <Text style={styles.mealTitle}>{mealType}</Text>
-                      {Object.keys(selectedMenu.meals[mealType]).length > 0 ? (
-                        Object.entries(selectedMenu.meals[mealType]).map(([category, item]) => (
-                          <View key={item.id} style={styles.itemDetails}>
-                            <Text style={styles.itemName}>{item.name}</Text>
-                            <Text style={styles.itemInfo}>Quantity: {item.quantity}g | Calories: {item.calories} | {"\n"}Protein: {item.protein}g | Fat: {item.fat}g | Carbs: {item.carbs}g</Text>
-                          </View>
-                        ))
-                      ) : (
-                        <Text style={styles.noItemsText}>No items added.</Text>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              )}
+              <Text style={styles.totalCaloriesText}>
+                Total Calories: {selectedMenu ? calculateTotalCalories(selectedMenu) : 0}
+              </Text>
 
-              {/* Creation date and time */}
-              {selectedMenu && (
-                <>
-                <Text style={styles.menuDateLabel}>Created at:</Text>
-                <Text style={styles.menuDateText}>
-                  {new Date(selectedMenu.date).toLocaleString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </Text>
-                </>
+              {selectedMenu && selectedMenu.meals && Object.keys(selectedMenu.meals).length > 0 ? (
+                Object.keys(selectedMenu.meals).map((mealType) => (
+                  <View key={mealType} style={[styles.mealSection, { borderColor: getBorderColor(mealType) }]}>
+                    <Text style={styles.mealTitle}>
+                      {mealType} -{' '}
+                      <Text style={styles.caloriesText}>
+                        {calculateMealCalories(selectedMenu.meals[mealType])} calories
+                      </Text>
+                    </Text>
+                    {Object.entries(selectedMenu.meals[mealType]).map(([category, item]) => (
+                      <View key={item.id} style={styles.itemDetails}>
+                        <Text style={styles.itemName}>{item.name}</Text>
+                        <Text style={styles.itemInfo}>
+                          Quantity: {item.quantity}g | Calories: {item.calories.toFixed(0)} | {"\n"}
+                          Protein: {item.protein.toFixed(1)}g | Fat: {item.fat.toFixed(1)}g | Carbs: {item.carbs.toFixed(1)}g
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noItemsText}>No items added.</Text>
               )}
 
               <TouchableOpacity onPress={() => setShowModal(false)} style={styles.closeButton}>
@@ -126,6 +152,7 @@ const AllMenusTable = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -194,6 +221,9 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingBottom: 100,
   },
+  caloriesText: {
+    fontSize: 14, 
+},
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -233,18 +263,18 @@ const styles = StyleSheet.create({
   mealTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 18,
     color: '#3E6613',
   },
   itemDetails: {
     marginBottom: 10,
   },
   itemName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   itemInfo: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#696B6D',
   },
   noItemsText: {
