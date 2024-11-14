@@ -34,7 +34,7 @@ const RecipeChat: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null); // כל פעם שהצאט יפיק תשובה זה יגלול את הצ'אט לסוף כל הודעה חדשה
   const API_KEY = "AIzaSyAEG-hwBmhVBOIz8t7BQRpGOyPhcr3tWiU";  // מפתח API עבור Google Generative AI
   const genAI = new GoogleGenerativeAI.GoogleGenerativeAI(API_KEY); // יצירת אינסטנס של Google Generative AI 
-  const [displayedRecipes, setDisplayedRecipes] = useState<string[]>([]); 
+  const [displayedRecipes, setDisplayedRecipes] = useState<string[]>([]); // סטייט המנהל רשימה של מתכונים שהוצגו כבר, כדי למנוע הצגת מתכונים חוזרים למשתמש
   const urlPattern = /(https?:\/\/[^\s]+)/g; // רגולר לחיפוש קישורים בטקסט - עבור ההודעות שגימיני מחזיר מתכונים עם קישור חיצוני
 
   // פונקציה לשליחת פרומפט ל-Gemini וקבלת תגובה

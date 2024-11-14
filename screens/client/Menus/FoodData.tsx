@@ -1,37 +1,40 @@
-// This should be your main FoodItem interface
+// כל פריט מזון מאופיין במזהה ייחודי, שם, כמות קלוריות ל100 גרם, כמות שומן ל100 גרם, כמות פחמימות ל100 גרם, כמות חלבונים ל100 גרם
 export interface FoodItem {
-    id: string; // Add ID for uniqueness
-    name: string; // Food name
-    calories: number; // Calories
-    protein: number; // Protein content
-    fat: number; // Fat content
-    carbs: number; // Carbohydrates content
-    quantity: number; // Amount in grams
-    food?: {
+    id: string; 
+    name: string; 
+    calories: number; 
+    protein: number;
+    fat: number;
+    carbs: number; 
+    quantity: number; 
+    food?: { // לצורך המוצרים שמתווספים מAPI חיצוני
         foodId: string;
         label: string;
         nutrients: FoodNutrients;
     };
 }
   
-export interface FoodCategory {
-    category: string;
-    items: FoodItem[];
-    code?: string;
-
-}
-
+//טייפים עבור 3 ארוחות בעמוד למטה - כל אחת מכילה שם ומערך שלFoodCategory 
 export interface Meal {
     mealName: string;
     categories: FoodCategory[];
 }
 
+//כל ארוחה בדף למטה מכילה קטגוריה(5 סוגים) בכל קטגוריה פריטי מזון וקוד ייחודי
+export interface FoodCategory {
+    category: string;
+    items: FoodItem[];
+    code?: string;
+}
+
+// לצורך שליפת פריטי המזון מתוך כל אחת מהארוחות
 export interface FoodData {
     breakfastCategories: FoodCategory[];
     lunchCategories: FoodCategory[];
     dinnerCategories: FoodCategory[];
 }
 
+//טייפים עבור שליפת ערכי מוצרי המזון בAPI החיצוני בארוחת אקסטרה
 export interface FoodNutrients {
     ENERC_KCAL: number; // Calories
     PROCNT: number; // Protein

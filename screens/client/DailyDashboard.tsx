@@ -1,85 +1,78 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-  TextInput,
-  TouchableWithoutFeedback,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import ProgressBar from './weight/progressBar';
 import WaterConsumption from './weight/WaterConsumption';
 import StepsCounter from './weight/StepsCounter';
 import { useUser } from '../../context/UserContext';
 
 const DailyDashboard = () => {
-  const { currentUser, updateUserDetails } = useUser();
-  const [lastWeight, setLastWeight] = useState(currentUser?.currentWeight || 0);
-  const [isAddingWeight, setIsAddingWeight] = useState(false);
-  const [weight, setWeight] = useState('');
-  const [isWeightChanged, setIsWeightChanged] = useState(false);
-  const screenWidth = Dimensions.get('window').width;
-  const componentWidth = (screenWidth - 60) / 2;
+  const { currentUser, updateUserDetails } = useUser(); // שימוש בהוק לקבלת ועדכון פרטי משתמש
+  const [lastWeight, setLastWeight] = useState(currentUser?.currentWeight || 0); // שדה לשמירת משקל אחרון של המשתמש
+  const [isAddingWeight, setIsAddingWeight] = useState(false); // מצב אם המשתמש מוסיף משקל חדש
+  const [weight, setWeight] = useState(''); // שדה לשמירת ערך המשקל שהמשתמש הכניס
+  const [isWeightChanged, setIsWeightChanged] = useState(false); // מצב אם המשקל שהוזן שונה מהמשקל הקודם
+  const screenWidth = Dimensions.get('window').width; // גודל המסך הנוכחי
+  const componentWidth = (screenWidth - 60) / 2; // חישוב רוחב עבור רכיבים שונים
 
-  const inputRef = useRef(null);
-  const scrollViewRef = useRef(null);
+  const inputRef = useRef(null); // הפניה לשדה הקלט של המשקל
+  const scrollViewRef = useRef(null); // הפניה ל-ScrollView
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
+  const currentDate = new Date().toLocaleDateString('en-US', { // תאריך נוכחי בפורמט יומי
     weekday: 'long',
     month: 'short',
     day: 'numeric',
   });
 
-  const formattedDate = new Date().toISOString().split('T')[0];
+  const formattedDate = new Date().toISOString().split('T')[0]; // תאריך בפורמט יISO
 
+  // אפקט שמשתנה כאשר פרטי המשתמש משתנים, ומעדכן את המשקל האחרון
   useEffect(() => {
     if (currentUser) {
       setLastWeight(currentUser.currentWeight);
     }
   }, [currentUser]);
 
-  const handleSave = () => {
-    if (weight && isWeightChanged) {
-      const newWeight = parseFloat(weight);
-      setLastWeight(newWeight);
-      setIsAddingWeight(false);
-      setWeight('');
-      setIsWeightChanged(false);
-
-      updateUserDetails(currentUser.email, { currentWeight: newWeight })
-        .then(() => Alert.alert('Success', 'Weight updated successfully.'))
-        .catch(() => Alert.alert('Error', 'Failed to update weight. Please try again.'));
-    }
-  };
-
+  // פונקציה שמעדכנת את הערך של המשקל שהמשתמש הכניס
   const handleWeightChange = (text) => {
     setWeight(text);
     setIsWeightChanged(true);
   };
 
-  const handlePressOutside = () => {
+  // פונקציה שמתבצעת כאשר לוחצים על הכפתור של הוספת משקל
+  const handleAddWeightPress = () => {
     if (isAddingWeight) {
-      Keyboard.dismiss();
-      setIsAddingWeight(false);
-      setWeight('');
-      setIsWeightChanged(false);
+      handleSave(); // אם כבר מזינים משקל, שומרים את הנתון
+    } else {
+      setIsAddingWeight(true); // אם לא, מתחילים להזין משקל
+      setTimeout(() => inputRef.current?.focus(), 100); // ממקדים את השדה לאחר זמן קצר
     }
   };
 
-  const handleAddWeightPress = () => {
-    if (isAddingWeight) {
-      handleSave();
-    } else {
-      setIsAddingWeight(true);
-      setTimeout(() => inputRef.current?.focus(), 100);
+  // פונקציה לסגירת המקלדת בעת לחיצה מחוץ לשדה הקלט
+  const handlePressOutside = () => {
+    if (isAddingWeight) { //
+      Keyboard.dismiss(); // סגירת המקלדת
+      setIsAddingWeight(false); // שינוי מצב האם המשתמש מכניס משקל
+      setWeight(''); // איפוס ערך המשקל
+      setIsWeightChanged(false); // איפוס מצב שינוי המשקל
     }
   };
+
+  // פונקציה ששומרת את השינוי במשקל
+  const handleSave = () => {
+    if (weight && isWeightChanged) { // אם יש ערך חדש שהוזן
+      const newWeight = parseFloat(weight); // ממירים את הערך שהוזן למספר
+      setLastWeight(newWeight); // עדכון המשקל האחרון
+      setIsAddingWeight(false); // סיום הזנת המשקל
+      setWeight(''); // איפוס שדה הקלט
+      setIsWeightChanged(false); // איפוס מצב שינוי המשקל
+
+      updateUserDetails(currentUser.email, { currentWeight: newWeight }) // עדכון פרטי המשתמש
+        .then(() => Alert.alert('Success', 'Weight updated successfully.')) // הצלחה בעדכון
+        .catch(() => Alert.alert('Error', 'Failed to update weight. Please try again.')); // כישלון בעדכון
+    }
+  };
+
 
   return (
     <KeyboardAvoidingView
@@ -87,18 +80,20 @@ const DailyDashboard = () => {
       style={styles.mainContainer}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
-      <TouchableWithoutFeedback onPress={handlePressOutside}>
+      <TouchableWithoutFeedback onPress={handlePressOutside}>{/*הפעלת הפונקציה  שאחראית לסגור את המקלדת בעת לחיצה מחוצה לה*/}
         <ScrollView
           ref={scrollViewRef}
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
+          {/*  */}
           <ProgressBar 
             startWeight={currentUser?.startWeight || 0} 
             currentWeight={lastWeight} 
             goalWeight={currentUser?.goalWeight || 0} 
           />
           
+          {/*  */}
           <View style={styles.horizontalContainer}>
             <View style={styles.infoContainer}>
               <View style={styles.weightRow}>
@@ -108,15 +103,17 @@ const DailyDashboard = () => {
               <Text style={styles.dateText}>{currentDate}</Text>
             </View>
 
+            {/*   */}
             <TouchableOpacity style={[styles.updateButton, isAddingWeight && isWeightChanged ? { backgroundColor: '#d9534f', paddingHorizontal: 20 } : null]} onPress={handleAddWeightPress}>
-            <Text style={styles.updateButtonText}>
-              {isAddingWeight
-                ? (isWeightChanged ? 'Save\nChanges' : 'Update\n Weight')
-                : 'Update\n Weight'}
-            </Text>
+              <Text style={styles.updateButtonText}>
+                {isAddingWeight
+                  ? (isWeightChanged ? 'Save\nChanges' : 'Update\n Weight')
+                  : 'Update\n Weight'}
+              </Text>
             </TouchableOpacity>
           </View>
 
+          {/*  */}
           {isAddingWeight && (
             <View style={styles.weightInputContainer}>
               <Text style={styles.inputLabel}>Date: {formattedDate}</Text>
@@ -131,6 +128,7 @@ const DailyDashboard = () => {
             </View>
           )}
 
+          {/*  */}
           <View style={styles.row}>
             <View style={[styles.componentContainer, { width: componentWidth }]}>
               <WaterConsumption />
@@ -139,12 +137,14 @@ const DailyDashboard = () => {
               <StepsCounter />
             </View>
           </View>
+
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };
 
+//סטיילים
 const styles = StyleSheet.create({
   mainContainer: { flex: 1 },
   container: {
