@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -19,14 +20,12 @@
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to choose photos.",
         "NSPhotoLibraryAddUsageDescription": "This app needs access to save photos to your library.",
         "NSHealthShareUsageDescription": "This app needs access to write step data to the Health app.",
-        "newArchEnabled": false
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff",
-        "newArchEnabled": false
+        "backgroundColor": "#ffffff"
       }
     },
     "web": {
@@ -40,6 +39,11 @@
           "cameraPermission": "The app accesses your camera to take pictures."
         }
       ]
-    ]
+    ],
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": ["react-redux"]
+      }
+    }
   }
 }
