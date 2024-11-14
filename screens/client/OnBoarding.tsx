@@ -4,7 +4,7 @@ import { Button, Text } from 'react-native-paper';
 import Swiper from 'react-native-swiper';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av'; // Importing the Video component
+import { Video, AVPlaybackStatus, ResizeMode } from 'expo-av'; // Importing Video from expo-av
 
 const { width, height } = Dimensions.get('window');
 

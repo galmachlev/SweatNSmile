@@ -1,5 +1,6 @@
 {
   "expo": {
+    "sdkVersion": "52.0.0",
     "name": "SweatNSmile",
     "slug": "SweatNSmile",
     "version": "1.0.0",
@@ -17,13 +18,15 @@
         "NSCameraUsageDescription": "This app uses the camera to take photos.",
         "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to choose photos.",
         "NSPhotoLibraryAddUsageDescription": "This app needs access to save photos to your library.",
-        "NSHealthShareUsageDescription": "This app needs access to write step data to the Health app."
+        "NSHealthShareUsageDescription": "This app needs access to write step data to the Health app.",
+        "newArchEnabled": false
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "newArchEnabled": false
       }
     },
     "web": {
