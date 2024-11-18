@@ -165,24 +165,6 @@ export default function Profile() {
     }
   };
   
-  const deleteImage = () => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this image?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'OK',
-          onPress: async () => {
-            setProfileImage(defaultProfileImage);
-            updateProfileImage(defaultProfileImage);
-            await AsyncStorage.removeItem(`profileImage_${currentUser ? currentUser.email : 'defaultUserEmail'}`);
-          },
-        },
-      ]
-    );
-  };
-  
 
   // Function to handle logout
   const handleLogout = () => {

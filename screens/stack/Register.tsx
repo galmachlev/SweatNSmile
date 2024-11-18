@@ -4,9 +4,7 @@ import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView
 import Swiper from 'react-native-swiper';
 import { useFormik } from 'formik';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { Picker } from '@react-native-picker/picker';
 import { User } from '../../types/user';
-import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import * as ImagePicker from 'expo-image-picker';
 
 
@@ -21,23 +19,8 @@ export type RootStackParamList = {
     HomeStore: undefined;
     Login: undefined ;
 };
-
-type CustomCheckboxProps = {
-    checked: boolean;
-    onPress: () => void;
-  };
-  
-const CustomCheckbox = ({ checked, onPress }: CustomCheckboxProps) => (
-    <TouchableOpacity onPress={onPress}>
-      <View style={[styles.checkbox, checked && styles.checked]}>
-        {checked && <Icon name="check" size={16} color="#FFFFFF" />}
-      </View>
-    </TouchableOpacity>
-);  
-
+ 
 const Register = () => {
-    const [cityPickerOpen, setCityPickerOpen] = useState(false);
-    const [streetPickerOpen, setStreetPickerOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const swiperRef = React.useRef<Swiper>(null);
     const navigation = useNavigation();
@@ -100,6 +83,7 @@ const Register = () => {
                 let data = await res.json();
                 if (res.status === 201) {
                     console.log('User added:', data);
+                    alert('User added successfully!\nPlease Login to continue.');
                     navigation.navigate('Login' as never);
                 } else {
                     console.error('Error adding user:', data);
@@ -452,40 +436,27 @@ const Register = () => {
 
                 <ScrollView contentContainerStyle={styles.scrollViewContainer}>
                     <View style={styles.screenContainer}>
-                        <Text style={styles.congratulationsText}>Congratulations!</Text>
-                        <Text style={styles.greetingText}>Nice to meet you <Text style={styles.userName}>{formik.values.firstName} {formik.values.lastName}</Text></Text>
-                        <Text style={styles.infoText}>
-                            Your custom diet plan is ready and you're one{'\n'}
-                            step closer to reach your goal!
+                        {/* ברכה אישית למשתמש */}
+                        <Text style={styles.greetingText}>
+                            Final Step!
                         </Text>
-                        <Text style={styles.calorieInfoText}>
-                            Your daily net calorie goal is:
-                        </Text>
-                        {/* <Text style={styles.calorieNumber}>
-                            {formik.values.caloricIntake}1710 <Text style={styles.calorieUnit}>calories</Text>
-                        </Text> */}
-                        
-                        <View style={styles.optionsContainer}>
-                            {/* <View style={styles.optionRow}>
-                                <CustomCheckbox
-                                    checked={formik.values.trackSteps}
-                                    onPress={() => formik.setFieldValue('trackSteps', !formik.values.trackSteps)}
-                                />
-                                <Text style={styles.optionText}>Use my phone to track my steps</Text>
-                            </View> */}
-                            <View style={styles.optionRow}>
-                                {/* <CustomCheckbox
-                                    checked={formik.values.receiveEmails}
-                                    onPress={() => formik.setFieldValue('receiveEmails', !formik.values.receiveEmails)}
-                                /> */}
-                                <Text style={styles.optionText}>Would you like to receive our emails?</Text>
-                            </View>
-                        </View>
 
-                        <TouchableOpacity style={styles.nextButton} onPress={() => SendToDb()}>
+                        {/* מידע על השלב הבא */}
+                        <Text style={styles.infoText}>
+                            After submitting, we'll verify your details and prepare your custom diet plan 🚀{'\n'}
+                            Soon, you'll be ready to access your dashboard and start your journey to a healthier lifestyle!
+                        </Text>
+
+                        {/* כפתור מעבר לדף הבית */}
+                        <TouchableOpacity
+                            style={styles.nextButton}
+                            onPress={() => {
+                                SendToDb(); // שמירת הנתונים או ביצוע פעולה עם ה-DB
+                            }}
+                        >
                             <Text style={styles.nextButtonText}>Submit</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View>               
                 </ScrollView>
             </Swiper>
         </View>
@@ -634,9 +605,6 @@ const styles = StyleSheet.create({
     selectedButtonText: {
         color: '#fff',
     },
-
-
-    
       questionText: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -673,44 +641,32 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#696B6D',
       },
-
-
-      checkbox: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#808080',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-      },
-      checked: {
-        backgroundColor: '#3E6613', // צבע ירוק כהה
-        borderColor: '#3E6613',
-      },    
       congratulationsText: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
         color: '#808080', // צבע אפור כהה
         textAlign: 'center',
         marginBottom: 10,
+        marginTop: 50,
       },
       greetingText: {
         fontSize: 24,
         color: '#808080', // צבע אפור כהה
         textAlign: 'center',
-        marginVertical: 20,
+        marginTop: 20,
+        marginBottom: 100,
+      },
+      infoText: {
+        fontSize: 16,
+        lineHeight: 24,
+        color: '#808080',
+        textAlign: 'center',
+        marginTop: 50,
+        marginBottom: 163,
       },
       userName: {
           color: '#3E6613', // צבע ירוק כהה
           fontWeight: 'bold',
-      },
-      infoText: {
-        fontSize: 16,
-        color: '#808080',
-        textAlign: 'center',
-        marginTop: 40,
       },
       calorieInfoText: {
         fontSize: 18,

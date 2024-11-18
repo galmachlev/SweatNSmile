@@ -30,9 +30,13 @@ import { PaperProvider } from 'react-native-paper';
 import StoreScreen from './screens/client/StoreScreen';
 import AllMenusTable from './screens/client/Menus/AllMenusTable';
 
+// Ignore specific log messages
 LogBox.ignoreLogs([
   'VirtualizedLists should never be nested inside plain ScrollViews', // Ignore VirtualizedLists warning
-  'Warning: Encountered two children with the same key' // Ignore duplicate key warning
+  'Warning: Encountered two children with the same key', // Ignore duplicate key warning
+  'Bridgeless mode is enabled', // Ignore Bridgeless mode log
+  'JavaScript logs will be removed from Metro in React Native 0.77', // Ignore Metro logs warning
+  '[expo-av]: Video component from `expo-av` is deprecated in favor of `expo-video`' // Ignore expo-av warning
 ]);
 
 

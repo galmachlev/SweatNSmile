@@ -8,55 +8,60 @@ import { Meal, mealData } from './FoodData';
 import { FoodItem, FoodCategory, FoodData } from '../Menus/FoodData'; // Import from the new file
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+// הגדרת טיפוס למבנה נתונים המייצג את נראות פרטי המזון בכל ארוחה ובקטגוריות
 interface DetailsVisibility {
+  // המפתח הוא סוג הארוחה (כמו 'Breakfast', 'Lunch', 'Dinner', 'Extras')
   [mealType: string]: {
-    [category: string]: boolean;
+    // המפתח הוא קטגוריית המזון (כמו 'protein', 'carbs', 'fat', 'vegetable')
+    [category: string]: boolean; // הערך הבוליאני מציין אם פרטי המזון מוצגים או לא
   };
 }
 
+// טיפוס של פריטי המזון שנבחרו, כל ארוחה מכילה קטגוריות עם פריטי מזון או null
 type SelectedItemsType = Record<string, Record<string, FoodItem | null>>;
 
 // Main DailyMenu Component
 const DailyMenu: React.FC = () => {
-  const { currentUser, calculateDailyCalories } = useUser();
-  const [dailyCalories, setDailyCalories] = useState<number>(0);
-  const [macros, setMacros] = useState<{ protein: number; carbs: number; fat: number; calories: number }>({ protein: 0, carbs: 0, fat: 0, calories: 0 });
-  const [meals, setMeals] = useState<Meal[]>([]);
-  const [showSearch, setShowSearch] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const [subcategories, setSubcategories] = useState<Record<string, FoodCategory[]>>({});
-  const [selectedItems, setSelectedItems] = useState<Record<string, Record<string, FoodItem | null>>>({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} });
-  const [showModal, setShowModal] = useState(false);
-  const [showModalSave, setShowModalSave] = useState(false);  
-  const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({});
-  const [mealCalories, setMealCalories] = useState<{ [key: string]: number }>({});
-  const [extrasCalories, setExtrasCalories] = useState(0);
-  const [tempSelections, setTempSelections] = useState<SelectedItemsType>({});
-  const [resetClicked, setResetClicked] = useState(false);
-  const [resetCounter, setResetCounter] = useState(0);
-  const [showModalDelete, setShowModalDelete] = useState(false); // מצב המודל
-  const [itemToDelete, setItemToDelete] = useState(null); // אחסון הפריט למחיקה
+  const { currentUser, calculateDailyCalories } = useUser(); // גישה למשתמש הנוכחי וחישוב קלוריות יומיות
+  const [dailyCalories, setDailyCalories] = useState<number>(0); // משתנה לשמירת סך הקלוריות היומיות
+  const [macros, setMacros] = useState<{ protein: number; carbs: number; fat: number; calories: number }>({ protein: 0, carbs: 0, fat: 0, calories: 0 }); // שמירת ערכי המאקרו היומיים
+  const [meals, setMeals] = useState<Meal[]>([]); // שמירת רשימת הארוחות
+  const [showSearch, setShowSearch] = useState<boolean>(false); // שליטה בהצגת תיבת החיפוש
+  const [searchQuery, setSearchQuery] = useState<string>(''); // ערך הקלט לחיפוש
+  const [searchResults, setSearchResults] = useState<FoodItem[]>([]); // תוצאות החיפוש
+  const [loading, setLoading] = useState<boolean>(false); // סטטוס טעינה
+  const [error, setError] = useState<string>(''); // הודעת שגיאה
+  const [subcategories, setSubcategories] = useState<Record<string, FoodCategory[]>>({}); // קטגוריות משנה של פריטי המזון
+  const [selectedItems, setSelectedItems] = useState<Record<string, Record<string, FoodItem | null>>>({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} }); // פריטים שנבחרו לכל ארוחה
+  const [showModal, setShowModal] = useState(false); // שליטה בהצגת המודל הכללי
+  const [showModalSave, setShowModalSave] = useState(false); // שליטה בהצגת מודל השמירה
+  const [detailsVisibility, setDetailsVisibility] = useState<DetailsVisibility>({}); // מצב הצגת פרטים לפי ארוחה וקטגוריה
+  const [mealCalories, setMealCalories] = useState<{ [key: string]: number }>({}); // סך הקלוריות לכל ארוחה
+  const [extrasCalories, setExtrasCalories] = useState(0); // סך הקלוריות של פריטי ה-Extras
+  const [tempSelections, setTempSelections] = useState<SelectedItemsType>({}); // פריטים שנבחרו זמנית
+  const [resetClicked, setResetClicked] = useState(false); // מעקב אחרי לחיצה על ריסט
+  const [resetCounter, setResetCounter] = useState(0); // ספירה של פעולות הריסט
+  const [showModalDelete, setShowModalDelete] = useState(false); // שליטה בהצגת מודל מחיקה
+  const [itemToDelete, setItemToDelete] = useState(null); // פריט שמיועד למחיקה
 
-  // Function to get the border color based on the meal type
+  // פונקציה לקבלת צבע גבול לפי סוג הארוחה
   const getBorderColor = (mealType: string): string => {
-      const colors: Record<string, string> = {
-        Breakfast: '#FFCE76',
-        Lunch: '#F8D675',
-        Dinner: '#FDE598',
-        Extras: '#E8A54B',
-      };
-      return colors[mealType] || '#FBF783';
+    const colors: Record<string, string> = {
+        Breakfast: '#FFCE76', // צבע לארוחת בוקר
+        Lunch: '#F8D675',    // צבע לארוחת צהריים
+        Dinner: '#FDE598',   // צבע לארוחת ערב
+        Extras: '#E8A54B',   // צבע לאקסטרות
+    };
+    return colors[mealType] || '#FBF783'; // ברירת מחדל לצבע
   };
-  
+
+  // פונקציה לשמירת תפריט לשרת
   const saveMenu = async () => {
-    const email = currentUser?.email; 
+    const email = currentUser?.email; // מקבל את המייל של המשתמש הנוכחי
     const menuData = {
         email,
-        meals: selectedItems,
-        totalMacros: macros,
+        meals: selectedItems, // הארוחות שנבחרו
+        totalMacros: macros,  // סך המאקרונוטריינטים
     };
 
     try {
@@ -65,39 +70,39 @@ const DailyMenu: React.FC = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(menuData),
+            body: JSON.stringify(menuData), // המרה ל-JSON
         });
 
+        // בדיקה אם הבקשה הצליחה
         if (res.ok) {
             Alert.alert('Success', 'Menu saved successfully!');
         } else {
             Alert.alert('Error', 'Failed to save the menu.');
         }
     } catch (error) {
-        console.error('Error saving menu:', error);
+        console.error('Error saving menu:', error); // שגיאה בעת שליחה
         Alert.alert('Error', 'An error occurred while saving the menu.');
     }
-};
+  };
 
-
-  // Calculate daily calories when current user or related data changes
+  // חישוב קלוריות יומיות כשהמשתמש או נתונים קשורים משתנים
   useEffect(() => {
-      if (currentUser) {
+    if (currentUser) {
         const result = calculateDailyCalories(
-          currentUser.gender || '',
-          String(currentUser.height || ''),
-          String(currentUser.currentWeight || ''),
-          String(currentUser.goalWeight || ''),
-          currentUser.activityLevel || ''
+            currentUser.gender || '',         // מגדר
+            String(currentUser.height || ''), // גובה
+            String(currentUser.currentWeight || ''), // משקל נוכחי
+            String(currentUser.goalWeight || ''),    // משקל יעד
+            currentUser.activityLevel || ''   // רמת פעילות
         );
-  
+
         if (result) {
-          setDailyCalories(result.RecommendedDailyCalories);
+            setDailyCalories(result.RecommendedDailyCalories); // הגדרת קלוריות יומיות
         }
-      }
-  }, [currentUser, calculateDailyCalories]);
-  
-  // Calories percentage per meal
+    }
+  }, [currentUser, calculateDailyCalories]); // מאזין לשינויים במשתמש ובפונקציית החישוב
+
+  // אחוזים לקלוריות לפי ארוחה
   const mealDistribution = {
     Breakfast: 0.25,
     Lunch: 0.4,
@@ -105,7 +110,7 @@ const DailyMenu: React.FC = () => {
     Extras: 0.1
   };
 
-  // Calories percentage per macronutrient
+  // אחוזים לקלוריות לפי מאקרונוטריינטים
   const nutrientDistribution = {
     Protein: 0.35,
     Fat: 0.15,
@@ -114,10 +119,10 @@ const DailyMenu: React.FC = () => {
     Fruit: 0.075,
   };
 
-  // Calculate the distribution of calories and macronutrients
+  // חישוב חלוקת קלוריות ומאקרונוטריינטים
   function calculateMealNutrientDistribution(dailyCalories: number) {
-    const mealCalories: { [key: string]: number } = {};
-    const nutrientCalories: { [key: string]: number } = {};
+    const mealCalories: { [key: string]: number } = {}; // קלוריות לארוחות
+    const nutrientCalories: { [key: string]: number } = {}; // קלוריות לפי רכיבי מזון
 
     // חישוב קלוריות עבור כל ארוחה
     for (const meal in mealDistribution) {
@@ -136,143 +141,154 @@ const DailyMenu: React.FC = () => {
     };
   }
 
-  // שימוש ב-useEffect כדי לעדכן את mealCalories כאשר dailyCalories משתנה
+  // עדכון קלוריות לפי שינוי ב-dailyCalories
   useEffect(() => {
     const { mealCalories: calculatedMealCalories } = calculateMealNutrientDistribution(dailyCalories);
-    setMealCalories(calculatedMealCalories);
+    setMealCalories(calculatedMealCalories); // עדכון state של קלוריות לפי ארוחה
   }, [dailyCalories]);
 
-  // Adjust food item values based on target calories
+  // התאמת פריט מזון לפי קלוריות יעד
   function adjustFoodItem(item: FoodItem, targetCalories: number): FoodItem {
-    // Calculate the scaling factor based on original calories
-    const scalingFactor = targetCalories / item.calories;
-
-    // Adjust each nutrient based on the scaling factor
-    const adjustedProtein = item.protein * scalingFactor;
-    const adjustedFat = item.fat * scalingFactor;
-    const adjustedCarbs = item.carbs * scalingFactor;
-    const adjustedQuantity = item.quantity * scalingFactor;
-
-    // Return the adjusted item with new values
+    const scalingFactor = targetCalories / item.calories; // פקטור ההתאמה
     return {
-      ...item,
-      calories: parseFloat(targetCalories.toFixed(0)),
-      protein: parseFloat(adjustedProtein.toFixed(1)),
-      fat: parseFloat(adjustedFat.toFixed(1)),
-      carbs: parseFloat(adjustedCarbs.toFixed(1)),
-      quantity: parseFloat(adjustedQuantity.toFixed(1)),
+        ...item,
+        calories: parseFloat(targetCalories.toFixed(0)),       // קלוריות מותאמות
+        protein: parseFloat((item.protein * scalingFactor).toFixed(1)), // חלבון מותאם
+        fat: parseFloat((item.fat * scalingFactor).toFixed(1)),         // שומן מותאם
+        carbs: parseFloat((item.carbs * scalingFactor).toFixed(1)),     // פחמימות מותאמות
+        quantity: parseFloat((item.quantity * scalingFactor).toFixed(1)), // כמות מותאמת
     };
   }
 
-  // Generate daily menu
+  // יצירת תפריט יומי
   const generateDailyMenu = () => {
+    // רשימת הארוחות בתפריט
     const meals = ['Breakfast', 'Lunch', 'Dinner', 'Extras'];
-    const updatedSelectedItems: SelectedItemsType = { Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} };
-  
-    // אובייקט לשמירה על קלוריות לכל קטגוריה
+
+    // משתנה שמכיל את הפריטים שנבחרו לכל ארוחה
+    const updatedSelectedItems: SelectedItemsType = {
+      Breakfast: {},
+      Lunch: {},
+      Dinner: {},
+      Extras: {},
+    };
+
+    // אובייקט לשמירת הקלוריות המוקצות לכל קטגוריה בכל ארוחה
     const allocatedCalories: { [key: string]: { [key: string]: number } } = {
       Breakfast: {},
       Lunch: {},
       Dinner: {},
       Extras: {},
     };
-  
-    // Calculate the distribution based on the daily calories
+
+    // חישוב חלוקת הקלוריות בין הארוחות על בסיס כמות הקלוריות היומית
     const distribution = calculateMealNutrientDistribution(dailyCalories);
-  
+
+    // לולאה על כל סוגי הארוחות
     meals.forEach(mealType => {
+      // הקצאת הקלוריות לארוחה הנוכחית לפי החלוקה
       const mealCalories = distribution.mealCalories[mealType];
-  
-      // Create an item for each category according to the macronutrient distribution
-      Object.keys(nutrientDistribution).forEach(nutrient => {
-        const nutrientCalories = mealCalories * nutrientDistribution[nutrient as keyof typeof nutrientDistribution];
-        const item = getRandomItemForCategory(mealType, nutrient, nutrientCalories);
-  
+
+      // יצירת פריט עבור כל קטגוריה (חלבון, פחמימה וכו') לפי חלוקת המאקרונוטריינטים
+      Object.keys(nutrientDistribution).forEach(nutrient => { 
+        
+        const nutrientCalories = mealCalories * nutrientDistribution[nutrient as keyof typeof nutrientDistribution]; // חישוב הקלוריות עבור הקטגוריה הספציפית
+        const item = getRandomItemForCategory(mealType, nutrient, nutrientCalories); // שליפת פריט אקראי שמתאים לקטגוריה ולכמות הקלוריות
+        
         if (item) {
-          const adjustedItem = adjustFoodItem(item, nutrientCalories);
-          updatedSelectedItems[mealType][nutrient] = adjustedItem;
-          // הוסף קלוריות לקטגוריה המתאימה
-          allocatedCalories[mealType][nutrient] = adjustedItem.calories;
+          const adjustedItem = adjustFoodItem(item, nutrientCalories); // התאמת הפריט לכמות הקלוריות הנדרשת
+          updatedSelectedItems[mealType][nutrient] = adjustedItem; // הוספת הפריט למבנה הנתונים של הפריטים שנבחרו
+          allocatedCalories[mealType][nutrient] = adjustedItem.calories; // עדכון הקלוריות המוקצות לקטגוריה זו
         }
       });
     });
-  
-    setSelectedItems(updatedSelectedItems); // Update selected items state
-    setTempSelections(updatedSelectedItems);
-    updateMacros(updatedSelectedItems); // Update macro values based on selected items
-    setResetClicked(false);
-    setExtrasCalories(0);
+
+    setSelectedItems(updatedSelectedItems); // עדכון מצב הפריטים שנבחרו
+    setTempSelections(updatedSelectedItems); // שמירת הבחירות הזמניות עבור עריכה
+    updateMacros(updatedSelectedItems); // עדכון ערכי המאקרונוטריינטים על בסיס הפריטים שנבחרו
+    setResetClicked(false); // איפוס מצב הכפתור של הריסט
+    setExtrasCalories(0); // איפוס הקלוריות של הקטגוריה Extras
   };
 
-  // Select a random item based on category and target calories
+  // בוחרת פריט אקראי מתוך קטגוריה מסוימת וסוג ארוחה, בהתבסס על קלוריות יעד
   const getRandomItemForCategory = (mealType: string, category: string, targetCalories: number): FoodItem | null => {
+    // מחפשים את רשימת הפריטים לפי סוג הארוחה והקטגוריה
     const categoryItems = mealData
       .find(meal => meal.mealName === mealType)?.categories
       .find(cat => cat.category === category)?.items || [];
-
-    if (categoryItems.length === 0) return null; // Return null if no items in category
-
+      
+    // מחזירים null אם אין פריטים בקטגוריה
+    if (categoryItems.length === 0) return null;
+    // בוחרים פריט אקראי מתוך הרשימה
     const randomItem = categoryItems[Math.floor(Math.random() * categoryItems.length)];
-    
-    // Adjust the item based on target calories, but without changing the calories here
+    // מחזירים את הפריט מבלי לשנות את הקלוריות
     return { ...randomItem };
   };
 
-  // Initialize visibility state for subcategories (items description will be hidden by default)
+  // יוזם את מצב התצוגה (פרטי הפריטים יהיו מוסתרים כברירת מחדל)
   useEffect(() => {
     const initialVisibility = Object.fromEntries(
-      ['Breakfast', 'Lunch', 'Dinner', 'Extras'].map(mealType => [
-        mealType,
-        Object.fromEntries(subcategories[mealType]?.map(subcategory => [subcategory.category, false]) || [])
-      ])
+        ['Breakfast', 'Lunch', 'Dinner', 'Extras'].map(mealType => [
+            mealType,
+            // ממפה כל תת-קטגוריה לאובייקט עם ערך ראשוני false (מוסתר)
+            Object.fromEntries(subcategories[mealType]?.map(subcategory => [subcategory.category, false]) || [])
+        ])
     );
-    setDetailsVisibility(initialVisibility);
-  }, [subcategories]);
+    setDetailsVisibility(initialVisibility); // מעדכן את הסטייט
+  }, [subcategories]); // רץ מחדש כאשר subcategories משתנה
+
   
-  // Toggle visibility for specific subcategory
+  // משנה את מצב התצוגה של תת-קטגוריה מסוימת
   const toggleDetails = (mealType: string, itemId: string) => {
     setDetailsVisibility(prev => ({
-        ...prev,
+        ...prev, // שומר על המצב הקודם
         [mealType]: {
-            ...prev[mealType],
-            [itemId]: !prev[mealType]?.[itemId],
+            ...prev[mealType], // שומר על מצב הארוחות האחרות
+            [itemId]: !prev[mealType]?.[itemId], // הופך את המצב הנוכחי של הפריט
         },
     }));
-};
-  
-  // Handle item selection
+  };
+
+  // מטפלת בבחירת פריט ומעדכנת אותו לפי קלוריות יעד
   const handleSelect = (selected: FoodItem | null, mealType: string, category: string, targetCalories: number) => {
     if (selected) {
-      const adjustedItem = adjustFoodItem(selected, targetCalories); // מתאימים את הפריט לפי קלוריות יעד
-      setSelectedItems(prev => {
-        const newSelectedItems = {
-          ...prev,
-          [mealType]: {
-            ...prev[mealType],
-            [category]: adjustedItem, // מעדכנים את הפריט החדש בסטייט
-          },
-        };
-        updateMacros(newSelectedItems); // מעדכנים את הערכים הכוללים
-        return newSelectedItems; // מחזירים את הסטייט החדש
-      });
+        // מתאים את הפריט הנבחר על בסיס קלוריות היעד
+        const adjustedItem = adjustFoodItem(selected, targetCalories); 
+        
+        // מעדכן את הסטייט של הפריטים שנבחרו
+        setSelectedItems(prev => {
+            const newSelectedItems = {
+                ...prev, // שומר על הפריטים שנבחרו עד כה
+                [mealType]: {
+                    ...prev[mealType], // שומר על הפריטים האחרים באותה ארוחה
+                    [category]: adjustedItem, // מעדכן את הפריט החדש בקטגוריה הנכונה
+                },
+            };
+            updateMacros(newSelectedItems); // מעדכן את המאקרו
+            return newSelectedItems; // מחזיר את הסטייט החדש
+        });
     }
   };
-  
-  const FindItem = (id: string) => { 
-    let categories = mealData.find(meal => meal.mealName[0] === id[0])?.categories || []; 
-    let items = categories.find(cat => cat.code === id[1])?.items || []; 
-    let item = items.find(item => item.id === id) || null; 
-    let mealType = id[0]=='B'?'Breakfast':id[0]=='L'?'Lunch':id[0]=='D'?'Dinner':'Extras'; 
-    let cat = categories.find(cat => cat.code === id[1])?.category || ''; 
-    let targetCalories = mealCalories[mealType] * nutrientDistribution[cat];
 
+  // פונקציה למציאת פריט על פי מזהה ייחודי (id)
+  const FindItem = (id: string) => { 
+    let categories = mealData.find(meal => meal.mealName[0] === id[0])?.categories || []; // מחפש את הקטגוריות המתאימות לארוחה על פי האות הראשונה של המזהה
+    let items = categories.find(cat => cat.code === id[1])?.items || []; // מוצא את הפריטים שבקטגוריה הרלוונטית על פי האות השנייה של המזהה
+    let item = items.find(item => item.id === id) || null; // מוצא את הפריט הספציפי על פי ה-id המלא
+    let mealType = id[0]=='B'?'Breakfast':id[0]=='L'?'Lunch':id[0]=='D'?'Dinner':'Extras'; // מזהה את סוג הארוחה לפי התו הראשון של ה-id
+    let cat = categories.find(cat => cat.code === id[1])?.category || ''; // מוצא את שם הקטגוריה על פי הקוד השני של ה-id
+    let targetCalories = mealCalories[mealType] * nutrientDistribution[cat]; // מחשב את כמות הקלוריות המטרה על בסיס חלוקה תזונתית
+    
+    // קורא לפונקציה שמטפלת בבחירת הפריט, ומעביר את המידע שמצאנו
     handleSelect(item, mealType, cat, targetCalories);
+
+    // הדפסה לצורכי ניפוי שגיאות ובדיקת הנתונים שנבחרו
     console.log("Selected Item:", item);
     console.log("Target Calories:", targetCalories); 
     console.log("ID:", id);
   }
 
-  // Handle Extras item selection and adding to selected items after searching item
+  // פונקציה שפועלת בעת בחירת פריט מתוך הרשימה של החיפוש והוספה בשביל לארוחת האקסטרה
   const handleSelectFood = (item: any) => {
       if (item.food) {
         const newFood: FoodItem = {
@@ -484,7 +500,6 @@ const DailyMenu: React.FC = () => {
     setItemToDelete(null); // איפוס הפריט למחיקה
   };
 
-
   useEffect(() => {
     // חישוב המאקרו מחדש כאשר `selectedItems` מתעדכן
     const newMacros = calculateMacros(selectedItems);
@@ -518,10 +533,9 @@ const DailyMenu: React.FC = () => {
   };
   
 
-    //Reset Menu button
+  // פונקציה לאתחול התפריט
   const handleReset = () => {
-    // עדכן את המונה כדי לגרום לאתחול מחדש
-    setResetCounter(prevCounter => prevCounter + 1);
+    setResetCounter(prevCounter => prevCounter + 1);// עדכן את המונה כדי לגרום לאתחול מחדש
     setShowModal(false);
     setResetClicked(true);
     setSelectedItems({ Breakfast: {}, Lunch: {}, Dinner: {}, Extras: {} });
@@ -538,81 +552,84 @@ const DailyMenu: React.FC = () => {
   
   console.log(selectedItems.Extras)
 
-
   return (
     <ScrollView>
       
-      {/* Reset Menu Button */}
+      {/* כפתור לאיפוס התפריט */}
       <TouchableOpacity 
-        onPress={() => setShowModal(true)} 
+        onPress={() => setShowModal(true)} // מציג את המודל לאישור איפוס התפריט
         style={styles.resetButton}
       >
         <Text style={styles.resetButtonText}>
-          Generate new menu
+          Generate new menu {/* טקסט על כפתור זה: "צור תפריט חדש" */}
         </Text>
-        <MaterialIcons name="refresh" size={24} color="#FFF" />
+        <MaterialIcons name="refresh" size={24} color="#FFF" /> {/* אייקון רענון */}
       </TouchableOpacity>
 
-      {/* Reset Menu Button Modal */}
+      {/* מודל לאישור איפוס התפריט */}
       <Modal transparent={true} visible={showModal} animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Reset Menu</Text>
-            <Text style={styles.modalMessage}>Are you sure you want to reset the menu?</Text>
-            <View style={styles.modalButtons}>
+        <View style={styles.modalOverlay}> {/* מסך רקע כהה שמכסה את המסך */}
+          <View style={styles.modalContainer}> {/* מיכל המודל */}
+            <Text style={styles.modalTitle}>Reset Menu</Text> {/* כותרת המודל */}
+            <Text style={styles.modalMessage}>Are you sure you want to reset the menu?</Text> {/* הודעת אישור */}
+            <View style={styles.modalButtons}> {/* אזור כפתורים */}
+              {/* כפתור אישור איפוס */}
               <TouchableOpacity onPress={handleReset} style={styles.confirmButton}>
-                <Text style={styles.confirmButtonText}>Yes</Text>
+                <Text style={styles.confirmButtonText}>Yes</Text> {/* טקסט על כפתור האישור */}
               </TouchableOpacity>
+              {/* כפתור דחיית איפוס */}
               <TouchableOpacity onPress={() => setShowModal(false)} style={styles.cancelButton}>
-                <Text style={styles.cancelButtonText}>No</Text>
+                <Text style={styles.cancelButtonText}>No</Text> {/* טקסט על כפתור הדחייה */}
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+      
+      {/* משמש כאשר יש צורך לעדכן את התצוגה בצורה דינמית, כמו במקרה של שינוי מסוים בתפריט או אינדיקציה לפעולה שהתרחשה */}
+      <View style={styles.container}  key={resetCounter}> 
 
-      <View style={styles.container}  key={resetCounter}>
-
-        {/* Calories Circle */}
-        <View style={styles.caloriesContainer}>
-          <View style={styles.outerCircle}>
-            <View style={styles.middleCircle}>
-              <View style={styles.inner2Circle}>
-                <View style={styles.inner1Circle}>
+      {/* עיגול סך כל הקלוריות בתפריט */}
+      <View style={styles.caloriesContainer}>
+        <View style={styles.outerCircle}>
+          <View style={styles.middleCircle}>
+            <View style={styles.inner2Circle}>
+              <View style={styles.inner1Circle}>
                 <Text 
-                    style={[
-                      styles.caloriesNum, 
-                      macros.calories > dailyCalories ? styles.overBudget : null
-                    ]}
-                  >
-                    {macros.calories.toFixed(0)}/
-                  </Text>
-                  <Text style={styles.caloriesNum}>{dailyCalories}</Text>
-                  <Text style={styles.caloriesLabel}>calories</Text>
-                </View>
+                  style={[
+                    styles.caloriesNum, 
+                    macros.calories > dailyCalories ? styles.overBudget : null // אם הסכום של הפריטים לאחר שמשתמש הוסיף פריטים לאקסטרה גדול מזה שהומלץ מתלכחילה אז חריגה - צביעה באדום
+                  ]}
+                >
+                  {macros.calories.toFixed(0)}/
+                </Text>
+                <Text style={styles.caloriesNum}>{dailyCalories}</Text>
+                <Text style={styles.caloriesLabel}>calories</Text>
               </View>
             </View>
           </View>
         </View>
+      </View>
 
-        {/* Macros */}
-        <View style={styles.macros}>
-          {Object.entries(macros)
-            .filter(([key]) => key !== 'calories') // Filter out the 'calories' key
-            .map(([key, value]) => (
-              <View key={key} style={styles.macroItem}>
-                <Text style={styles.macroLabel}>
-                  {`${key.charAt(0).toUpperCase() + key.slice(1)} (g)`}
-                </Text>
-                <View style={styles.macroValueContainer}>
-                  <Text style={styles.macroValue}>{value}</Text>
-                </View>
+      {/* סכימת כל הערכים של המאקרו-נוטריינטים */}
+      <View style={styles.macros}>
+        {Object.entries(macros)
+          .filter(([key]) => key !== 'calories') // מסנן את מפתח 'calories' כי הוא כבר מוצג בנפרד
+          .map(([key, value]) => (
+            <View key={key} style={styles.macroItem}>
+              <Text style={styles.macroLabel}>
+                {`${key.charAt(0).toUpperCase() + key.slice(1)} (g)`} {/* ממיר את שם המפתח לאות ראשונה גדולה */}
+              </Text>
+              <View style={styles.macroValueContainer}>
+                <Text style={styles.macroValue}>{value}</Text> {/* מציג את ערך המאקרו */}
               </View>
-            ))}
-        </View>
+            </View>
+          ))}
+      </View>
 
-        {/* Loading indicator */}
+        {/* מודל הטעינה של המונה */}
         {loading && <ActivityIndicator size="small" color="#0000ff" />}
+        {/* אם יש שגיאה, הצג את הודעת השגיאה */}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
         {/* Meal Sections */}
@@ -651,121 +668,124 @@ const DailyMenu: React.FC = () => {
           </View>
         ))}
 
-        {/* Extras Section */}
-        <View style={[styles.mealSection, { borderColor: getBorderColor('Extras') }]}>
-        <Text style={[styles.mealTitle, styles.caloriesText]}>
-          Extras - {' '}
-          <Text 
-            style={[
-              styles.caloriesText,
-              extrasCalories > Math.round(mealCalories['Extras'] || 0) ? styles.overBudget : null
-            ]}
-          >
-            {Math.round(extrasCalories || 0)} 
-          </Text> 
-          / {Math.round(mealCalories['Extras'] || 0)} cal
-        </Text>
+        {/* קונטיינר ארוחת אקסטרות */}
+        <View style={[styles.mealSection, { borderColor: getBorderColor('Extras') }]}> 
+          <Text style={[styles.mealTitle, styles.caloriesText]}>
+            Extras - {' '}
+            <Text 
+              style={[
+                styles.caloriesText,
+                extrasCalories > Math.round(mealCalories['Extras'] || 0) ? styles.overBudget : null
+              ]}
+            >
+              {Math.round(extrasCalories || 0)} {/* הצגת סך הקלוריות של האקסטרות */}
+            </Text> 
+            / {Math.round(mealCalories['Extras'] || 0)} cal {/* הצגת סך הקלוריות שהוקצו לאקסטרות */}
+          </Text>
+          
+          {/* אם יש פריטים באקסטרות */}
           {selectedItems.Extras && Object.values(selectedItems.Extras).length > 0 ? (
-            Object.values(selectedItems.Extras).map((item: any) => (
+            Object.values(selectedItems.Extras).map((item: any) => ( // עבור כל פריט אקסטרה 
               <View key={item.id} style={styles.subcategory}>
-                <Text style={[styles.selectedItemName, styles.itemContainer]}>{item.name}</Text>              
+                <Text style={[styles.selectedItemName, styles.itemContainer]}>{item.name}</Text> {/* הצגת שם הפריט */}
                 
-                  {/* Delete Extra item Button */}
-                  <TouchableOpacity 
-                    onPress={() => { 
-                      setShowModalDelete(true); // הצגת המודל
-                      setItemToDelete(item.name); // הגדרת הפריט למחיקה
-                    }} 
-                    style={styles.deleteButton}
-                  >
-                    <Icon name="delete" size={20} color="#f00" />
-                  </TouchableOpacity>
+                {/* כפתור מחיקת פריט אקסטרה */}
+                <TouchableOpacity 
+                  onPress={() => { 
+                    setShowModalDelete(true); // הצגת המודל למחיקת פריט
+                    setItemToDelete(item.name); // הגדרת שם הפריט למחיקה
+                  }} 
+                  style={styles.deleteButton}
+                >
+                  <Icon name="delete" size={20} color="#f00" /> {/* אייקון מחיקה */}
+                </TouchableOpacity>
 
-                  {/* Delete Extra item Button Modal */}
-                  <Modal transparent={true} visible={showModalDelete} animationType="fade">
-                    <View style={styles.modalOverlay}>
-                      <View style={styles.modalContainer}>
-                        <Text style={styles.modalMessage}>Are you sure you want to delete this item?</Text>
-                        <View style={styles.modalButtons}>
-                          <TouchableOpacity onPress={handleDeleteExtraItem} style={styles.confirmButton}>
-                            <Text style={styles.confirmButtonText}>Yes</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity onPress={() => setShowModalDelete(false)} style={styles.cancelButton}>
-                            <Text style={styles.cancelButtonText}>No</Text>
-                          </TouchableOpacity>
-                        </View>
+                {/* מודל לאישור מחיקת פריט אקסטרה */}
+                <Modal transparent={true} visible={showModalDelete} animationType="fade">
+                  <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                      <Text style={styles.modalMessage}>Are you sure you want to delete this item?</Text> {/* הודעת אישור למחיקה */}
+                      <View style={styles.modalButtons}>
+                        <TouchableOpacity onPress={handleDeleteExtraItem} style={styles.confirmButton}>
+                          <Text style={styles.confirmButtonText}>Yes</Text> {/* כפתור אישור למחיקה */}
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setShowModalDelete(false)} style={styles.cancelButton}>
+                          <Text style={styles.cancelButtonText}>No</Text> {/* כפתור ביטול מחיקה */}
+                        </TouchableOpacity>
                       </View>
                     </View>
-                  </Modal>
+                  </View>
+                </Modal>
 
-                {/* Info Button */}
+                {/* כפתור הצגת פרטי אקסטרה */}
                 <TouchableOpacity onPress={() => toggleDetails('Extras', item.id)} style={styles.infoButton}>
-                  <Icon name="info" size={20} color="#696B6D" />
+                  <Icon name="info" size={20} color="#696B6D" /> {/* אייקון מידע */}
                 </TouchableOpacity>                
+                
+                {/* הצגת פרטי פריט אקסטרה אם הם מוצגים */}
                 <View style={styles.selectContainer}>
                   {detailsVisibility['Extras']?.[item.id] && (
                     <Text style={styles.selectedItemDetails}>
                       Calories: {item.calories.toFixed(0)} | P(g): {item.protein.toFixed(1)} | F(g): {item.fat.toFixed(1)} | C(g): {item.carbs.toFixed(1)}
-                    </Text>
+                    </Text> // הצגת פרטי תזונה: קלוריות, חלבון, שומן, פחמימות
                   )}
                 </View>
-
               </View>
             ))
           ) : (
-            <Text>No extras added yet.</Text>
+            <Text>No extras added yet.</Text> // אם אין פריטים באקסטרות 
           )}
         </View>
 
-        {/* Floating Add Button */}
+        {/* הכפתור של הוספת פריט לרשימת האקסטרות (+) */}
         <TouchableOpacity onPress={handleSearchIconPress} style={styles.floatingButton}>
           <FontAwesome name="plus" size={24} color="#FFF" />
         </TouchableOpacity>
 
-        {/* Search Bar */}
-        {showSearch && (
-          <TouchableWithoutFeedback onPress={handleOutsidePress}>
-            <View style={styles.overlay}>
-              <TouchableWithoutFeedback>
-                <View style={styles.searchContainer}>
+        {/* הצגת החיפוש של הפריט שעתיד להתווסף לרשימת האקסטרות */}
+        {showSearch && ( // אם flag showSearch הוא true, הצג את תיבת החיפוש
+          <TouchableWithoutFeedback onPress={handleOutsidePress}> {/* לוחצים מחוץ לתיבת החיפוש כדי לסגור אותה */}
+            <View style={styles.overlay}> {/* שכבת רקע כדי למנוע אינטראקציה עם שאר המסך */}
+              <TouchableWithoutFeedback> {/* לחיצה פנימית לא תסגור את החיפוש */}
+                <View style={styles.searchContainer}> {/* קונטיינר תיבת החיפוש */}
                   <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search for food to add"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    onSubmitEditing={handleSearch}
-                    autoFocus
+                    style={styles.searchInput} // סגנון תיבת הקלט
+                    placeholder="Search for food to add" // טקסט רמז בתיבת הקלט
+                    value={searchQuery} // הערך הנוכחי של חיפוש
+                    onChangeText={setSearchQuery} // עדכון השאילתה בעת שינוי טקסט
+                    onSubmitEditing={handleSearch} // קריאה לפונקציה בעת שליחה (לחיצה על אנטר)
+                    autoFocus // התמקדות אוטומטית בתיבת החיפוש
                   />
-                  {loading ? (
-                    <ActivityIndicator size="small" color="#0000ff" />
-                  ) : error ? (
-                    <Text style={styles.errorText}>{error}</Text>
-                  ) : (
-                  <FlatList
-                      data={searchResults}
-                      renderItem={({ item }) => (
-                          <TouchableOpacity
-                              style={styles.resultItem}
-                              onPress={() => handleSelectFood(item)}
-                          >
-                              <Text style={styles.resultText}>{item.food?.label || 'Unknown Food'}</Text>
-                              <Text style={styles.resultDetail}>
-                                  Calories: {Number(item.food?.nutrients?.ENERC_KCAL || 0).toFixed(2)} cal
-                              </Text>
-                              <Text style={styles.resultDetail}>
-                                  Carbohydrates: {Number(item.food?.nutrients?.CHOCDF || 0).toFixed(2)} g
-                              </Text>
-                              <Text style={styles.resultDetail}>
-                                  Fat: {Number(item.food?.nutrients?.FAT || 0).toFixed(2)} g
-                              </Text>
-                              <Text style={styles.resultDetail}>
-                                  Protein: {Number(item.food?.nutrients?.PROCNT || 0).toFixed(2)} g
-                              </Text>
-                          </TouchableOpacity>
+                  {loading ? ( // אם אנחנו בטעות בטעינה
+                    <ActivityIndicator size="small" color="#0000ff" /> // מציג את האינדיקטור של טעינה
+                  ) : error ? ( // אם יש שגיאה
+                    <Text style={styles.errorText}>{error}</Text> // מציג את השגיאה
+                  ) : ( // אם לא בטעינה ואין שגיאה
+                    <FlatList
+                      data={searchResults} // מציג את התוצאות שחזרו מהחיפוש
+                      renderItem={({ item }) => ( // עבור כל תוצאה בחיפוש
+                        <TouchableOpacity
+                          style={styles.resultItem} // סגנון עבור כל פריט תוצאה
+                          onPress={() => handleSelectFood(item)} // לחיצה על פריט תוצאה כדי לבחור אותו
+                        >
+                          <Text style={styles.resultText}>{item.food?.label || 'Unknown Food'}</Text> {/* שם המזון או טקסט חלופי אם לא נמצא */}
+                          <Text style={styles.resultDetail}>
+                            Calories: {Number(item.food?.nutrients?.ENERC_KCAL || 0).toFixed(2)} cal
+                          </Text> {/* קלוריות */}
+                          <Text style={styles.resultDetail}>
+                            Carbohydrates: {Number(item.food?.nutrients?.CHOCDF || 0).toFixed(2)} g
+                          </Text> {/* פחמימות */}
+                          <Text style={styles.resultDetail}>
+                            Fat: {Number(item.food?.nutrients?.FAT || 0).toFixed(2)} g
+                          </Text> {/* שומן */}
+                          <Text style={styles.resultDetail}>
+                            Protein: {Number(item.food?.nutrients?.PROCNT || 0).toFixed(2)} g
+                          </Text> {/* חלבון */}
+                        </TouchableOpacity>
                       )}
-                      keyExtractor={(item) => item.food?.foodId.toString() || Math.random().toString()}
-                      ListEmptyComponent={() => <Text>No results found</Text>}
-                  />
+                      keyExtractor={(item) => item.food?.foodId.toString() || Math.random().toString()} // מפתח ייחודי לכל פריט
+                      ListEmptyComponent={() => <Text>No results found</Text>} // אם אין תוצאות, מציג הודעה
+                    />
                   )}
                 </View>
               </TouchableWithoutFeedback>
@@ -775,14 +795,13 @@ const DailyMenu: React.FC = () => {
 
       </View>
 
-      {/* Save Menu Button */}
+      {/* כפתור המפעיל את הפונקציה ששומרת בדאטה בייס בתוך דף AllMenusTable */}
       <TouchableOpacity onPress={saveMenu} style={styles.saveButton}>
-    <Text style={styles.resetButtonText}>Save Menu</Text>
-    <MaterialIcons name="save" size={24} color="#FFF" />
+        <Text style={styles.resetButtonText}>Save Menu</Text>
+        <MaterialIcons name="save" size={24} color="#FFF" />
       </TouchableOpacity>
 
-
-      {/* Save Menu Button Modal */}
+      {/* המודל של כפתור השמירה */}
       <Modal transparent={true} visible={showModalSave} animationType="fade">
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
@@ -805,7 +824,7 @@ const DailyMenu: React.FC = () => {
 };
 
 
-// Styles
+// סטיילים
 const styles = StyleSheet.create({
   container: {
     flex: 1,
