@@ -400,15 +400,12 @@ macrosValue: {
     fontWeight: 'bold',
   },
 
-
-
-
   caloriesContainer: {
     alignItems: 'center',
   },
   outerCircle: {
-    width: 155,
-    height: 155,
+    width: 135,
+    height: 135,
     borderRadius: 100,
     borderWidth: 7,
     borderColor: '#E8A54B',
@@ -416,8 +413,8 @@ macrosValue: {
     alignItems: 'center',
   },
   middleCircle: {
-    width: 145,
-    height: 145,
+    width: 125,
+    height: 125,
     borderRadius: 100,
     borderWidth: 7,
     borderColor: '#FFCE76',
@@ -425,8 +422,8 @@ macrosValue: {
     alignItems: 'center',
   },
   inner2Circle: {
-    width: 135,
-    height: 135,
+    width: 115,
+    height: 115,
     borderRadius: 100,
     borderWidth: 7,
     borderColor: '#F8D675',
@@ -434,8 +431,8 @@ macrosValue: {
     alignItems: 'center',
   },
   inner1Circle: {
-    width: 125,
-    height: 125,
+    width: 105,
+    height: 105,
     borderRadius: 100,
     borderWidth: 7,
     borderColor: '#FDE598',

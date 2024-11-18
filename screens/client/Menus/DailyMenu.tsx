@@ -20,7 +20,6 @@ interface DetailsVisibility {
 // טיפוס של פריטי המזון שנבחרו, כל ארוחה מכילה קטגוריות עם פריטי מזון או null
 type SelectedItemsType = Record<string, Record<string, FoodItem | null>>;
 
-// Main DailyMenu Component
 const DailyMenu: React.FC = () => {
   const { currentUser, calculateDailyCalories } = useUser(); // גישה למשתמש הנוכחי וחישוב קלוריות יומיות
   const [dailyCalories, setDailyCalories] = useState<number>(0); // משתנה לשמירת סך הקלוריות היומיות
@@ -368,8 +367,7 @@ const DailyMenu: React.FC = () => {
       calories: parseFloat(totalCalories.toFixed(1)),
     });
   };
-    
-     
+         
   // Show selected item details below each selected food item
   const renderSelectedItemDetails = (mealType: string, category: string) => {
     const item = selectedItems[mealType]?.[category];
@@ -467,6 +465,7 @@ const DailyMenu: React.FC = () => {
     }
   }, [resetClicked]); // This useEffect is triggered only when resetClicked is set to true
   
+  // פונקציה למחיקת פריט מתוך Extras
   const deleteExtraItem = (itemName: string) => {
     const itemToRemove = selectedItems.Extras?.[itemName];
   
