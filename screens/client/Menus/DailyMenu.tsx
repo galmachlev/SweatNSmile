@@ -531,7 +531,6 @@ const DailyMenu: React.FC = () => {
     };
   };
   
-
   // פונקציה לאתחול התפריט
   const handleReset = () => {
     setResetCounter(prevCounter => prevCounter + 1);// עדכן את המונה כדי לגרום לאתחול מחדש

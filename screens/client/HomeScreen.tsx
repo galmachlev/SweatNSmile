@@ -83,6 +83,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   );
 };
 
+// סטיילים
 const styles = StyleSheet.create({
   page: {
     backgroundColor: '#FFFFFF',
