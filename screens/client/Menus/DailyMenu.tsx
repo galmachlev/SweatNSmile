@@ -743,10 +743,10 @@ const DailyMenu: React.FC = () => {
 
         {/* הצגת החיפוש של הפריט שעתיד להתווסף לרשימת האקסטרות */}
         {showSearch && ( // אם flag showSearch הוא true, הצג את תיבת החיפוש
-          <TouchableWithoutFeedback onPress={handleOutsidePress}> {/* לוחצים מחוץ לתיבת החיפוש כדי לסגור אותה */}
-            <View style={styles.overlay}> {/* שכבת רקע כדי למנוע אינטראקציה עם שאר המסך */}
-              <TouchableWithoutFeedback> {/* לחיצה פנימית לא תסגור את החיפוש */}
-                <View style={styles.searchContainer}> {/* קונטיינר תיבת החיפוש */}
+          <TouchableWithoutFeedback onPress={handleOutsidePress}>
+            <View style={styles.overlay}>
+              <TouchableWithoutFeedback>
+                <View style={styles.searchContainer}>
                   <TextInput
                     style={styles.searchInput} // סגנון תיבת הקלט
                     placeholder="Search for food to add" // טקסט רמז בתיבת הקלט
