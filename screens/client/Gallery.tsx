@@ -17,6 +17,7 @@ const itemSize = (screenWidth - 20) / numColumns;
 
 const GalleryScreen: React.FC = () => {
   const { currentUser } = useUser();
+  const { updateUserDetails } = useUser();  
   const defaultImage = require('../../Images/gallery_img.png');
   const [fullSizeImageUri, setFullSizeImageUri] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -140,6 +141,7 @@ const GalleryScreen: React.FC = () => {
 
     try {
       const response = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData);
+      await updateUserDetails (currentUser?.email, { ...currentUser, gallery:[...currentUser?.gallery, response.data.secure_url] });
       return response.data.secure_url;
     } catch (error) {
       console.error('Upload failed', error);
