@@ -39,7 +39,7 @@ const GalleryScreen: React.FC = () => {
 
   const [galleryImg, setGalleryImg] = useState<GalleryImage[]>([]);
 
-  useEffect(() => {
+-  useEffect(() => {
     const requestPermissions = async () => {
       const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
       const { status: mediaLibraryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -223,6 +223,7 @@ const GalleryScreen: React.FC = () => {
   );
 };
 
+// סטיילים
 const styles = StyleSheet.create({
   container: {
     flex: 1,
