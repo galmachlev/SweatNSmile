@@ -40,11 +40,11 @@ const DailyCalories: React.FC = () => {
     };
 
     // פונקציה לחישוב BMR
-    const calculateBMR = (gender: string, height: number, weight: number): number => {
+    const calculateBMR = (gender: string, height: number, weight: number, age = 30): number => {
         if (gender.toLowerCase() === 'male') {
-            return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * 30); // חישוב ל-זכר (גיל ממוצע 30)
+            return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age); // חישוב ל-זכר (גיל ממוצע 30)
         } else if (gender.toLowerCase() === 'female') {
-            return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * 30); // חישוב לנקבה (גיל ממוצע 30)
+            return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age); // חישוב לנקבה (גיל ממוצע 30)
         } else {
             return 0; // אם אין מגדר שנבחר
         }

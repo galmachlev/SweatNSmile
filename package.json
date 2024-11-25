@@ -47,6 +47,7 @@
     "react-native": "0.76.1",
     "react-native-chart-kit": "^6.12.0",
     "react-native-confetti-cannon": "^1.5.2",
+    "react-native-datepicker": "^1.7.2",
     "react-native-dropdown-select-list": "^2.0.5",
     "react-native-elements": "^3.4.3",
     "react-native-flash-message": "^0.4.2",
@@ -70,6 +71,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~18.3.12",
+    "@types/react-native-datepicker": "^1.7.6",
     "metro": "^0.81.0",
     "typescript": "^5.3.3",
     "vite": "^5.4.5"

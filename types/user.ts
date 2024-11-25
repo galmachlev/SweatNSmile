@@ -6,6 +6,8 @@ export type User = {
     password: string;
     phoneNumber: string;
     profileImageUrl?: string;
+    dateOfBirth?: Date;        
+    age?: number;             
 
     // Physical and Health Details
     gender?: string;

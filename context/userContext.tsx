@@ -98,7 +98,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
             if (res.ok) {
                 let data = await res.json();
+                data.user.age = new Date().getFullYear() - new Date(data.user.dateOfBirth).getFullYear();
                 setCurrentUser(data.user);
+                console.log('User Logged In:', data.user); // הדפסת פרטי המשתמש לאחר התחברות
                 navigation.navigate('HomeScreen');
             } else {
                 Alert.alert('Error', 'Invalid email or password.');
@@ -187,11 +189,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     };
 
     // Calculate BMR (assuming a default age of 30)
-    const calculateBMR = (gender: string, height: number, weight: number): number => {
+    const calculateBMR = (gender: string, height: number, weight: number, age = 30): number => {
         if (gender.toLowerCase() === 'male') {
-            return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * 30);
+            return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
         } else if (gender.toLowerCase() === 'female') {
-            return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * 30);
+            return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
         } else {
             return 0;
         }

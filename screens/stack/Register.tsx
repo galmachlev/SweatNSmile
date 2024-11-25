@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ScrollView,Image, Alert } from 'react-native';
 import Swiper from 'react-native-swiper';
@@ -6,7 +5,7 @@ import { useFormik } from 'formik';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { User } from '../../types/user';
 import * as ImagePicker from 'expo-image-picker';
-
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export type RootStackParamList = {
     OnBoarding: undefined;
@@ -25,7 +24,14 @@ const Register = () => {
     const swiperRef = React.useRef<Swiper>(null);
     const navigation = useNavigation();
     const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+    const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined); // שמירה כ- Date או undefined
+    const [targetDate, setTargetDate] = useState<Date | undefined>(undefined); // שמירה כ- Date או undefined
 
+    const handleDateChange = (event: any, selectedDate: Date | undefined, setter: React.Dispatch<React.SetStateAction<Date | undefined>>) => {
+        if (selectedDate) {
+            setter(selectedDate);  // עדכון התאריך אם נבחר
+        }
+    };
 
     const screenTitles = [
         'Basic Details',
@@ -42,11 +48,9 @@ const Register = () => {
                 email: formik.values.email,
                 password: formik.values.password,
                 phoneNumber: formik.values.phoneNumber,
-                // Ensure startWeight is always provided
                 startWeight: formik.values.startWeight
                     ? parseFloat(formik.values.startWeight.toString())
                     : parseFloat(formik.values.currentWeight?.toString() || '0'),
-                // Use currentWeight as fallback for startWeight, if necessary
                 currentWeight: formik.values.currentWeight
                     ? parseFloat(formik.values.currentWeight.toString())
                     : formik.values.startWeight
@@ -59,15 +63,14 @@ const Register = () => {
                 height: formik.values.height
                     ? parseFloat(formik.values.height.toString())
                     : undefined,
-                targetDate: formik.values.targetDate
-                    ? formik.values.targetDate.toISOString().split('T')[0]
-                    : undefined,
+                targetDate: targetDate,
                 activityLevel: formik.values.activityLevel ?? '',
-                profileImageUrl: profileImageUri, // Attach the image URI here
+                profileImageUrl: profileImageUri,
                 isAdmin: false,
+                dateOfBirth: dateOfBirth,
             };
-    
-            // Send a POST request to the backend
+            console.log(user);
+
             let res = await fetch('https://database-s-smile.onrender.com/api/users/register', {
                 method: 'POST',
                 headers: {
@@ -75,32 +78,25 @@ const Register = () => {
                 },
                 body: JSON.stringify(user),
             });
-    
+
             const contentType = res.headers.get('content-type');
-            console.log('Response Content-Type:', contentType);
-    
             if (contentType && contentType.includes('application/json')) {
                 let data = await res.json();
                 if (res.status === 201) {
-                    console.log('User added:', data);
                     alert('User added successfully!\nPlease Login to continue.');
                     navigation.navigate('Login' as never);
                 } else {
-                    console.error('Error adding user:', data);
                     alert(`Error: ${data.error || 'Failed to add user'}`);
                 }
             } else {
                 const text = await res.text();
-                console.error('Non-JSON response received:', text);
                 alert('An error occurred. Please check the server.');
             }
         } catch (error) {
-            console.error('Error in SendToDb:', error);
             alert('An error occurred while adding the user.');
         }
     };
-    
-    
+            
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
@@ -120,66 +116,76 @@ const Register = () => {
         }
     };
     
-
     useEffect(() => {
         navigation.setOptions({ headerTitle: screenTitles[currentIndex] });
     }, [currentIndex, navigation]);
 
     const validate = (values: Partial<User>) => {
         const errors: Partial<Record<keyof User, string>> = {};
-    
+
         // Validate first name
         if (values.firstName && !/^[A-Za-z\s]{2,50}$/.test(values.firstName)) {
             errors.firstName = 'Invalid first name';
         } else if (!values.firstName) {
             errors.firstName = 'First name is required';
         }
-    
+
         // Validate last name
         if (values.lastName && !/^[A-Za-z\s]{2,50}$/.test(values.lastName)) {
             errors.lastName = 'Invalid last name';
         } else if (!values.lastName) {
             errors.lastName = 'Last name is required';
         }
-    
+
         // Validate phone number
         if (values.phoneNumber && !/^(05\d)-\d{7}$/.test(values.phoneNumber)) {
             errors.phoneNumber = 'Invalid phone number';
         } else if (!values.phoneNumber) {
             errors.phoneNumber = 'Phone number is required';
         }
-    
+
         // Validate password
         if (values.password && !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*]{6,}$/.test(values.password)) {
             errors.password = 'Invalid password (min 6 chars, letters and numbers required)';
         } else if (!values.password) {
             errors.password = 'Password is required';
         }
-    
+
         // Validate height
         if (values.height !== undefined && (isNaN(values.height) || values.height <= 0)) {
             errors.height = 'Height must be a positive number';
         }
-    
+
         if (values.startWeight === undefined || isNaN(values.startWeight) || values.startWeight <= 0) {
             errors.startWeight = 'Start weight is required and must be a positive number';
         }
-    
+
         // Validate current weight
         if (values.currentWeight === undefined || isNaN(values.currentWeight) || values.currentWeight <= 0) {
             errors.currentWeight = 'Current weight must be a positive number';
         }
-    
+
         // Validate goal weight (optional)
         if (values.goalWeight !== undefined && (isNaN(values.goalWeight) || values.goalWeight <= 0)) {
             errors.goalWeight = 'Goal weight must be a positive number';
         }
-    
-        // Validate target date
-        if (values.targetDate && !(values.targetDate instanceof Date)) {
-            errors.targetDate = 'Invalid date format, must be a Date object';
+
+        // Validate dateOfBirth
+        if (!values.dateOfBirth) { // אם dateOfBirth לא הוגדר
+            errors.dateOfBirth = 'Date of birth is required';
+        } else if (!(values.dateOfBirth instanceof Date) || isNaN(values.dateOfBirth.getTime())) {
+            errors.dateOfBirth = 'Invalid date format';
+        } else if (values.dateOfBirth > new Date()) {
+            errors.dateOfBirth = 'Date of birth cannot be in the future';
         }
-    
+
+        // Validate targetDate
+        if (values.targetDate !== undefined && !(values.targetDate instanceof Date)) {
+            errors.targetDate = 'Invalid date format, must be a Date object';
+        } else if (values.targetDate && values.targetDate < new Date()) {
+            errors.targetDate = 'Target date cannot be in the past';
+        }
+
         return errors;
     };
     
@@ -195,9 +201,9 @@ const Register = () => {
             gender: undefined,
             height: undefined,
             startWeight: undefined,
-            currentWeight: undefined, // Set initial value as needed
+            currentWeight: undefined,
             goalWeight: undefined,
-            targetDate: undefined,
+            age: 0,       
             dailyCalories: undefined,
         },
         validate,
@@ -209,7 +215,6 @@ const Register = () => {
         },
     });
     
-
     return (
         <View style={styles.container}>
             <Swiper
@@ -263,6 +268,18 @@ const Register = () => {
                             value={formik.values.phoneNumber ?? ''}
                             placeholder="054-1234567"
                             keyboardType="phone-pad"
+                        />
+                        {/* Date of Birth */}
+                        <Text style={styles.label}>Date of Birth</Text>
+                        <DateTimePicker
+                            value={dateOfBirth || new Date()} // אם התאריך לא מוגדר, השתמש בתאריך נוכחי
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                if (event.type === 'set' && selectedDate) {
+                                    handleDateChange(event, selectedDate, setDateOfBirth);
+                                }
+                            }}
                         />
                         {/* password */}
                         <Text style={styles.label}>Password</Text>
@@ -368,14 +385,18 @@ const Register = () => {
                             placeholder="Goal Weight (kg)"
                             keyboardType="numeric"
                         />
-                        {/* goal date */}
-                        <Text style={styles.label}>What's your target date to reach your goal?</Text>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={formik.handleChange('goalDate')}
-                            value={formik.values.targetDate ? formik.values.targetDate.toISOString().split('T')[0] : ''}
-                            placeholder="YYYY-MM-DD"
-                            keyboardType="numeric"
+                        {/* target date */}
+                        <Text style={styles.label}>Target Date</Text>
+                        <DateTimePicker
+                            value={targetDate || new Date()} // אם התאריך לא מוגדר, השתמש בתאריך נוכחי
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                if (event.type === 'set' && selectedDate) {
+                                    console.log('Selected Date:', selectedDate);
+                                    handleDateChange(event, selectedDate, setTargetDate);
+                                }
+                            }}
                         />
                         {/* next button */}
                         <TouchableOpacity style={styles.nextButton} onPress={() => swiperRef.current?.scrollBy(1)}>
@@ -463,6 +484,7 @@ const Register = () => {
     );
 };
 
+// סטיילים
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -604,6 +626,10 @@ const styles = StyleSheet.create({
     },
     selectedButtonText: {
         color: '#fff',
+    },
+    datePicker: {
+        width: 200,
+        marginBottom: 20,
     },
       questionText: {
         fontSize: 18,

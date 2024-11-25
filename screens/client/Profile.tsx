@@ -59,6 +59,9 @@ export default function Profile() {
     currentWeight: false,
     goalWeight: false,
     height: false,
+    birthDate: false,
+    age: false,
+    targetDate: false,
   });
 
   // State variables for field values
@@ -71,11 +74,11 @@ export default function Profile() {
   const [goalWeight, setGoalWeight] = useState(currentUser?.goalWeight?.toString() || '');
   const [height, setHeight] = useState(currentUser?.height?.toString() || '');
   const [isProfileImageChanged, setIsProfileImageChanged] = useState(false);
-
-  
-
+  const [birthDate, setBirthDate] = useState(new Date(currentUser?.dateOfBirth || 0).toLocaleDateString() || '');
+  const [age, setAge] = useState(currentUser?.age?.toString() || '');
+  const [targetDate, setTargetDate] = useState(new Date(currentUser?.targetDate || 0).toLocaleDateString() || '');
   const navigation = useNavigation();
-
+  
   // Function to load profile image
   useEffect(() => {
     const loadProfileImage = async () => {
@@ -165,7 +168,6 @@ export default function Profile() {
     }
   };
   
-
   // Function to handle logout
   const handleLogout = () => {
     Alert.alert(
@@ -199,6 +201,7 @@ export default function Profile() {
         currentWeight: parseFloat(currentWeight),
         goalWeight: parseFloat(goalWeight),
         height: parseFloat(height),
+        targetDate,
         profileImageUrl: isProfileImageChanged ? profileImage.uri : currentUser.profileImageUrl,
       };
   
@@ -381,6 +384,62 @@ export default function Profile() {
               onChangeText={setHeight}
             />
           </View>
+
+            {/* Date of Birth */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Date of Birth</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('birthDate')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={[
+                styles.input,
+                isEditingField.birthDate && styles.inputEditing,
+              ]}
+              placeholder="Enter your date of birth"
+              value={birthDate}
+              editable={isEditingField.birthDate}
+              onChangeText={setBirthDate}
+            />
+
+            {/* Age */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Age</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('age')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={[
+                styles.input,
+                isEditingField.age && styles.inputEditing,
+              ]}
+              placeholder="Enter your age"
+              value={age}
+              keyboardType="numeric"
+              editable={isEditingField.age}
+              onChangeText={setAge}
+            />
+
+            {/* Target Date */}
+            <View style={styles.fieldRow}>
+              <Text style={styles.inputLabel}>Target Date</Text>
+              <TouchableOpacity onPress={() => handleFieldEdit('targetDate')}>
+                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={[
+                styles.input,
+                isEditingField.targetDate && styles.inputEditing,
+              ]}
+              placeholder="Enter your target date"
+              value={targetDate}
+              editable={isEditingField.targetDate}
+              onChangeText={setTargetDate}
+            />
+
 
           {/* Save Changes Button */}
           {isAnyFieldEditing && (

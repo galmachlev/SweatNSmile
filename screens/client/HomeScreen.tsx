@@ -5,13 +5,13 @@ import { useUser } from '../../context/UserContext';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { currentUser, profileImage } = useUser();
-
+  console.log(currentUser);
   const userName = currentUser ? `${currentUser.firstName}` : 'User';
   const startingWeight = currentUser?.startWeight || 0;
   const currentWeight = currentUser?.currentWeight || 0;
   const targetWeight = currentUser?.goalWeight || 0;
   const profile_img = currentUser?.profileImageUrl;
-  const targetDate = currentUser?.targetDate || new Date();
+  const targetDate = new Date(currentUser?.targetDate || new Date());
 
   // Calculate weight progress percentage
   const totalWeightToLose = startingWeight - targetWeight;
@@ -45,7 +45,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
             <Text style={styles.textbelow}>
-            Target Date: {targetDate instanceof Date ? targetDate.toLocaleDateString() : new Date().toLocaleDateString()}
+              Target Date: {targetDate instanceof Date ? targetDate.toLocaleDateString() : new Date().toLocaleDateString()}
             </Text>
             </View>
         </View>
