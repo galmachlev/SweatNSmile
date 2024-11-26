@@ -3,48 +3,51 @@ import { Alert } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { User } from '../types/user';
 
-// Define the RootStackParamList type for navigation
+// הגדרת רשימת הניווט באפליקציה (שמות המסכים והפרמטרים שלהם)
 type RootStackParamList = {
-    OnBoarding: undefined;
-    HomeScreen: undefined;
-    DailyCalories: undefined;
-    Register: undefined;
-    Gallery: undefined;
-    Profile: undefined;
-    AllMenusTable: undefined;
-    HomeStore: undefined;
-    Login: undefined;
-    HomeAdmin: undefined;
+    OnBoarding: undefined; // מסך פתיחה
+    HomeScreen: undefined; // מסך הבית
+    Register: undefined; // מסך הרשמה
+    Gallery: undefined; // גלריית תמונות
+    Profile: undefined; // פרופיל משתמש
+    AllMenusTable: undefined; // טבלת כל התפריטים
+    HomeStore: undefined; // מסך החנות
+    Login: undefined; // מסך התחברות
+    HomeAdmin: undefined; // מסך אדמין
 };
 
-// Define the context type
+// הגדרת טיפוס הקונטקסט של המשתמש
 type UserContextType = {
-    login: (email: string, password: string) => Promise<void>;
-    currentUser: User | null;
-    users: User[];
-    fetchUsers: () => Promise<void>;
-    deleteUser: (email: string) => Promise<void>;
-    profileImage: string | null;
-    updateProfileImage: (imageUri: string) => void;
-    updateUserDetails: (email: string, updates: Partial<User>) => Promise<void>; // Add this line
-    calculateDailyCalories: (
-        gender: string, height: string, currentWeight: string,
-        goalWeight: string, activityLevel: string
+    login: (email: string, password: string) => Promise<void>; // פונקציה להתחברות
+    currentUser: User | null; // פרטי המשתמש המחובר
+    users: User[]; // רשימת כל המשתמשים
+    fetchUsers: () => Promise<void>; // פונקציה לשליפת משתמשים
+    deleteUser: (email: string) => Promise<void>; // פונקציה למחיקת משתמש
+    profileImage: string | null; // תמונת פרופיל
+    updateProfileImage: (imageUri: string) => void; // פונקציה לעדכון תמונת פרופיל
+    updateUserDetails: (email: string, updates: Partial<User>) => Promise<void>; // פונקציה לעדכון פרטי משתמש
+    calculateDailyCalories: ( // פונקציה לחישוב הקלוריות היומיות
+        gender: string,
+        height: string,
+        currentWeight: string,
+        goalWeight: string,
+        activityLevel: string,
+        age: number
     ) => Result | null;
 };
 
-// Define the Result type
+// טיפוס שמגדיר את תוצאות חישוב הקלוריות
 interface Result {
-    BMR: number;
-    TDEE: number;
-    DailyCalorieDeficit: number;
-    RecommendedDailyCalories: number;
+    BMR: number; // חילוף חומרים בסיסי
+    TDEE: number; // סך הוצאת האנרגיה היומית
+    DailyCalorieDeficit: number; // גירעון קלורי יומי
+    RecommendedDailyCalories: number; // קלוריות יומיות מומלצות
 }
 
-// Create the UserContext
+// יצירת קונטקסט עבור המשתמש
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Create a custom hook to use the UserContext
+// הוק מותאם לשימוש בקונטקסט של המשתמש
 export const useUser = () => {
     const context = useContext(UserContext);
     if (!context) {
@@ -53,38 +56,38 @@ export const useUser = () => {
     return context;
 };
 
-// Define the props for the UserProvider
+// טיפוס עבור פרופס של ספק הקונטקסט
 type UserProviderProps = {
     children: ReactNode;
 };
 
-// Create the UserProvider component
+// ספק הקונטקסט של המשתמש
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [users, setUsers] = useState<User[]>([]);
+    const [currentUser, setCurrentUser] = useState<User | null>(null); // סטייט של המשתמש הנוכחי
+    const [users, setUsers] = useState<User[]>([]); // סטייט של רשימת המשתמשים
 
-    // Login function
+    // פונקציה להתחברות
     const login = async (email: string, password: string) => {
         if (!email || !password) {
-            Alert.alert('Error', 'Please fill in both fields.');
+            Alert.alert('Error', 'Please fill in both fields.'); // בדיקת שדות חובה
             return;
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // אימות כתובת מייל
         if (!emailRegex.test(email)) {
             Alert.alert('Error', 'Invalid email address.');
             return;
         }
 
         if (password.length < 6) {
-            Alert.alert('Error', 'Password must be at least 6 characters long');
+            Alert.alert('Error', 'Password must be at least 6 characters long'); // אימות אורך הסיסמה
             return;
         }
 
         try {
             if (email === 'admin@gmail.com' && password === 'admin1234321!') {
-                navigation.navigate('HomeAdmin');
+                navigation.navigate('HomeAdmin'); // כניסה כאדמין
                 return;
             }
 
@@ -93,15 +96,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password }), // שליחה לשרת
             });
 
             if (res.ok) {
                 let data = await res.json();
-                data.user.age = new Date().getFullYear() - new Date(data.user.dateOfBirth).getFullYear();
-                setCurrentUser(data.user);
-                console.log('User Logged In:', data.user); // הדפסת פרטי המשתמש לאחר התחברות
-                navigation.navigate('HomeScreen');
+                data.user.age = new Date().getFullYear() - new Date(data.user.dateOfBirth).getFullYear(); // חישוב גיל המשתמש
+                setCurrentUser(data.user); // שמירת פרטי המשתמש הנוכחי
+                navigation.navigate('HomeScreen'); // מעבר למסך הבית
             } else {
                 Alert.alert('Error', 'Invalid email or password.');
             }
@@ -111,7 +113,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
     };
 
-    // Function to update user details
+    // פונקציה לעדכון פרטי משתמש
     const updateUserDetails = async (email: string, updates: Partial<User>) => {
         try {
             const res = await fetch('https://database-s-smile.onrender.com/api/users/edit', {
@@ -125,9 +127,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             if (res.ok) {
                 const updatedUser = await res.json();
                 setCurrentUser((prevUser) => {
-                    // Update the local user state if the current user matches the edited one
                     if (prevUser && prevUser.email === email) {
-                        return { ...prevUser, ...updates };
+                        return { ...prevUser, ...updates }; // עדכון סטייט המשתמש
                     }
                     return prevUser;
                 });
@@ -142,7 +143,31 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
     };
 
-    // Fetch users from the API
+    // פונקציה למחיקת משתמש
+    const deleteUser = async (email: string) => {
+        try {
+            let res = await fetch('https://database-s-smile.onrender.com/api/users/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            if (res.ok) {
+                await fetchUsers(); // עדכון רשימת המשתמשים לאחר מחיקה
+                Alert.alert('Success', 'User deleted successfully.');
+            } else {
+                const errorResponse = await res.json();
+                throw new Error(errorResponse.message || 'Failed to delete user');
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            Alert.alert('Error', 'An error occurred while deleting the user. Please try again.');
+        }
+    };
+
+    // פונקציה לשליפת משתמשים מהשרת
     const fetchUsers = async () => {
         try {
             let res = await fetch('https://database-s-smile.onrender.com/api/users/');
@@ -157,39 +182,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
     };
 
-    const defaultProfileImage = require('../Images/profile_img.jpg');
+    const defaultProfileImage = require('../Images/profile_img.jpg'); // תמונת פרופיל ברירת מחדל
     const [profileImage, setProfileImage] = useState(defaultProfileImage);
 
     const updateProfileImage = (imageUri: string) => {
-        setProfileImage(imageUri);
+        setProfileImage(imageUri); // עדכון תמונת פרופיל
     };
 
-    // Delete user function
-    const deleteUser = async (email: string) => {
-        try {
-            let res = await fetch('https://database-s-smile.onrender.com/api/users/delete', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email }),
-            });
-
-            if (res.ok) {
-                await fetchUsers();
-                Alert.alert('Success', 'User deleted successfully.');
-            } else {
-                const errorResponse = await res.json();
-                throw new Error(errorResponse.message || 'Failed to delete user');
-            }
-        } catch (error) {
-            console.error('Error deleting user:', error);
-            Alert.alert('Error', 'An error occurred while deleting the user. Please try again.');
-        }
-    };
-
-    // Calculate BMR (assuming a default age of 30)
-    const calculateBMR = (gender: string, height: number, weight: number, age = 30): number => {
+    // חישוב חילוף חומרים בסיסי (BMR)
+    const calculateBMR = (gender: string, height: number, weight: number, age: number): number => {
         if (gender.toLowerCase() === 'male') {
             return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
         } else if (gender.toLowerCase() === 'female') {
@@ -198,7 +199,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             return 0;
         }
     };
-
+    
+    // חישוב הוצאת אנרגיה יומית (TDEE)
     const calculateTDEE = (bmr: number, activityLevel: string): number => {
         const activityMultipliers: Record<string, number> = {
             'notVeryActive': 1.2,
@@ -211,23 +213,25 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return bmr * (activityMultipliers[activityLevel] || 1.2);
     };
 
+    // חישוב גירעון קלורי יומי
     const calculateDailyCalorieDeficit = (currentWeight: number, goalWeight: number): number => {
-        const totalWeightLossNeeded = currentWeight - goalWeight;
-        const weeklyWeightLoss = 0.5;
-        const caloriesPerKg = 7700;
+        const totalWeightLossNeeded = currentWeight - goalWeight; // כמה ק"ג צריך להוריד
+        const weeklyWeightLoss = 0.5; // ירידה שבועית מומלצת
+        const caloriesPerKg = 7700; // קלוריות בק"ג שומן
         const weeklyCalorieDeficit = weeklyWeightLoss * caloriesPerKg;
-        const dailyCalorieDeficit = weeklyCalorieDeficit / 7;
-        return dailyCalorieDeficit;
+        return weeklyCalorieDeficit / 7; // חלוקה לגירעון יומי
     };
 
+    // חישוב קלוריות יומיות מומלצות
     const calculateDailyCalories = (
         gender: string,
         height: string,
         currentWeight: string,
         goalWeight: string,
-        activityLevel: string
+        activityLevel: string,
+        age: number
     ): Result | null => {
-        const bmr = calculateBMR(gender, parseFloat(height), parseFloat(currentWeight));
+        const bmr = calculateBMR(gender, parseFloat(height), parseFloat(currentWeight), age);
         const tdee = calculateTDEE(bmr, activityLevel);
         const dailyCalorieDeficit = calculateDailyCalorieDeficit(parseFloat(currentWeight), parseFloat(goalWeight));
         const recommendedDailyCalories = Math.round(tdee - dailyCalorieDeficit);
@@ -249,7 +253,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             deleteUser,
             profileImage,
             updateProfileImage,
-            updateUserDetails, // Include the new function here
+            updateUserDetails,
             calculateDailyCalories
         }}>
             {children}

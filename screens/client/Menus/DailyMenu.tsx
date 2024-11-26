@@ -84,7 +84,7 @@ const DailyMenu: React.FC = () => {
     }
   };
 
-  // חישוב קלוריות יומיות כשהמשתמש או נתונים קשורים משתנים
+  // חישוב קלוריות יומיות כשהמשתמש או נתונים קשורים משתנים - משתמש בנוסחאות שנמצאות ביוזר קונטקסט
   useEffect(() => {
     if (currentUser) {
         const result = calculateDailyCalories(
@@ -92,8 +92,13 @@ const DailyMenu: React.FC = () => {
             String(currentUser.height || ''), // גובה
             String(currentUser.currentWeight || ''), // משקל נוכחי
             String(currentUser.goalWeight || ''),    // משקל יעד
-            currentUser.activityLevel || ''   // רמת פעילות
+            currentUser.activityLevel || '',   // רמת פעילות
+            currentUser.age || 0               // גיל המשתמש
         );
+
+        if (currentUser.age === undefined || currentUser.age === 0) {
+            console.error("Error: User's age is missing!"); // הודעת שגיאה אם הגיל חסר
+        }
 
         if (result) {
             setDailyCalories(result.RecommendedDailyCalories); // הגדרת קלוריות יומיות

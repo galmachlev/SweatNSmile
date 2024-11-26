@@ -8,7 +8,6 @@ import Onboarding from './screens/client/OnBoarding';
 import Register from './screens/stack/Register';
 import Gallery from './screens/client/Gallery';
 import Profile from './screens/client/Profile';
-import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyMenu from './screens/client/Menus/DailyMenu';
 import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
@@ -184,7 +183,6 @@ export default function App() {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
           <Stack.Screen name="HomeScreen" component={TabNavigator} options={{ headerShown: false }} />
-          <Stack.Screen name="DailyCalories" component={DailyCalories} />
           <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
           <Stack.Screen name="Gallery" component={Gallery} />
           <Stack.Screen name="AllMenusTable" component={AllMenusTable} />

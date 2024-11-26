@@ -19,6 +19,7 @@ import { useUser } from '../../context/UserContext';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNPickerSelect from 'react-native-picker-select';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface ProfileImage {
   uri: string | null;
@@ -51,7 +52,7 @@ export default function Profile() {
   const [modalVisible, setModalVisible] = useState(false);
 
   // State variables for each field's edit mode
-  const [isEditingField, setIsEditingField] = useState({
+  const [isEditingField, setIsEditingField] = useState<{ [key: string]: boolean }>({
     fullName: false,
     gender: false,
     activityLevel: false,
@@ -59,8 +60,7 @@ export default function Profile() {
     currentWeight: false,
     goalWeight: false,
     height: false,
-    birthDate: false,
-    age: false,
+    dateOfBirth: false,
     targetDate: false,
   });
 
@@ -74,11 +74,44 @@ export default function Profile() {
   const [goalWeight, setGoalWeight] = useState(currentUser?.goalWeight?.toString() || '');
   const [height, setHeight] = useState(currentUser?.height?.toString() || '');
   const [isProfileImageChanged, setIsProfileImageChanged] = useState(false);
-  const [birthDate, setBirthDate] = useState(new Date(currentUser?.dateOfBirth || 0).toLocaleDateString() || '');
-  const [age, setAge] = useState(currentUser?.age?.toString() || '');
-  const [targetDate, setTargetDate] = useState(new Date(currentUser?.targetDate || 0).toLocaleDateString() || '');
   const navigation = useNavigation();
+<div className="
+"></div>
+  const [age, setAge] = useState(currentUser?.age?.toString() || '');
+  const [dateOfBirth, setdateOfBirth] = useState(new Date(currentUser?.dateOfBirth || new Date())); // תאריך לידה
+  const [targetDate, setTargetDate] = useState(new Date(currentUser?.targetDate || new Date())); // תאריך יעד
+  const [showDatePicker, setShowDatePicker] = useState(false); // מצב להציג/להסתיר את בורר התאריך
+  const [showTargetDatePicker, setShowTargetDatePicker] = useState(false);
+
+  // חישוב הגיל של המשתמש בהתאם לתאריך הלידה
+  const calculateAge = (dateOfBirth: Date) => {
+    const today = new Date();
+    let age = today.getFullYear() - dateOfBirth.getFullYear();
+    const m = today.getMonth() - dateOfBirth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dateOfBirth.getDate())) {
+      age--;
+    }
+    return age;
+  };
   
+  // עדכון תאריך הלידה
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || dateOfBirth;
+    setdateOfBirth(currentDate);
+    setShowDatePicker(false); // נסגור את בורר התאריך לאחר הבחירה
+    
+    // חישוב הגיל על פי תאריך הלידה
+    const newAge = calculateAge(currentDate);
+    setAge(newAge.toString()); // מעדכן את הגיל רק במצב של שינוי התאריך, אך לא שולח את המידע לעדכון
+  };
+  
+  // עדכון תאריך היעד
+  const handleTargetDateChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || targetDate;
+    setTargetDate(currentDate);
+    setShowTargetDatePicker(false); // נסגור את בורר התאריך לאחר הבחירה
+  };
+
   // Function to load profile image
   useEffect(() => {
     const loadProfileImage = async () => {
@@ -184,12 +217,12 @@ export default function Profile() {
   // Function to handle field edit toggle
   const handleFieldEdit = (fieldName: string) => {
     setIsEditingField((prev) => ({
-      ...prev,
-      [fieldName]: !prev[fieldName],
+        ...prev,
+        [fieldName]: !prev[fieldName], // גישה דינמית לשדה
     }));
   };
 
-  // Function to save all changes
+  // פונקציה לשמירה של כל השינויים
   const handleSaveChanges = () => {
     if (currentUser) {
       const updates: Partial<User> = {
@@ -202,14 +235,31 @@ export default function Profile() {
         goalWeight: parseFloat(goalWeight),
         height: parseFloat(height),
         targetDate,
+        dateOfBirth, // עדכון תאריך הלידה
+        age: parseInt(age, 10), // הגיל המעודכן
         profileImageUrl: isProfileImageChanged ? profileImage.uri : currentUser.profileImageUrl,
       };
-  
+
+      // עדכון בפרופיל
       updateUserDetails(currentUser.email, updates);
+
+      // סגירת כל שדות העריכה
+      setIsEditingField({
+        dateOfBirth: false,
+        targetDate: false,
+        fullName: false,
+        gender: false,
+        activityLevel: false,
+        startWeight: false,
+        currentWeight: false,
+        goalWeight: false,
+        height: false,
+      });
+
       setIsProfileImageChanged(false); // Reset the profile image change flag
       Alert.alert('Success', 'Profile updated successfully.');
     }
-  };  
+  };
 
   // Check if any field is being edited
   const isAnyFieldEditing = Object.values(isEditingField).some((editing) => editing) || isProfileImageChanged;
@@ -383,46 +433,42 @@ export default function Profile() {
               editable={isEditingField.height}
               onChangeText={setHeight}
             />
-          </View>
 
-            {/* Date of Birth */}
+            {/* תאריך לידה */}
             <View style={styles.fieldRow}>
               <Text style={styles.inputLabel}>Date of Birth</Text>
-              <TouchableOpacity onPress={() => handleFieldEdit('birthDate')}>
+              <TouchableOpacity onPress={() => handleFieldEdit('dateOfBirth')}>
                 <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
               </TouchableOpacity>
             </View>
             <TextInput
-              style={[
-                styles.input,
-                isEditingField.birthDate && styles.inputEditing,
-              ]}
-              placeholder="Enter your date of birth"
-              value={birthDate}
-              editable={isEditingField.birthDate}
-              onChangeText={setBirthDate}
+              style={[styles.input, isEditingField.dateOfBirth && styles.inputEditing]}
+              value={dateOfBirth.toLocaleDateString()} // תצוגת התאריך
+              editable={false} // לא ניתן לערוך ישירות את השדה
+              placeholder="Select your date of birth"
             />
+            {isEditingField.dateOfBirth && (
+              <DateTimePicker
+                value={dateOfBirth}
+                mode="date"
+                display="default"
+                onChange={handleDateChange}
+              />
+            )}
 
-            {/* Age */}
+            {/* גיל */}
             <View style={styles.fieldRow}>
               <Text style={styles.inputLabel}>Age</Text>
-              <TouchableOpacity onPress={() => handleFieldEdit('age')}>
-                <Icon name="edit" type="font-awesome" color="#517fa4" size={20} />
-              </TouchableOpacity>
             </View>
             <TextInput
               style={[
                 styles.input,
-                isEditingField.age && styles.inputEditing,
               ]}
-              placeholder="Enter your age"
               value={age}
-              keyboardType="numeric"
-              editable={isEditingField.age}
-              onChangeText={setAge}
+              editable={false}  // מונע את פתיחת המקלדת
             />
 
-            {/* Target Date */}
+            {/* תאריך יעד */}
             <View style={styles.fieldRow}>
               <Text style={styles.inputLabel}>Target Date</Text>
               <TouchableOpacity onPress={() => handleFieldEdit('targetDate')}>
@@ -430,16 +476,21 @@ export default function Profile() {
               </TouchableOpacity>
             </View>
             <TextInput
-              style={[
-                styles.input,
-                isEditingField.targetDate && styles.inputEditing,
-              ]}
-              placeholder="Enter your target date"
-              value={targetDate}
-              editable={isEditingField.targetDate}
-              onChangeText={setTargetDate}
+              style={[styles.input, isEditingField.targetDate && styles.inputEditing]}
+              value={targetDate.toLocaleDateString()} // תצוגת התאריך
+              editable={false} // לא ניתן לערוך ישירות את השדה
+              placeholder="Select your target date"
             />
+            {isEditingField.targetDate && (
+              <DateTimePicker
+                value={targetDate}
+                mode="date"
+                display="default"
+                onChange={handleTargetDateChange}
+              />
+            )}
 
+          </View>
 
           {/* Save Changes Button */}
           {isAnyFieldEditing && (
@@ -473,6 +524,7 @@ export default function Profile() {
   );
 }
 
+// סטיילים
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
