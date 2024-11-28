@@ -19,6 +19,8 @@ const GalleryScreen: React.FC = () => {
   const { currentUser } = useUser();
   const { updateUserDetails } = useUser();  
   const defaultImage = require('../../Images/gallery_img.png');
+  const defaultImageUri = Image.resolveAssetSource(defaultImage).uri;
+  console.log(defaultImageUri);  // בודק את ה-URI של התמונה
   const [fullSizeImageUri, setFullSizeImageUri] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -132,23 +134,34 @@ const GalleryScreen: React.FC = () => {
     const cloudName = 'duiifdn9s';
     const uploadPreset = 'GALMACH';
     const userId = currentUser ? currentUser.email : 'defaultUserEmail'; // משתמש באימייל
-
+  
     const formData = new FormData();
-    formData.append('file', { uri: imageUri, name: 'image.jpg', type: 'image/jpeg' });
+    formData.append('file', { uri: imageUri, name: 'image.jpg', type: 'image/jpeg/png' });
     formData.append('upload_preset', uploadPreset);
     formData.append('folder', `user_images/${userId}`);
     formData.append('resource_type', 'image');
-
+  
     try {
       const response = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, formData);
-      await updateUserDetails (currentUser?.email, { ...currentUser, gallery:[...currentUser?.gallery, response.data.secure_url] });
-      return response.data.secure_url;
-    } catch (error) {
-      console.error('Upload failed', error);
+      if (response && response.data && response.data.secure_url) {
+        return response.data.secure_url;
+      } else {
+        console.error('Cloudinary response is invalid or missing URL:', response);
+        return null;
+      }
+    } catch (error: unknown) {
+      // טיפול נכון בשגיאה כאשר הסוג הוא 'unknown'
+      if (axios.isAxiosError(error)) {
+        // שגיאה ממענה של axios (באמצעות axios.isAxiosError)
+        console.error('Upload failed', error.response ? error.response.data : error.message);
+      } else {
+        // שגיאה כללית שלא קשורה ל-axios
+        console.error('An unexpected error occurred:', error);
+      }
       Alert.alert('Upload failed', 'Could not upload the image to Cloudinary.');
       return null;
     }
-  };
+  };  
 
   const viewFullSize = (uri: string | null) => {
     setFullSizeImageUri(uri);

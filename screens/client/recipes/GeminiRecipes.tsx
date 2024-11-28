@@ -80,7 +80,7 @@ const RecipeChat: React.FC = () => {
           const nutritionalInfo = await handleUserInputForQuantityAndIngredient(`${quantity} ${ingredient}`); // Call nutritional info function
           if (nutritionalInfo) {
             // יצירת התגובה עם פרטי המידע התזונתי
-            responseText = `Nutritional Information for ${quantity} ${ingredient}:\n- Calories: ${nutritionalInfo.calories}\n- Protein: ${nutritionalInfo.protein}\n- Fat: ${nutritionalInfo.fat}\n- Carbs: ${nutritionalInfo.carbs}\n- Sodium: ${nutritionalInfo.sodium}`;
+            responseText = `Nutritional Information for ${quantity} ${ingredient}:\n- Calories: ${nutritionalInfo.calories}\n- Protein: ${nutritionalInfo.protein}\n- Fat: ${nutritionalInfo.fat}\n- Carbs: ${nutritionalInfo.carbs}`;
           } else {
             // הודעה שהקלט לא זוהה כמו שצריך בתבנית הנדרשת
             responseText = "Input not recognized. Please enter in the format 'quantity ingredient' in English.";
@@ -92,7 +92,7 @@ const RecipeChat: React.FC = () => {
       else if (ingredientPattern.test(inputText)) {
         const nutritionalInfo = await handleUserInputForQuantityAndIngredient(inputText);
         if (nutritionalInfo) {
-          responseText = `Nutritional Information for ${inputText}:\n- Calories: ${nutritionalInfo.calories}\n- Protein: ${nutritionalInfo.protein}\n- Fat: ${nutritionalInfo.fat}\n- Carbs: ${nutritionalInfo.carbs}\n- Sodium: ${nutritionalInfo.sodium}`;
+          responseText = `Nutritional Information for ${inputText}:\n- Calories: ${nutritionalInfo.calories}\n- Protein: ${nutritionalInfo.protein}\n- Fat: ${nutritionalInfo.fat}\n- Carbs: ${nutritionalInfo.carbs}`;
         } else {
           responseText = "Input not recognized. Please enter in the format 'quantity ingredient' in English.";
         }

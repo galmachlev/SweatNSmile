@@ -7,6 +7,11 @@ import { SelectList } from 'react-native-dropdown-select-list';
 import { Meal, mealData } from './FoodData';
 import { FoodItem, FoodCategory, FoodData } from '../Menus/FoodData'; // Import from the new file
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'Warning: Text strings must be rendered within a <Text> component.'
+]);
 
 // הגדרת טיפוס למבנה נתונים המייצג את נראות פרטי המזון בכל ארוחה ובקטגוריות
 interface DetailsVisibility {
@@ -287,9 +292,9 @@ const DailyMenu: React.FC = () => {
     handleSelect(item, mealType, cat, targetCalories);
 
     // הדפסה לצורכי ניפוי שגיאות ובדיקת הנתונים שנבחרו
-    console.log("Selected Item:", item);
-    console.log("Target Calories:", targetCalories); 
-    console.log("ID:", id);
+    // console.log("Selected Item:", item);
+    // console.log("Target Calories:", targetCalories); 
+    // console.log("ID:", id);
   }
 
   // פונקציה שפועלת בעת בחירת פריט מתוך הרשימה של החיפוש והוספה בשביל לארוחת האקסטרה
@@ -553,7 +558,7 @@ const DailyMenu: React.FC = () => {
     });
   };        
   
-  console.log(selectedItems.Extras)
+  // console.log(selectedItems.Extras)
 
   return (
     <ScrollView>
@@ -571,18 +576,18 @@ const DailyMenu: React.FC = () => {
 
       {/* מודל לאישור איפוס התפריט */}
       <Modal transparent={true} visible={showModal} animationType="fade">
-        <View style={styles.modalOverlay}> {/* מסך רקע כהה שמכסה את המסך */}
-          <View style={styles.modalContainer}> {/* מיכל המודל */}
-            <Text style={styles.modalTitle}>Reset Menu</Text> {/* כותרת המודל */}
-            <Text style={styles.modalMessage}>Are you sure you want to reset the menu?</Text> {/* הודעת אישור */}
-            <View style={styles.modalButtons}> {/* אזור כפתורים */}
+        <View style={styles.modalOverlay}>{/* מסך רקע כהה שמכסה את המסך */}
+          <View style={styles.modalContainer}>{/* מיכל המודל */}
+            <Text style={styles.modalTitle}>Reset Menu</Text>{/* כותרת המודל */}
+            <Text style={styles.modalMessage}>Are you sure you want to reset the menu?</Text>{/* הודעת אישור */}
+            <View style={styles.modalButtons}>{/* אזור כפתורים */}
               {/* כפתור אישור איפוס */}
               <TouchableOpacity onPress={handleReset} style={styles.confirmButton}>
-                <Text style={styles.confirmButtonText}>Yes</Text> {/* טקסט על כפתור האישור */}
+                <Text style={styles.confirmButtonText}>Yes</Text>{/* טקסט על כפתור האישור */}
               </TouchableOpacity>
               {/* כפתור דחיית איפוס */}
               <TouchableOpacity onPress={() => setShowModal(false)} style={styles.cancelButton}>
-                <Text style={styles.cancelButtonText}>No</Text> {/* טקסט על כפתור הדחייה */}
+                <Text style={styles.cancelButtonText}>No</Text>{/* טקסט על כפתור הדחייה */}
               </TouchableOpacity>
             </View>
           </View>
@@ -621,10 +626,10 @@ const DailyMenu: React.FC = () => {
           .map(([key, value]) => (
             <View key={key} style={styles.macroItem}>
               <Text style={styles.macroLabel}>
-                {`${key.charAt(0).toUpperCase() + key.slice(1)} (g)`} {/* ממיר את שם המפתח לאות ראשונה גדולה */}
+                {`${key.charAt(0).toUpperCase() + key.slice(1)} (g)`}{/* ממיר את שם המפתח לאות ראשונה גדולה */}
               </Text>
               <View style={styles.macroValueContainer}>
-                <Text style={styles.macroValue}>{value}</Text> {/* מציג את ערך המאקרו */}
+                <Text style={styles.macroValue}>{value}</Text>{/* מציג את ערך המאקרו */}
               </View>
             </View>
           ))}
@@ -645,7 +650,7 @@ const DailyMenu: React.FC = () => {
               subcategories[mealType].map((subcategory) => {
                 const isVisible = detailsVisibility[mealType]?.[subcategory.category];
 
-                console.log(selectedItems[mealType][subcategory.category]?.name)
+                // console.log(selectedItems[mealType][subcategory.category]?.name)
 
                 return (
                   <View key={subcategory.category} style={styles.subcategory}>
@@ -683,14 +688,14 @@ const DailyMenu: React.FC = () => {
             >
               {Math.round(extrasCalories || 0)} {/* הצגת סך הקלוריות של האקסטרות */}
             </Text> 
-            / {Math.round(mealCalories['Extras'] || 0)} cal {/* הצגת סך הקלוריות שהוקצו לאקסטרות */}
+            / {Math.round(mealCalories['Extras'] || 0)} cal{/* הצגת סך הקלוריות שהוקצו לאקסטרות */}
           </Text>
           
           {/* אם יש פריטים באקסטרות */}
           {selectedItems.Extras && Object.values(selectedItems.Extras).length > 0 ? (
             Object.values(selectedItems.Extras).map((item: any) => ( // עבור כל פריט אקסטרה 
               <View key={item.id} style={styles.subcategory}>
-                <Text style={[styles.selectedItemName, styles.itemContainer]}>{item.name}</Text> {/* הצגת שם הפריט */}
+                <Text style={[styles.selectedItemName, styles.itemContainer]}>{item.name}</Text>{/* הצגת שם הפריט */}
                 
                 {/* כפתור מחיקת פריט אקסטרה */}
                 <TouchableOpacity 
@@ -700,20 +705,20 @@ const DailyMenu: React.FC = () => {
                   }} 
                   style={styles.deleteButton}
                 >
-                  <Icon name="delete" size={20} color="#f00" /> {/* אייקון מחיקה */}
+                  <Icon name="delete" size={20} color="#f00" />{/* אייקון מחיקה */}
                 </TouchableOpacity>
 
                 {/* מודל לאישור מחיקת פריט אקסטרה */}
                 <Modal transparent={true} visible={showModalDelete} animationType="fade">
                   <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
-                      <Text style={styles.modalMessage}>Are you sure you want to delete this item?</Text> {/* הודעת אישור למחיקה */}
+                      <Text style={styles.modalMessage}>Are you sure you want to delete this item?</Text>{/* הודעת אישור למחיקה */}
                       <View style={styles.modalButtons}>
                         <TouchableOpacity onPress={handleDeleteExtraItem} style={styles.confirmButton}>
-                          <Text style={styles.confirmButtonText}>Yes</Text> {/* כפתור אישור למחיקה */}
+                          <Text style={styles.confirmButtonText}>Yes</Text>{/* כפתור אישור למחיקה */}
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setShowModalDelete(false)} style={styles.cancelButton}>
-                          <Text style={styles.cancelButtonText}>No</Text> {/* כפתור ביטול מחיקה */}
+                          <Text style={styles.cancelButtonText}>No</Text>{/* כפתור ביטול מחיקה */}
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -722,7 +727,7 @@ const DailyMenu: React.FC = () => {
 
                 {/* כפתור הצגת פרטי אקסטרה */}
                 <TouchableOpacity onPress={() => toggleDetails('Extras', item.id)} style={styles.infoButton}>
-                  <Icon name="info" size={20} color="#696B6D" /> {/* אייקון מידע */}
+                  <Icon name="info" size={20} color="#696B6D" />{/* אייקון מידע */}
                 </TouchableOpacity>                
                 
                 {/* הצגת פרטי פריט אקסטרה אם הם מוצגים */}
@@ -771,19 +776,19 @@ const DailyMenu: React.FC = () => {
                           style={styles.resultItem} // סגנון עבור כל פריט תוצאה
                           onPress={() => handleSelectFood(item)} // לחיצה על פריט תוצאה כדי לבחור אותו
                         >
-                          <Text style={styles.resultText}>{item.food?.label || 'Unknown Food'}</Text> {/* שם המזון או טקסט חלופי אם לא נמצא */}
+                          <Text style={styles.resultText}>{item.food?.label || 'Unknown Food'}</Text>{/* שם המזון או טקסט חלופי אם לא נמצא */}
                           <Text style={styles.resultDetail}>
                             Calories: {Number(item.food?.nutrients?.ENERC_KCAL || 0).toFixed(2)} cal
-                          </Text> {/* קלוריות */}
+                          </Text>{/* קלוריות */}
                           <Text style={styles.resultDetail}>
                             Carbohydrates: {Number(item.food?.nutrients?.CHOCDF || 0).toFixed(2)} g
-                          </Text> {/* פחמימות */}
+                          </Text>{/* פחמימות */}
                           <Text style={styles.resultDetail}>
                             Fat: {Number(item.food?.nutrients?.FAT || 0).toFixed(2)} g
-                          </Text> {/* שומן */}
+                          </Text>{/* שומן */}
                           <Text style={styles.resultDetail}>
                             Protein: {Number(item.food?.nutrients?.PROCNT || 0).toFixed(2)} g
-                          </Text> {/* חלבון */}
+                          </Text>{/* חלבון */}
                         </TouchableOpacity>
                       )}
                       keyExtractor={(item) => item.food?.foodId.toString() || Math.random().toString()} // מפתח ייחודי לכל פריט
