@@ -37,21 +37,22 @@ const RecipeChat: React.FC = () => {
   const [displayedRecipes, setDisplayedRecipes] = useState<string[]>([]); // סטייט המנהל רשימה של מתכונים שהוצגו כבר, כדי למנוע הצגת מתכונים חוזרים למשתמש
   const urlPattern = /(https?:\/\/[^\s]+)/g; // רגולר לחיפוש קישורים בטקסט - עבור ההודעות שגימיני מחזיר מתכונים עם קישור חיצוני
 
-  // פונקציה לשליחת פרומפט ל-Gemini וקבלת תגובה
-  const getGeminiResponse = async (prompt: string) => {
+// פונקציה אסינכרונית לשליחת פרומפט (שאלה או בקשה) למודל גימיני וקבלת תגובה
+const getGeminiResponse = async (prompt: string) => {
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const result = await model.generateContent(prompt);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // קבלת אובייקט המודל של גימיני עם תצורה ספציפית (גרסת "gemini-1.5-flash")
+      const result = await model.generateContent(prompt); // שליחת הפרומפט למודל וקבלת תוצאה
       const response = result.response;
       const text = await response.text(); // חילוץ טקסט מהתגובה
-
       return text; // החזרת הטקסט
-    } catch (error) {
+
+    } catch (error) { // הודעות שגיאה במקרה של כשל
       console.error("Error trying get a response from Gemini: ", error);
-      return "Something went wrong, please try again."; // הודעת שגיאה במקרה של כשל
+      return "Something went wrong, please try again."; 
     }
   };
 
+  // פונקציה המופעלת בעת שליחת ההודעה מהצד של היוזר
   const handleChat = async () => {
 
     if (!inputText.trim()) return; // בדיקה אם הקלט ריק או מכיל רק רווחים, אם כן, לא שולחים הודעה
@@ -66,7 +67,7 @@ const RecipeChat: React.FC = () => {
       const generalGreetingPattern = /^(hello|hi|hey|help|what can you do|how are you)/i; // תבנית לברכות כלליות (למשל 'hello')
       const nutritionalRequestPattern = /^(give me|what is|tell me) (the )?calories? (of|for)? (\d+)\s+(\w+)/i; // תבנית לשאילתות על קלוריות של רכיב מסוים (למשל 'give me the calories of 2 apples')
   
-      // אם הקלט תואם לברכה כללית או שאלה לא קשורה
+      // אם הקלט תואם לברכה כללית
       if (generalGreetingPattern.test(inputText)) {
         responseText = "Hi there! 👋 I'm here to help you with nutritional information or recipe suggestions!";
       } 
@@ -185,7 +186,7 @@ const RecipeChat: React.FC = () => {
         ref={scrollViewRef}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled" // שומר את מצב המקלדת גם לאחר הקשה על מסך
-        onScroll={() => Keyboard.dismiss()} // מסלק את המקלדת כאשר גוללים
+        onScroll={() => Keyboard.dismiss()} // מסתיר את המקלדת כאשר גוללים
       >
         {loading ? (
           <ActivityIndicator size="large" color="#3E6613" /> // מציג אינדיקטור של טעינה אם הנתונים בטעינה
@@ -263,6 +264,7 @@ const RecipeChat: React.FC = () => {
   
 };
 
+// סטיילים
 const styles = StyleSheet.create({
   container: {
     flex: 1,

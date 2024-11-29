@@ -4,70 +4,80 @@ import DailyGeminiChat from './DailyGeminiChat';
 import { useUser } from '../../context/UserContext';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  // קריאת מידע על המשתמש מתוך הקונטקסט
   const { currentUser, profileImage } = useUser();
   console.log(currentUser);
+
+  // נתונים עבור שם המשתמש, משקל התחלה, משקל נוכחי, משקל יעד, תאריך יעד ותמונת פרופיל
   const userName = currentUser ? `${currentUser.firstName}` : 'User';
   const startingWeight = currentUser?.startWeight || 0;
   const currentWeight = currentUser?.currentWeight || 0;
   const targetWeight = currentUser?.goalWeight || 0;
-  const profile_img = currentUser?.profileImageUrl;
   const targetDate = new Date(currentUser?.targetDate || new Date());
+  const profile_img = currentUser?.profileImageUrl;
 
-  const [modalVisible, setModalVisible] = useState(false); // מצב למודל
-  const [hasShownReminder, setHasShownReminder] = useState(false); // מצב לוודא שהמודל יוצג פעם אחת
-  
-  // Calculate weight progress percentage
-  const totalWeightToLose = startingWeight - targetWeight;
-  const weightLost = startingWeight - currentWeight;
-  const progress = Math.min(Math.max((weightLost / totalWeightToLose) * 100, 0), 100);
+  // מצבים למודל ולווידוא תצוגתו פעם אחת בלבד בעת הכניסה לאפליקציה
+  const [modalVisible, setModalVisible] = useState(false);
+  const [hasShownReminder, setHasShownReminder] = useState(false);
 
-  // Check if the target date has passed and if the user has not completed 100% progress
+  // חישוב אחוז ההתקדמות בירידה במשקל
+  const totalWeightToLose = startingWeight - targetWeight; // כמות המשקל שיש להוריד
+  const weightLost = startingWeight - currentWeight; // כמות המשקל שכבר ירד
+  const progress = Math.min(Math.max((weightLost / totalWeightToLose) * 100, 0), 100); // אחוז ההתקדמות בין 0 ל-100
+
+  // בדיקה האם התאריך המטרה עבר והאם ההתקדמות פחותה מ-100%
   useEffect(() => {
-    const currentDate = new Date();
+    const currentDate = new Date(); // תאריך נוכחי
     if (currentDate > targetDate && progress < 100 && !hasShownReminder) {
       console.log('Target date passed and progress < 100%');
       setModalVisible(true); // מציג את המודל
-      setHasShownReminder(true); // מכניס את המשתמש למצב שכבר הוצג לו המודל
+      setHasShownReminder(true); // מוודא שהמודל לא יוצג שוב
     }
   }, [targetDate, progress, hasShownReminder]);
 
   // סגירת המודל
   const handleCloseModal = () => {
-    setModalVisible(false); // נסגור את המודל לאחר לחיצה על OK
+    setModalVisible(false); // סגירה לאחר לחיצה על כפתור OK
   };
 
+  // פונקציה לניווט בין קומפוננטות
   const handleNavigation = (componentName: string) => {
-    navigation.navigate(componentName);
+    navigation.navigate(componentName); // ניווט לפי שם הקומפוננטה
   };
 
-  // PDF link "Open Training Progaram"
+  // פונקציה לפתיחת קישור PDF
   const openPDF = () => {
     const pdfUrl = 'https://www.spinplus.co.il/wp-content/uploads/2019/03/%D7%AA%D7%9B%D7%A0%D7%99%D7%AA-%D7%90%D7%99%D7%9E%D7%95%D7%9F-%D7%9E%D7%AA%D7%97%D7%99%D7%9C%D7%99%D7%9D.pdf';
-    Linking.openURL(pdfUrl);
+    Linking.openURL(pdfUrl); // פתיחת הקישור
   };
 
   return (
     <ScrollView style={styles.page}>
       <View style={styles.container}>
+        {/* תצוגת כותרת עם תמונת פרופיל והודעת שלום */}
         <View style={styles.header}>
-        <Image source={profile_img ? { uri: profile_img } : require('../../Images/profile_img.jpg')} style={styles.profileImage} />
-        <Text style={styles.greeting}>Hello, {userName}</Text>
+          <Image source={profile_img ? { uri: profile_img } : require('../../Images/profile_img.jpg')} style={styles.profileImage} />
+          <Text style={styles.greeting}>Hello, {userName}</Text>
         </View>
+
+        {/* פס ההתקדמות בירידה במשקל */}
         <View style={styles.progressBarContainer}>
           <Text style={styles.progressBarTextLeft}>Start: {startingWeight} kg</Text>
           <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
           <Text style={styles.progressBarTextRight}>Goal: {targetWeight} kg</Text>
         </View>
 
+        {/* פרטים על ההתקדמות */}
         <View style={styles.details}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
             <Text style={styles.textbelow}>
               Target Date: {targetDate instanceof Date ? targetDate.toLocaleDateString() : new Date().toLocaleDateString()}
             </Text>
-            </View>
+          </View>
         </View>
 
+        {/* כפתורים לניווט */}
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={[styles.button, styles.GalleryButton]} onPress={() => handleNavigation('Gallery')}>
             <Image source={require('../../Images/GalleryIcon.png')} style={styles.iconImage} />
@@ -87,17 +97,19 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
+        {/* תצוגת צ'אט יומי */}
         <View style={styles.chatContainer}>
           <View style={styles.chatBox}>
             <DailyGeminiChat />
           </View>
         </View>
 
+        {/* כפתור לפתיחת קובץ PDF */}
         <TouchableOpacity style={styles.pdfButton} onPress={openPDF}>
           <Text style={styles.pdfButtonText}>Open Training Program</Text>
         </TouchableOpacity>
 
-        {/* Modal for target date reminder */}
+        {/* מודל תזכורת אם תאריך המטרה עבר */}
         <Modal
           visible={modalVisible}
           transparent={true}
@@ -121,7 +133,6 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
           </View>
         </Modal>
-
       </View>
     </ScrollView>
   );

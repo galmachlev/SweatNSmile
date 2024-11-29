@@ -1,12 +1,12 @@
 import axios from 'axios'; // הספרייה עוזרת לתקשר עם שירותים חיצוניים כמו גט, פוסט, דליט, פוט, שימושית עבור החזרת מידע בפורמט גייסון 
 
 // API חיצוני מתוך אתר EDAMAM 
-const NUTRITION_APP_ID = '1819ba46';
-const NUTRITION_APP_KEY = '4d37c48e6bb660485646255234d6009d';
-const RECIPE_APP_ID = 'e5c2dbb7';
-const RECIPE_APP_KEY = '77c9bd3f46f7f035b6ade101987451a6';
-const FOOD_DATABASE_APP_ID = 'f08678bb';
-const FOOD_DATABASE_APP_KEY = 'e5ffa7af8b03dfb301649b18a7ea2d57';
+const NUTRITION_APP_ID = '1819ba46'; // עבור הפונקציה של כמות+שם מרכיב
+const NUTRITION_APP_KEY = '4d37c48e6bb660485646255234d6009d'; // עבור הפונקציה של כמות+שם מרכיב
+const RECIPE_APP_ID = 'e5c2dbb7'; // עבור הפונקציה של מתכונים
+const RECIPE_APP_KEY = '77c9bd3f46f7f035b6ade101987451a6'; // עבור הפונקציה של מתכונים
+const FOOD_DATABASE_APP_ID = 'f08678bb'; // עבור הפונקציה של חיפוש מזון והוספה לאקסטרות
+const FOOD_DATABASE_APP_KEY = 'e5ffa7af8b03dfb301649b18a7ea2d57'; // עבור הפונקציה של חיפוש מזון והוספה לאקסטרות
 
 // API URLs
 const EDAMAM_NUTRITION_API_URL = 'https://api.edamam.com/api/food-database/v2/parser';
@@ -15,7 +15,7 @@ const EDAMAM_RECIPE_API_URL = 'https://api.edamam.com/search';
 // פונקציה שמחזירה הבטחה לאחר השהייה מסוימת
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// ביצוע חיפוש מידע על מזון דרך ה-API של Edamam עבור התפריט היומי והוספה ל-Extras
+// ביצוע חיפוש מידע על פריטי מזון דרך המסד נתונים חיצוני של אדמם עבור התפריט היומי והוספה לאקסטרות
 export const searchFood = async (ingredient: string) => {
   try {
     // בקשת GET ל-API של Edamam עם פרמטרים לזיהוי מזהה האפליקציה, המפתח, והמרכיב לחיפוש
@@ -91,33 +91,12 @@ export const fetchRecipeFromAPI = async (ingredients: string[], displayedRecipes
    }
 };
 
-// פונקציה שתטפל בקלט של המשתמש ליצירת מתכון
+// פונקציה שתטפל בקלט של המשתמש ליצירת מתכון - בשימוש בקובץ של המתכונים-גימיני
 export const handleUserInputForRecipe = async (input: string, displayedRecipes: string[]): Promise<string> => {
   // פיצול הקלט למרכיבים, התחשבות גם בפסיקים וגם ברווחים
   const ingredients = input.split(/[\s,]+/).map((item) => item.trim()).filter(Boolean);
   const recipe = await fetchRecipeFromAPI(ingredients, displayedRecipes);
   return recipe;
-};
-
-// פונקציה לזיהוי כמות ומרכיב מתוך הקלט של המשתמש
-export const handleUserInputForQuantityAndIngredient = async (input: string) => {
-  // יצירת ביטוי רגולרי למציאת מספר וכמות בקלט
-  const regex = /^(\d+)\s+(.+)$/;
-  const match = input.match(regex); // התאמה לביטוי הרגולרי
-
-  if (match) {
-    const quantity = match[1]; // הכמות המספרית
-    const ingredient = match[2]; // שם המרכיב
-    const ingredientWithQuantity = `${quantity} ${ingredient}`; // הרכבת מחרוזת מלאה עם הכמות והמרכיב
-
-    console.log(`Fetching nutritional info for: ${ingredientWithQuantity}`);
-    // מחזירים את המידע התזונתי עבור הכמות והמרכיב המבוקשים
-    return await getNutritionalInfoForIngredient(ingredientWithQuantity);
-  } else {
-    // הודעת שגיאה אם הפורמט אינו תואם
-    console.log("Input not recognized. Please enter in the format 'quantity ingredient' in English.");
-    return null; // החזר NULL אם הפורמט אינו זוהה
-  }
 };
 
 // פונקציה שולחת בקשה למאגר חיצוני כדי לקבל מידע תזונתי עבור פריט מזון עם כמות מסוימת
@@ -173,4 +152,26 @@ export const getNutritionalInfoForIngredient = async (ingredient: string) => {
     return null; // החזרת נאל במידה ולא הצליח לטעון טוב את הערכים
   }
 };
+
+// פונקציה לזיהוי כמות ומרכיב מתוך הקלט של המשתמש - בשימוש בקובץ של המתכונים-גימיני
+export const handleUserInputForQuantityAndIngredient = async (input: string) => {
+  // יצירת ביטוי רגולרי למציאת מספר וכמות בקלט
+  const regex = /^(\d+)\s+(.+)$/;
+  const match = input.match(regex); // התאמה לביטוי הרגולרי
+
+  if (match) {
+    const quantity = match[1]; // הכמות המספרית
+    const ingredient = match[2]; // שם המרכיב
+    const ingredientWithQuantity = `${quantity} ${ingredient}`; // הרכבת מחרוזת מלאה עם הכמות והמרכיב
+
+    console.log(`Fetching nutritional info for: ${ingredientWithQuantity}`);
+    // מחזירים את המידע התזונתי עבור הכמות והמרכיב המבוקשים
+    return await getNutritionalInfoForIngredient(ingredientWithQuantity);
+  } else {
+    // הודעת שגיאה אם הפורמט אינו תואם
+    console.log("Input not recognized. Please enter in the format 'quantity ingredient' in English.");
+    return null; // החזר NULL אם הפורמט אינו זוהה
+  }
+};
+
 
