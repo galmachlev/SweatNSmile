@@ -216,7 +216,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // חישוב גירעון קלורי יומי
     const calculateDailyCalorieDeficit = (currentWeight: number, goalWeight: number): number => {
         const totalWeightLossNeeded = currentWeight - goalWeight; // כמה ק"ג צריך להוריד
-        const weeklyWeightLoss = 0.5; // ירידה שבועית מומלצת
+        const weeklyWeightLoss = 0.5; // ירידה שבועית מומלצת בק"ג
         const caloriesPerKg = 7700; // קלוריות בק"ג שומן
         const weeklyCalorieDeficit = weeklyWeightLoss * caloriesPerKg;
         return weeklyCalorieDeficit / 7; // חלוקה לגירעון יומי
