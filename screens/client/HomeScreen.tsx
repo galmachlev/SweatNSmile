@@ -1,22 +1,40 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView, Modal } from 'react-native';
 import DailyGeminiChat from './DailyGeminiChat';
 import { useUser } from '../../context/UserContext';
 
 const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { currentUser, profileImage } = useUser();
-
+  console.log(currentUser);
   const userName = currentUser ? `${currentUser.firstName}` : 'User';
   const startingWeight = currentUser?.startWeight || 0;
   const currentWeight = currentUser?.currentWeight || 0;
   const targetWeight = currentUser?.goalWeight || 0;
   const profile_img = currentUser?.profileImageUrl;
-  const targetDate = currentUser?.targetDate || new Date();
+  const targetDate = new Date(currentUser?.targetDate || new Date());
 
+  const [modalVisible, setModalVisible] = useState(false); // מצב למודל
+  const [hasShownReminder, setHasShownReminder] = useState(false); // מצב לוודא שהמודל יוצג פעם אחת
+  
   // Calculate weight progress percentage
   const totalWeightToLose = startingWeight - targetWeight;
   const weightLost = startingWeight - currentWeight;
   const progress = Math.min(Math.max((weightLost / totalWeightToLose) * 100, 0), 100);
+
+  // Check if the target date has passed and if the user has not completed 100% progress
+  useEffect(() => {
+    const currentDate = new Date();
+    if (currentDate > targetDate && progress < 100 && !hasShownReminder) {
+      console.log('Target date passed and progress < 100%');
+      setModalVisible(true); // מציג את המודל
+      setHasShownReminder(true); // מכניס את המשתמש למצב שכבר הוצג לו המודל
+    }
+  }, [targetDate, progress, hasShownReminder]);
+
+  // סגירת המודל
+  const handleCloseModal = () => {
+    setModalVisible(false); // נסגור את המודל לאחר לחיצה על OK
+  };
 
   const handleNavigation = (componentName: string) => {
     navigation.navigate(componentName);
@@ -45,7 +63,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.textbelow}>{progress.toFixed(0)}% completed</Text>
             <Text style={styles.textbelow}>
-            Target Date: {targetDate instanceof Date ? targetDate.toLocaleDateString() : new Date().toLocaleDateString()}
+              Target Date: {targetDate instanceof Date ? targetDate.toLocaleDateString() : new Date().toLocaleDateString()}
             </Text>
             </View>
         </View>
@@ -78,6 +96,32 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <TouchableOpacity style={styles.pdfButton} onPress={openPDF}>
           <Text style={styles.pdfButtonText}>Open Training Program</Text>
         </TouchableOpacity>
+
+        {/* Modal for target date reminder */}
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={handleCloseModal}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>
+                Your target date has passed, but you haven't completed your goal yet.
+              </Text>
+              <Text style={styles.modalTextBold}>
+                Please set a new target date.
+              </Text>
+              <Text style={styles.modalText}>
+                To do this, go to your profile and update your target date.
+              </Text>
+              <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
       </View>
     </ScrollView>
   );
@@ -216,6 +260,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalTextBold: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    backgroundColor: '#3E6613',
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+
 });
 
 export default HomeScreen;

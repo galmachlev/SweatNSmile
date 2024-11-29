@@ -8,16 +8,14 @@ import Onboarding from './screens/client/OnBoarding';
 import Register from './screens/stack/Register';
 import Gallery from './screens/client/Gallery';
 import Profile from './screens/client/Profile';
-import DailyCalories from './screens/client/DailyCalories';
 import HomeScreen from './screens/client/HomeScreen';
 import DailyMenu from './screens/client/Menus/DailyMenu';
-import { RootStackParamList } from './types/navigationTypes'; // Adjust the import path as needed
+import { RootStackParamList } from './types/navigationTypes';
 import Login from './screens/stack/Login';
 import { UserProvider } from './context/UserContext';
 import HealthyRecipesScreen from './screens/client/recipes/HealthyRecipesScreen';
 import GeminiRecipes from './screens/client/recipes/GeminiRecipes';
 import RecipeCategoryScreen from './screens/client/recipes/RecipeCategoryScreen';
-import AdminPage from './screens/admin/HomeAdmin';
 import AddUser from './screens/admin/AddUser';
 import UserTable from './screens/admin/UserTable';
 import HomeAdmin from './screens/admin/HomeAdmin';
@@ -30,35 +28,36 @@ import { PaperProvider } from 'react-native-paper';
 import StoreScreen from './screens/client/StoreScreen';
 import AllMenusTable from './screens/client/Menus/AllMenusTable';
 
-// Ignore specific log messages
+// התעלמות מהודעות לוג ספציפיות
 LogBox.ignoreLogs([
-  'VirtualizedLists should never be nested inside plain ScrollViews', // Ignore VirtualizedLists warning
-  'Warning: Encountered two children with the same key', // Ignore duplicate key warning
-  'Bridgeless mode is enabled', // Ignore Bridgeless mode log
-  'JavaScript logs will be removed from Metro in React Native 0.77', // Ignore Metro logs warning
-  '[expo-av]: Video component from `expo-av` is deprecated in favor of `expo-video`' // Ignore expo-av warning
+  'VirtualizedLists should never be nested inside plain ScrollViews', // התעלמות מהתראה על רשימות וירטואליות בתוך ScrollViews רגיל
+  'Warning: Encountered two children with the same key', // התעלמות מהתראה על מפתח כפול
+  'Bridgeless mode is enabled', // התעלמות מהודעת Bridgeless mode
+  'JavaScript logs will be removed from Metro in React Native 0.77', // התעלמות מהודעה על הסרת יומני ג'אווהסקריפט
+  '[expo-av]: Video component from `expo-av` is deprecated in favor of `expo-video`' // התעלמות מהודעה על רכיב וידאו מ-`expo-av`
 ]);
 
 
-const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator(); // יצירת טאב נוויגטור
+const Stack = createStackNavigator<RootStackParamList>(); // יצירת סטאק נוויגטור
 
-const menuItems = [
+const menuItems = [ // פרטי התפריט של ה-"More"
   { name: 'Gallery', icon: 'images', routeName: 'Gallery' },
   { name: 'Store', icon: 'cart', routeName: 'Store' },
   { name: 'Recipes', icon: 'nutrition', routeName: 'HealthyRecipesScreen' },
 ];
 
-type MoreMenuProps = {
-  visible: boolean;
-  onClose: () => void;
+type MoreMenuProps = { // הגדרת סוג המאפיינים של ה-MoreMenu
+  visible: boolean; // אם התפריט גלוי או לא
+  onClose: () => void; // פונקציה לסגור את התפריט
 };
 
+// פונקציה המייצרת את התפריט הקטן עם אפשרויות שונות
 function MoreMenu({ visible, onClose }: MoreMenuProps) {
-  const navigation = useNavigation<any>();
-  const [animation] = useState(new Animated.Value(visible ? 1 : 0));
+  const navigation = useNavigation<any>(); // שימוש בניווט
+  const [animation] = useState(new Animated.Value(visible ? 1 : 0)); // הגדרת אנימציה
 
-  React.useEffect(() => {
+  React.useEffect(() => { // אפקט של אנימציה כשהתפריט משנה את מצב ה-Visible
     Animated.timing(animation, {
       toValue: visible ? 1 : 0,
       duration: 300,
@@ -66,52 +65,53 @@ function MoreMenu({ visible, onClose }: MoreMenuProps) {
     }).start();
   }, [visible]);
 
-  const navigateToScreen = (routeName: keyof RootStackParamList) => {
-    onClose();
-    navigation.navigate(routeName);
-};
+  const navigateToScreen = (routeName: keyof RootStackParamList) => { // פונקציה לנווט בין המסכים
+    onClose(); // סגירת התפריט הקטן
+    navigation.navigate(routeName); // ניווט למסך המבוקש
+  };
 
-  const translateY = animation.interpolate({
+  const translateY = animation.interpolate({ // הגדרת אנימציה של תזוזה
     inputRange: [0, 1],
-    outputRange: [300, 0],
+    outputRange: [300, 0], // מסלול תזוזה
   });
 
-  return (
+  return ( 
     <Animated.View 
       style={[
-        styles.moreMenuContainer,
+        styles.moreMenuContainer, // סגנון התפריט הקטן
         {
           transform: [{ translateY }],
-          opacity: animation,
+          opacity: animation, // שינוי שקיפות בהתאמה לאנימציה
         }
       ]}
     >
-      {menuItems.map((item, index) => (
+      {menuItems.map((item, index) => ( // יצירת כל פריט בתפריט
         <TouchableOpacity
-          key={index}
-          style={[styles.menuItem, index !== menuItems.length - 1 && styles.menuItemBorder]}
-          onPress={() => navigateToScreen(item.routeName as keyof RootStackParamList)}
+          key={index} // שימוש במפתח ייחודי
+          style={[styles.menuItem, index !== menuItems.length - 1 && styles.menuItemBorder]} // סגנון עבור כל פריט
+          onPress={() => navigateToScreen(item.routeName as keyof RootStackParamList)} // ניווט למסך המתאים
         >
-          <Ionicons name={item.icon as any} size={24} color="#9AB28B" style={styles.menuIcon} />
-          <Text style={styles.menuText}>{item.name}</Text>
+          <Ionicons name={item.icon as any} size={24} color="#9AB28B" style={styles.menuIcon} />{/* אייקון של הפריט */}
+          <Text style={styles.menuText}>{item.name}</Text>{/* שם הפריט */}
         </TouchableOpacity>
       ))}
     </Animated.View>
   );
 }
 
-const PlusButton = ({ onPress, isOpen }: { onPress: () => void; isOpen: boolean }) => {
+const PlusButton = ({ onPress, isOpen }: { onPress: () => void; isOpen: boolean }) => { // כפתור ה-"המבורגר" המפנה למצב פתוח וסגור
   return (
     <TouchableOpacity onPress={onPress} style={styles.plusButtonContainer}>
-      <Ionicons name={isOpen ? "close" : "menu"} size={30} color="#9AB28B" />
+      <Ionicons name={isOpen ? "close" : "menu"} size={30} color="#9AB28B" />{/* שינוי האייקון לפי מצב הכפתור */}
     </TouchableOpacity>
   );
 };
 
+// טאב נוויגטור – ניווט בין מסכים שונים עם אייקונים
 function TabNavigator() {
-  const [moreMenuVisible, setMoreMenuVisible] = useState(false);
+  const [moreMenuVisible, setMoreMenuVisible] = useState(false); // מצב של התפריט הקטן
 
-  const toggleMoreMenu = () => {
+  const toggleMoreMenu = () => { // פונקציה להדלקה/כיבוי של התפריט הקטן
     setMoreMenuVisible(!moreMenuVisible);
   };
 
@@ -119,7 +119,7 @@ function TabNavigator() {
     <View style={{ flex: 1, backgroundColor: '#white' }}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
-          tabBarIcon: ({ color, size }) => {
+          tabBarIcon: ({ color }) => { // הגדרת אייקונים עבור הטאבים
             let iconName;
 
             if (route.name === 'Home') {
@@ -132,27 +132,34 @@ function TabNavigator() {
               iconName = 'person';
             }
 
-            return <Ionicons name={iconName as any} size={28} color={color} />;
+            return <Ionicons name={iconName as any} size={30} color={color} />;
           },
-          tabBarActiveTintColor: 'white',
-          tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)',
-          tabBarStyle: {
-            backgroundColor: '#9AB28B',
-            borderRadius: 50,
+          tabBarActiveTintColor: 'white', // צבע האייקון ברגע שעומדים עליו
+          tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.7)', // צבע האייקון ברגע שלא עומדים עליו
+          tabBarStyle: { // סגנון בר הטאב
+            backgroundColor: '#9AB28B', // צבע הרקע של ה-TabBar
+            borderRadius: 50, // עיגול הפינות
             bottom: 25,
             marginHorizontal: 15,
             height: 75,
             paddingBottom: 10,
-            paddingTop: 20,
-            justifyContent: 'center',
+            paddingTop: 10,
+            justifyContent: 'center', // מרכז את התוכן
+            // אפקט תלת-ממדי עם צללים
+            shadowColor: '#000', // צבע הצל
+            shadowOffset: { width: 0, height: 10 }, // מיקום הצל
+            shadowOpacity: 0.25, // שקיפות הצל
+            shadowRadius: 5, // רדיוס הצל
+            elevation: 5, // אפקט הצל ב-iOS
+            borderWidth: 1, // מסביב לבר
+            borderColor: '#8F9A77', // צבע הגבול
           },
           tabBarLabelPosition: 'below-icon', // טקסט מתחת לאייקון
           tabBarLabelStyle: {
             fontSize: 12,            
           },
           tabBarIconStyle: {
-            paddingHorizontal: 10, // מרווח בין האייקונים
-            marginLeft: route.name === 'More' ? 35 : 0, // מרווח מיוחד לאייקון "More"
+            paddingHorizontal: 0, // מרווח בין האייקונים
           },
         })}
       >
@@ -184,7 +191,6 @@ export default function App() {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="OnBoarding" component={Onboarding} options={{ headerShown: false }} />
           <Stack.Screen name="HomeScreen" component={TabNavigator} options={{ headerShown: false }} />
-          <Stack.Screen name="DailyCalories" component={DailyCalories} />
           <Stack.Screen name="Register" component={Register} options={{ headerTitle: 'Basic Details' }} />
           <Stack.Screen name="Gallery" component={Gallery} />
           <Stack.Screen name="AllMenusTable" component={AllMenusTable} />
@@ -209,6 +215,7 @@ export default function App() {
   );
 }
 
+// סטיילים
 const styles = StyleSheet.create({
   moreMenuContainer: {
     position: 'absolute',

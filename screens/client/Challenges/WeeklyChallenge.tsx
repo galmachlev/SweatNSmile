@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   description: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6B8E23',
     textAlign: 'center',
     marginBottom: 20,
@@ -152,9 +152,10 @@ const styles = StyleSheet.create({
   },
   challengeCard: {
     width: '100%',
-    maxHeight: screenWidth * 0.6,
+    height: screenWidth * 0.7,
     padding: 10,
     justifyContent: 'space-between',
+    alignItems: 'center',  // הוספת יישור למרכז
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
     elevation: 7,
     backgroundColor: '#9AB28B',
     paddingBottom: 20,
-  },
+    },
   challengeImage: {
     width: '100%',
     height: '70%',
