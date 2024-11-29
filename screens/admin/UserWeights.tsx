@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 
 export default function UserWeights() {
-  const [weights, setWeights] = useState<{ name: string; weight: number; isAdmin?: boolean }[]>([]);
+  const [weights, setWeights] = useState<number[]>([]);
   const [avgWeight, setAvgWeight] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -12,8 +12,11 @@ export default function UserWeights() {
       const data = await response.json();
 
       if (data && data.weights) {
-        setWeights(data.weights);
-        setAvgWeight(data.avgWeight);
+        const allWeights = data.weights.map((user: { weight: number }) => user.weight);
+        setWeights(allWeights);
+
+        const totalWeight = allWeights.reduce((sum, weight) => sum + weight, 0);
+        setAvgWeight(totalWeight / allWeights.length);
       } else {
         console.error('No weight data returned from the API.');
       }
@@ -24,16 +27,37 @@ export default function UserWeights() {
     }
   };
 
+  const getWeightDistribution = () => {
+    if (weights.length === 0) return {};
+
+    const ranges = [
+      { label: 'Less than 50 kg', min: 0, max: 50 },
+      { label: '50 - 70 kg', min: 50, max: 70 },
+      { label: '70 - 90 kg', min: 70, max: 90 },
+      { label: '90 - 110 kg', min: 90, max: 110 },
+      { label: 'Above 110 kg', min: 110, max: Infinity },
+    ];
+
+    const distribution = ranges.map((range) => {
+      const count = weights.filter((weight) => weight >= range.min && weight < range.max).length;
+      return { label: range.label, percentage: ((count / weights.length) * 100).toFixed(2) };
+    });
+
+    return distribution;
+  };
+
   useEffect(() => {
     fetchUserWeights();
   }, []);
 
+  const distribution = getWeightDistribution();
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>User Weights</Text>
+      <Text style={styles.header}>Weight Distribution</Text>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#3E6613" />
+        <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
         <>
           {/* Average Weight */}
@@ -46,22 +70,19 @@ export default function UserWeights() {
             </View>
           )}
 
-          {/* Custom Bar Chart */}
+          {/* General Weight Distribution */}
           <View style={styles.chartContainer}>
-            <View style={styles.floor} />
-            {weights
-              .filter((user) => !user.name.includes('admin'))
-              .map((user, index) => {
-                const barHeight = user.weight ? user.weight * 3 : 1;
-                return (
-                  <View key={index} style={styles.barContainer}>
-                    <Text style={styles.barLabel}>{user.name}</Text>
-                    <View style={[styles.bar, { height: barHeight }]}>
-                      <Text style={styles.barText}>{user.weight} kg</Text>
-                    </View>
-                  </View>
-                );
-              })}
+            {distribution.map((range, index) => (
+              <View key={index} style={styles.row}>
+                <Text style={styles.label}>{range.label}</Text>
+                <View style={styles.percentageBarContainer}>
+                  <View
+                    style={[styles.percentageBar, { width: `${range.percentage}%` }]}
+                  />
+                  <Text style={styles.percentageText}>{range.percentage}%</Text>
+                </View>
+              </View>
+            ))}
           </View>
         </>
       )}
@@ -75,86 +96,84 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F0F4F8',
   },
   header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
+    fontSize: 32,
+    fontWeight: '700',
+    marginBottom: 24,
+    color: '#2E3B4E',
     textAlign: 'center',
   },
   boxContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 30,
+    marginBottom: 40,
   },
   countBox: {
-    backgroundColor: 'gray',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: '#4CAF50',
+    borderRadius: 20,
+    padding: 40,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 6,
-    elevation: 4,
-    minWidth: 100,
-    minHeight: 100,
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
+    elevation: 8,
+    minWidth: 140,
+    minHeight: 140,
   },
   countText: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
     color: '#ffffff',
   },
   countLabel: {
-    fontSize: 16,
+    fontSize: 20,
     color: '#ffffff',
-    marginTop: 8,
+    marginTop: 12,
   },
   chartContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'flex-end', // Align bars to the bottom of the chart container
-    width: '100%',
-    paddingVertical: 20,
-    position: 'relative',
-  },
-  floor: {
-    position: 'absolute',
-    bottom: 0,
-    height: 3,
-    backgroundColor: '#cccccc',
-    width: '90%',
-    alignSelf: 'center',
-  },
-  barContainer: {
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    width: 40,
-    marginHorizontal: 8,
-  },
-  bar: {
-    backgroundColor: '#3E6613',
-    width: '100%',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginBottom: 24,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 12,
     shadowColor: '#000',
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    elevation: 5,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  barText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: 'bold',
+  label: {
+    flex: 1,
+    fontSize: 13,
+    color: '#2E3B4E',
+    fontWeight: '600',
   },
-  barLabel: {
-    marginTop: 8,
-    fontSize: 12,
-    color: '#333',
-    textAlign: 'center',
+  percentageBarContainer: {
+    flex: 4,
+    height: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E0E0E0',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginLeft: 12,
+  },
+  percentageBar: {
+    height: '100%',
+    backgroundColor: '#4CAF50',
+  },
+  percentageText: {
+    marginLeft: 16,
+    fontSize: 16,
+    color: '#2E3B4E',
+    fontWeight: '600',
   },
 });

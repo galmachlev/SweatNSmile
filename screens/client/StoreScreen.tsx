@@ -5,10 +5,10 @@ import { Video } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons'; // Import for cart icon
 
 const StoreScreen = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [search, setSearch] = useState('');
-    const [cart, setCart] = useState<Product[]>([]);
-    const [isCartOpen, setIsCartOpen] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]); //רשימת המוצרים בחנות
+    const [search, setSearch] = useState(''); //חיפוש בחנות לפי טקסט
+    const [cart, setCart] = useState<Product[]>([]); //פריטים שנוספו לעגלה
+    const [isCartOpen, setIsCartOpen] = useState(false); //פתיחה וסגירה של העגלה
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [quantity, setQuantity] = useState(1);
     const [isModalVisible, setIsModalVisible] = useState(false);
