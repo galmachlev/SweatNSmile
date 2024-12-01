@@ -48,7 +48,7 @@ const AllMenusTable = () => {
         let data = await response.json();
         setMenus(data); // מעדכנים את הנתונים בסטייט
       } else {
-        setError('Failed to fetch menus.'); // הצגת הודעת שגיאה אם התגובה לא בסדר
+        setError('you have no menus yet!'); 
       }
     } catch (err) {
       setError('An error occurred while fetching menus.'); // הצגת שגיאה במידה ויש בעיה בהתחברות
