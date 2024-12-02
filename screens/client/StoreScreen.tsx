@@ -1,74 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Image, Modal, Button } from 'react-native';
-import { Product } from '../../types/product';
-import { Video } from 'expo-av'; 
-import { Ionicons } from '@expo/vector-icons'; // Import for cart icon
+import { Product } from '../../types/product'; // ייבוא טיפוס המוצר
+import { Video } from 'expo-av'; // וידאו להצגת סרטונים
+import { Ionicons } from '@expo/vector-icons'; // אייקונים, כולל אייקון עגלה
 
 const StoreScreen = () => {
-    const [products, setProducts] = useState<Product[]>([]); //רשימת המוצרים בחנות
-    const [search, setSearch] = useState(''); //חיפוש בחנות לפי טקסט
-    const [cart, setCart] = useState<Product[]>([]); //פריטים שנוספו לעגלה
-    const [isCartOpen, setIsCartOpen] = useState(false); //פתיחה וסגירה של העגלה
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [quantity, setQuantity] = useState(1);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]); // רשימת המוצרים בחנות
+    const [search, setSearch] = useState(''); // ערך החיפוש
+    const [cart, setCart] = useState<Product[]>([]); // רשימת מוצרים בעגלה
+    const [isCartOpen, setIsCartOpen] = useState(false); // האם העגלה פתוחה או סגורה
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); // מוצר שנבחר לתצוגה
+    const [quantity, setQuantity] = useState(1); // כמות פריטים שנבחרו
+    const [isModalVisible, setIsModalVisible] = useState(false); // האם חלון המוצר פתוח
 
+    // הבאת מוצרים ברגע שהרכיב נטען
     useEffect(() => {
         fetchProducts();
     }, []);
 
+    // פונקציה להבאת מוצרים מהשרת
     const fetchProducts = async () => {
         try {
-            const response = await fetch('https://database-s-smile.onrender.com/api/products');
-            const data = await response.json();
-            setProducts(data);
+            const response = await fetch('https://database-s-smile.onrender.com/api/products'); // קריאה ל-API
+            const data = await response.json(); // המרת התגובה למידע
+            setProducts(data); // עדכון רשימת המוצרים
         } catch (error) {
-            console.error("Failed to fetch products:", error);
+            console.error("Failed to fetch products:", error); // טיפול בשגיאות
         }
     };
 
+    // פונקציה להוספת מוצר לעגלה
     const handleAddToCart = (product: Product) => {
-        const existingItem = cart.find(item => item._id === product._id);
+        const existingItem = cart.find(item => item._id === product._id); // בדיקה אם המוצר כבר בעגלה
         if (existingItem) {
+            // אם המוצר כבר בעגלה, עדכון הכמות
             setCart(cart.map(item => item._id === product._id ? { ...item, quantity: item.quantity + quantity } : item));
         } else {
+            // אם המוצר לא בעגלה, הוספה חדשה
             setCart([...cart, { ...product, quantity }]);
         }
-        closeProductModal();
+        closeProductModal(); // סגירת חלון המוצר
     };
 
+    // פתיחת חלון מוצר
     const openProductModal = (product: Product) => {
-        setSelectedProduct(product);
-        setQuantity(1);
-        setIsModalVisible(true);
+        setSelectedProduct(product); // הגדרת המוצר שנבחר
+        setQuantity(1); // איפוס הכמות לכמות ברירת מחדל
+        setIsModalVisible(true); // פתיחת החלון
     };
 
+    // סגירת חלון מוצר
     const closeProductModal = () => {
-        setSelectedProduct(null);
-        setIsModalVisible(false);
+        setSelectedProduct(null); // איפוס המוצר הנבחר
+        setIsModalVisible(false); // סגירת החלון
     };
 
+    // פתיחה/סגירה של העגלה
     const toggleCart = () => {
-        setIsCartOpen(!isCartOpen);
+        setIsCartOpen(!isCartOpen); // הפיכת מצב העגלה
     };
 
+    // הסרת מוצר מהעגלה
     const handleRemoveFromCart = (productId: string) => {
-        setCart(cart.filter(item => item._id !== productId));
+        setCart(cart.filter(item => item._id !== productId)); // סינון המוצר מהעגלה
     };
 
+    // שינוי כמות פריט בעגלה
     const handleQuantityChange = (productId: string, change: number) => {
         setCart(cart.map(item => item._id === productId
-            ? { ...item, quantity: Math.max(1, item.quantity + change) }
+            ? { ...item, quantity: Math.max(1, item.quantity + change) } // מניעת כמות נמוכה מ-1
             : item
         ));
     };
 
     return (
         <View style={styles.container}>
-            {/* Video Section */}
+            {/* סרטון תדמית בראש המסך */}
             <View style={styles.hero}>
                 <Video
-                    source={require('../../Images/Video - Copy.mp4')} 
+                    source={require('../../Images/Video - Copy.mp4')} // מקור הסרטון
                     rate={1.0}
                     volume={1.0}
                     isMuted={false}
@@ -76,85 +86,88 @@ const StoreScreen = () => {
                     shouldPlay
                     isLooping
                     style={styles.video}
-                    isMuted={true} // Mute video by default
+                    isMuted={true} // הסרטון מושתק כברירת מחדל
                 />
             </View>
 
-            {/* Search Bar and Cart Icon Row */}
+            {/* שורת חיפוש ואייקון עגלה */}
             <View style={styles.headerRow}>
                 <TextInput
                     style={styles.searchBar}
-                    placeholder="Search products"
+                    placeholder="Search products" // טקסט placeholder
                     value={search}
-                    onChangeText={setSearch}
+                    onChangeText={setSearch} // עדכון ערך החיפוש
                 />
                 <TouchableOpacity onPress={toggleCart} style={styles.cartIconContainer}>
-                    <Ionicons name="cart" size={40} color="#333" paddingRight={2}/>
-                    {cart.length > 0 && <View style={styles.cartBadge}><Text style={styles.cartBadgeText}>{cart.length}</Text></View>}
+                    <Ionicons name="cart" size={40} color="#333" paddingRight={2} /> {/* אייקון העגלה */}
+                    {cart.length > 0 && <View style={styles.cartBadge}><Text style={styles.cartBadgeText}>{cart.length}</Text></View>} {/* תווית כמות בעגלה */}
                 </TouchableOpacity>
             </View>
 
-            {/* Product List */}
+            {/* רשימת המוצרים */}
             <FlatList
                 data={products.filter(product => 
-                    product.name.toLowerCase().includes(search.toLowerCase())
+                    product.name.toLowerCase().includes(search.toLowerCase()) // סינון לפי חיפוש
                 )}
-                keyExtractor={(item) => item._id}
+                keyExtractor={(item) => item._id} // שימוש ב-ID ייחודי כמפתח
                 renderItem={({ item }) => (
                     <TouchableOpacity onPress={() => openProductModal(item)} style={styles.productContainer}>
                         <View style={styles.productCard}>
-                            <Image source={{ uri: item.imageURL }} style={styles.productImage} />
-                            <Text style={styles.productName}>{item.name}</Text>
-                            <Text>${item.price}</Text>
+                            <Image source={{ uri: item.imageURL }} style={styles.productImage} /> {/* תמונה של המוצר */}
+                            <Text style={styles.productName}>{item.name}</Text> {/* שם המוצר */}
+                            <Text>${item.price}</Text> {/* מחיר המוצר */}
                         </View>
                     </TouchableOpacity>
                 )}
-                numColumns={2}
+                numColumns={2} // תצוגה של שני עמודות
             />
 
-{isCartOpen && (
-    <View style={styles.cartOverlay}>
-        <Text style={styles.cartTitle}>Cart</Text>
+            {/* עגלה */}
+            {isCartOpen && (
+                <View style={styles.cartOverlay}>
+                    <Text style={styles.cartTitle}>Cart</Text>
 
-        <FlatList
-            data={cart}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-                <View style={styles.cartItemContainer}>
-                    <Image source={{ uri: item.imageURL }} style={styles.cartItemImage} />
-                    <View style={styles.cartItemDetails}>
-                        <Text style={styles.cartItemName}>{item.name}</Text>
-                        <Text style={styles.cartItemPrice}>${(item.price * item.quantity).toFixed(2)}</Text>
-                    </View>
-                    <View style={styles.cartItemControls}>
-                        <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(item._id, -1)}>
-                            <Text style={styles.quantityButtonText}>-</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.quantityText}>{item.quantity}</Text>
-                        <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(item._id, 1)}>
-                            <Text style={styles.quantityButtonText}>+</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleRemoveFromCart(item._id)} style={styles.removeButton}>
-                            <Text style={styles.removeButtonText}>Remove</Text>
-                        </TouchableOpacity>
-                    </View>
+                    {/* רשימת פריטים בעגלה */}
+                    <FlatList
+                        data={cart}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({ item }) => (
+                            <View style={styles.cartItemContainer}>
+                                <Image source={{ uri: item.imageURL }} style={styles.cartItemImage} /> {/* תמונה של פריט בעגלה */}
+                                <View style={styles.cartItemDetails}>
+                                    <Text style={styles.cartItemName}>{item.name}</Text> {/* שם הפריט */}
+                                    <Text style={styles.cartItemPrice}>${(item.price * item.quantity).toFixed(2)}</Text> {/* מחיר כולל לכמות */}
+                                </View>
+                                <View style={styles.cartItemControls}>
+                                    {/* כפתורים לשינוי כמות והסרה */}
+                                    <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(item._id, -1)}>
+                                        <Text style={styles.quantityButtonText}>-</Text>
+                                    </TouchableOpacity>
+                                    <Text style={styles.quantityText}>{item.quantity}</Text>
+                                    <TouchableOpacity style={styles.quantityButton} onPress={() => handleQuantityChange(item._id, 1)}>
+                                        <Text style={styles.quantityButtonText}>+</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => handleRemoveFromCart(item._id)} style={styles.removeButton}>
+                                        <Text style={styles.removeButtonText}>Remove</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        )}
+                    />
+
+                    {/* סיכום כולל */}
+                    <Text style={styles.cartTotal}>
+                        Total: ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+                    </Text>
+
+                    {/* כפתור לסגירת העגלה */}
+                    <TouchableOpacity onPress={toggleCart} style={styles.closeCartButton}>
+                        <Text style={styles.closeCartButtonText}>Close Cart</Text>
+                    </TouchableOpacity>
                 </View>
             )}
-        />
 
-        <Text style={styles.cartTotal}>
-            Total: ${cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
-        </Text>
-
-        <TouchableOpacity onPress={toggleCart} style={styles.closeCartButton}>
-            <Text style={styles.closeCartButtonText}>Close Cart</Text>
-        </TouchableOpacity>
-    </View>
-)}
-
-
-
-            {/* Product Modal */}
+            {/* חלון מוצר */}
             <Modal
                 visible={isModalVisible}
                 transparent={true}
@@ -164,17 +177,19 @@ const StoreScreen = () => {
                     <View style={styles.modalContent}>
                         {selectedProduct && (
                             <>
-                                <Image source={{ uri: selectedProduct.imageURL }} style={styles.modalImage} />
-                                <Text style={styles.modalTitle}>{selectedProduct.name}</Text>
-                                <Text style={styles.modalDescription}>{selectedProduct.description}</Text>
-                                <Text style={styles.modalPrice}>${selectedProduct.price}</Text>
+                                <Image source={{ uri: selectedProduct.imageURL }} style={styles.modalImage} /> {/* תמונה של המוצר */}
+                                <Text style={styles.modalTitle}>{selectedProduct.name}</Text> {/* שם המוצר */}
+                                <Text style={styles.modalDescription}>{selectedProduct.description}</Text> {/* תיאור המוצר */}
+                                <Text style={styles.modalPrice}>${selectedProduct.price}</Text> {/* מחיר המוצר */}
 
+                                {/* שליטה על כמות */}
                                 <View style={styles.quantityContainer}>
                                     <Button title="-" onPress={() => setQuantity(Math.max(1, quantity - 1))} />
                                     <Text style={styles.quantityText}>{quantity}</Text>
                                     <Button title="+" onPress={() => setQuantity(quantity + 1)} />
                                 </View>
 
+                                {/* כפתור להוספה לעגלה */}
                                 <TouchableOpacity 
                                     onPress={() => handleAddToCart(selectedProduct)} 
                                     style={styles.addToCartButton}
@@ -182,6 +197,7 @@ const StoreScreen = () => {
                                     <Text style={styles.addToCartButtonText}>Add {quantity} to Cart</Text>
                                 </TouchableOpacity>
 
+                                {/* כפתור לסגירת החלון */}
                                 <TouchableOpacity onPress={closeProductModal} style={styles.closeModalButton}>
                                     <Text style={styles.closeModalButtonText}>Close</Text>
                                 </TouchableOpacity>

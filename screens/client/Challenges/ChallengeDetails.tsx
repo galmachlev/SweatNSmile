@@ -6,6 +6,7 @@ import { TextInput, Button, Card, Title, Paragraph, Menu } from 'react-native-pa
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/Ionicons';
 
+//אופציות של אימונים 
 const workoutTypes = [
   'Strength Training',
   'Cardio',
@@ -20,8 +21,10 @@ const workoutTypes = [
   'Other',
 ];
 
+// ימי השבוע למעקב אחר פעילות יומית
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+// רשימת פעילויות חדשות שהמשתמש יכול לבחור לנסות
 const activities = [
   { name: 'Zumba', description: 'A fun and energetic dance workout to lively music.', icon: 'musical-notes' },
   { name: 'Kickboxing', description: 'A high-energy workout involving punches and kicks.', icon: 'fitness' },
@@ -35,6 +38,7 @@ const activities = [
   { name: 'Running', description: 'A simple but effective way to improve cardiovascular fitness.', icon: 'walk' },
 ];
 
+// הרכיב הראשי של המסך שמציג את פרטי האתגר
 const ChallengeDetails = ({ route }) => {
   const { currentUser, updateUserDetails } = useUser();
   const { goalType } = route.params;
@@ -53,6 +57,7 @@ const ChallengeDetails = ({ route }) => {
     return <Text style={styles.errorText}>Loading challenge...</Text>;
   }
 
+  // פונקציה להחלפת אתגר (עם אזהרה על איבוד התקדמות)
   const handleSwitchChallenge = () => {
     Alert.alert(
       "Switch Challenge",
@@ -70,11 +75,13 @@ const ChallengeDetails = ({ route }) => {
     );
   };
 
+    // פונקציה לסימון יום פעילות
   const handleDayToggle = (dayIndex) => {
     const updatedDays = [...(challenge.activeDays || Array(7).fill(false))];
     updatedDays[dayIndex] = !updatedDays[dayIndex];
     const progressValue = updatedDays.filter(Boolean).length;
 
+      // עדכון רשימת האתגרים עם השינויים
     const updatedWeeklyGoals = currentUser.weeklyGoals.map((goal) =>
       goal.goalType === goalType
         ? { ...goal, activeDays: updatedDays, progressValue }
@@ -84,6 +91,7 @@ const ChallengeDetails = ({ route }) => {
     updateUserDetails(currentUser.email, { weeklyGoals: updatedWeeklyGoals });
   };
 
+  // פונקציה לשליחת סוג האימון הנבחר
   const handleWorkoutSubmit = () => {
     const workoutEntry = {
       date: new Date(),
@@ -105,6 +113,8 @@ const ChallengeDetails = ({ route }) => {
     setOtherWorkout('');
   };
 
+
+  // פונקציה להזנת שעות השינה
   const handleSleepInput = () => {
     const newSleepEntry = { date: new Date(), hours: parseFloat(dailySleep) };
     const updatedWeeklyGoals = currentUser.weeklyGoals.map((goal) =>
@@ -122,10 +132,12 @@ const ChallengeDetails = ({ route }) => {
     Keyboard.dismiss();
   };
 
+    // פונקציה לבחירת פעילות לניסיון חדש
   const handleActivitySelect = (activity) => {
     setSelectedActivity(activity);
   };
 
+    // סימון הפעילות כבוצעה
   const handleMarkAsTried = () => {
     const updatedWeeklyGoals = currentUser.weeklyGoals.map((goal) =>
       goal.goalType === goalType ? { ...goal, isCompleted: true } : goal
@@ -135,12 +147,14 @@ const ChallengeDetails = ({ route }) => {
     setIsMarkedAsTried(true);
   };
 
+    // שליחת משוב על פעילות
   const handleFeedbackSubmit = () => {
     Alert.alert("Thank you for your feedback!");
     setFeedback('');
     Keyboard.dismiss();
   };
 
+    // פונקציות לרינדור התוכן לפי סוג האתגר
   const renderWorkoutContent = () => (
     <>
       <Paragraph style={styles.description}>
@@ -205,6 +219,7 @@ const ChallengeDetails = ({ route }) => {
     </>
   );
 
+  // אתגר שינה
   const renderSleepContent = () => (
     <>
       <Paragraph style={styles.description}>
@@ -243,6 +258,7 @@ const ChallengeDetails = ({ route }) => {
     </>
   );
 
+  // ימים פעילים
   const renderActiveDaysContent = () => (
     <>
       <Paragraph style={styles.description}>
@@ -261,6 +277,7 @@ const ChallengeDetails = ({ route }) => {
     </>
   );
 
+  // אתגר נסה משהו חדש
   const renderTrySomethingNewContent = () => (
     <>
       <Paragraph style={styles.description}>
@@ -325,6 +342,7 @@ const ChallengeDetails = ({ route }) => {
     </>
   );
 
+  
   const renderChallengeContent = () => {
     switch (goalType) {
       case 'workouts':
