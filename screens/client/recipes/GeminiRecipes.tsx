@@ -135,7 +135,7 @@ const getGeminiResponse = async (prompt: string) => {
     }
   };      
   
-
+  // פונקציה של כפתור שיחה חדשה
   const startNewConversation = () => {
     // אם זו השיחה הראשונה, נעדכן את הודעות המשתמש עם הודעה ברירת מחדל
     setMessages([
