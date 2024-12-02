@@ -9,6 +9,7 @@ import { FoodItem, FoodCategory, FoodData } from '../Menus/FoodData'; // Import 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LogBox } from 'react-native';
 
+// התעלמות מהתראות מסוימות בלוג עבור חוויית פיתוח נקייה יותר
 LogBox.ignoreLogs([
   'Warning: Text strings must be rendered within a <Text> component.'
 ]);
@@ -59,7 +60,7 @@ const DailyMenu: React.FC = () => {
     return colors[mealType] || '#FBF783'; // ברירת מחדל לצבע
   };
 
-  // פונקציה לשמירת תפריט לשרת
+  // פונקציה אסינכרונית לשמירת תפריט לשרת
   const saveMenu = async () => {
     const email = currentUser?.email; // מקבל את המייל של המשתמש הנוכחי
     const menuData = {
@@ -77,7 +78,7 @@ const DailyMenu: React.FC = () => {
             body: JSON.stringify(menuData), // המרה ל-JSON
         });
 
-        // בדיקה אם הבקשה הצליחה
+        // בדיקה אם השרת החזיר תגובה מוצלחת (סטטוס 200-299). אם לא, נזרקת שגיאה
         if (res.ok) {
             Alert.alert('Success', 'Menu saved successfully!');
         } else {
@@ -112,7 +113,7 @@ const DailyMenu: React.FC = () => {
   }, [currentUser, calculateDailyCalories]); // מאזין לשינויים במשתמש ובפונקציית החישוב
 
   // אחוזים לקלוריות לפי ארוחה
-  const mealDistribution = {
+  const mealDistribution: { [key: string]: number } = { 
     Breakfast: 0.25,
     Lunch: 0.4,
     Dinner: 0.25,
@@ -120,7 +121,7 @@ const DailyMenu: React.FC = () => {
   };
 
   // אחוזים לקלוריות לפי מאקרונוטריינטים
-  const nutrientDistribution = {
+  const nutrientDistribution: { [key: string]: number } = {
     Protein: 0.35,
     Fat: 0.15,
     Carb: 0.35,
@@ -349,7 +350,7 @@ const DailyMenu: React.FC = () => {
       }
   };
       
-  // Update macros based on selected items
+  // עדכון המאקרו בהתאם לפריטים שמתווספים בארוחת האקסטרות
   const updateMacros = (tempSelections: SelectedItemsType) => {
     if (!tempSelections) return; // Check if selectedItems exist
     let totalProtein = 0;
@@ -378,7 +379,7 @@ const DailyMenu: React.FC = () => {
     });
   };
          
-  // Show selected item details below each selected food item
+  // הצגת הערכים התזונתיים עבור כל פריט בכל אחת מן הארוחות 
   const renderSelectedItemDetails = (mealType: string, category: string) => {
     const item = selectedItems[mealType]?.[category];
     if (!item) return null;
@@ -390,7 +391,7 @@ const DailyMenu: React.FC = () => {
     );
   };
   
-  // Fetches food data from FoodData.tsx
+  // שליפת הנתונים של החלוקה בתפריט ופריטי המזון מהקובץ FoodData.tsx
   const fetchFoodData = async (): Promise<FoodData> => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -441,7 +442,7 @@ const DailyMenu: React.FC = () => {
     }
   }, [dailyCalories]);
  
-  // Handle search query change
+  // פונקציה שמחזירה את כל הפריטים שמחפשים בשביל להוסיף לארוחת האקסטרות
   const handleSearch = async () => {
       if (searchQuery.trim()) {
         setLoading(true);
@@ -500,7 +501,7 @@ const DailyMenu: React.FC = () => {
     });
   };
 
-  // פונקציה לטיפול באישור מחיקה
+  // פונקציה לטיפול במחיקת פריט מרשימת האקסטרות
   const handleDeleteExtraItem = () => {
     if (itemToDelete) {
       deleteExtraItem(itemToDelete); // מחיקת הפריט
@@ -541,7 +542,7 @@ const DailyMenu: React.FC = () => {
     };
   };
   
-  // פונקציה לאתחול התפריט
+  // פונקציה לאתחול - ריסט לתפריט
   const handleReset = () => {
     setResetCounter(prevCounter => prevCounter + 1);// עדכן את המונה כדי לגרום לאתחול מחדש
     setShowModal(false);
